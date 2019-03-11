@@ -148,6 +148,16 @@
   </url>
   
   <url>
+    <loc>hadyang.github.io/2016/06/andorid-touch-event/</loc>
+    <lastmod>2016-06-04T16:56:59+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>hadyang.github.io/2016/06/android-view-draw/</loc>
+    <lastmod>2016-06-01T16:47:02+00:00</lastmod>
+  </url>
+  
+  <url>
     <loc>hadyang.github.io/2016/05/activity-startup/</loc>
     <lastmod>2016-05-28T14:27:13+00:00</lastmod>
   </url>
@@ -163,6 +173,11 @@
   </url>
   
   <url>
+    <loc>hadyang.github.io/2016/05/jvm-class-load-init/</loc>
+    <lastmod>2016-05-03T13:24:59+00:00</lastmod>
+  </url>
+  
+  <url>
     <loc>hadyang.github.io/2016/04/jvm-object-life-cycle/</loc>
     <lastmod>2016-04-30T13:30:28+00:00</lastmod>
   </url>
@@ -173,8 +188,18 @@
   </url>
   
   <url>
+    <loc>hadyang.github.io/2016/04/jvm-gc/</loc>
+    <lastmod>2016-04-27T18:32:11+00:00</lastmod>
+  </url>
+  
+  <url>
     <loc>hadyang.github.io/2016/04/jvm-architecture/</loc>
     <lastmod>2016-04-27T16:00:05+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>hadyang.github.io/2016/03/android-studio-ndk/</loc>
+    <lastmod>2016-03-07T11:02:53+00:00</lastmod>
   </url>
   
   <url>
@@ -200,11 +225,8 @@
   </url>
   
   <url>
-    <loc>hadyang.github.io/1/01/android-studio-ndk/</loc>
-  </url>
-  
-  <url>
     <loc>hadyang.github.io/tags/c/</loc>
+    <lastmod>2016-03-07T11:02:53+00:00</lastmod>
     <priority>0</priority>
   </url>
   
@@ -270,6 +292,7 @@
   
   <url>
     <loc>hadyang.github.io/tags/ndk/</loc>
+    <lastmod>2016-03-07T11:02:53+00:00</lastmod>
     <priority>0</priority>
   </url>
   
@@ -298,17 +321,9 @@
   </url>
   
   <url>
-    <loc>hadyang.github.io/1/01/android-view-draw/</loc>
-  </url>
-  
-  <url>
     <loc>hadyang.github.io/categories/vps/</loc>
     <lastmod>2016-06-23T19:33:11+00:00</lastmod>
     <priority>0</priority>
-  </url>
-  
-  <url>
-    <loc>hadyang.github.io/1/01/andorid-touch-event/</loc>
   </url>
   
   <url>
@@ -351,14 +366,6 @@
     <loc>hadyang.github.io/tags/%E6%B3%9B%E5%9E%8B/</loc>
     <lastmod>2016-11-15T19:57:44+00:00</lastmod>
     <priority>0</priority>
-  </url>
-  
-  <url>
-    <loc>hadyang.github.io/1/01/jvm-gc/</loc>
-  </url>
-  
-  <url>
-    <loc>hadyang.github.io/1/01/jvm-class-load-init/</loc>
   </url>
   
   <url>

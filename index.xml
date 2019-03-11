@@ -277,6 +277,24 @@
     </item>
     
     <item>
+      <title>事件分发过程</title>
+      <link>hadyang.github.io/2016/06/andorid-touch-event/</link>
+      <pubDate>Sat, 04 Jun 2016 16:56:59 +0000</pubDate>
+      
+      <guid>hadyang.github.io/2016/06/andorid-touch-event/</guid>
+      <description>&lt;p&gt;这篇文章我们继续分析Activity的事件分发过程。&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>View的绘制过程</title>
+      <link>hadyang.github.io/2016/06/android-view-draw/</link>
+      <pubDate>Wed, 01 Jun 2016 16:47:02 +0000</pubDate>
+      
+      <guid>hadyang.github.io/2016/06/android-view-draw/</guid>
+      <description>&lt;p&gt;上次我们分析了Activity的启动过程，我们已经分析到ActivityThread.main函数，接下来两篇文章我们分析Activity的绘制、时间分发过程。以前，Activity的绘制在我的印象中就measure、lyaout、draw三个过程，对于这三个过程具体的调用过程和细节知之甚少，下面我们就来分析一下Activity的绘制过程。&lt;/p&gt;</description>
+    </item>
+    
+    <item>
       <title>Activity启动过程</title>
       <link>hadyang.github.io/2016/05/activity-startup/</link>
       <pubDate>Sat, 28 May 2016 14:27:13 +0000</pubDate>
@@ -306,6 +324,15 @@
     </item>
     
     <item>
+      <title>深入Java虚拟机读书笔记——类装载、连接和初始化</title>
+      <link>hadyang.github.io/2016/05/jvm-class-load-init/</link>
+      <pubDate>Tue, 03 May 2016 13:24:59 +0000</pubDate>
+      
+      <guid>hadyang.github.io/2016/05/jvm-class-load-init/</guid>
+      <description>&lt;p&gt;在前面的文章《深入Java虚拟机读书笔记——类加载器》中我们介绍了JVM中类加载器，类加载器是JVM中重要的组成部分，当类第一次被使用时，由它负责类的装载、连接和初始化，进而能让我们使用类来生成对象等等。&lt;/p&gt;</description>
+    </item>
+    
+    <item>
       <title>深入Java虚拟机读书笔记——对象的生命周期</title>
       <link>hadyang.github.io/2016/04/jvm-object-life-cycle/</link>
       <pubDate>Sat, 30 Apr 2016 13:30:28 +0000</pubDate>
@@ -324,12 +351,30 @@
     </item>
     
     <item>
+      <title>深入Java虚拟机读书笔记——垃圾回收</title>
+      <link>hadyang.github.io/2016/04/jvm-gc/</link>
+      <pubDate>Wed, 27 Apr 2016 18:32:11 +0000</pubDate>
+      
+      <guid>hadyang.github.io/2016/04/jvm-gc/</guid>
+      <description>&lt;p&gt;作为自动管理内存的编程语言，Java为我们做了许多的工作。程序员不需要关心内存分配和回收，这大大提高了程序员的工作效率，同时也减少了内存泄漏的风险。正是由于Java语言的这种特性，导致很多程序员对内存分配没有太深刻的概念，产生OOM后不知从何处修改。我们需要对Java内存管理进行了解，更加合理的利用Java自动管理内存的特性。&lt;/p&gt;</description>
+    </item>
+    
+    <item>
       <title>深入Java虚拟机读书笔记——虚拟机体系结构</title>
       <link>hadyang.github.io/2016/04/jvm-architecture/</link>
       <pubDate>Wed, 27 Apr 2016 16:00:05 +0000</pubDate>
       
       <guid>hadyang.github.io/2016/04/jvm-architecture/</guid>
       <description>&lt;p&gt;最近在逛知乎的时候，看到有人推荐这本《深入Java虚拟机》，这几天一直在看这本书，虽然这本书里使用的JVM版本比较低，但是讲的内容还是很有营养的。在看这本书的时候学习到很多东西，在这里写一下，方便以后学习：）&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>Android Studio NDK 入门教程</title>
+      <link>hadyang.github.io/2016/03/android-studio-ndk/</link>
+      <pubDate>Mon, 07 Mar 2016 11:02:53 +0000</pubDate>
+      
+      <guid>hadyang.github.io/2016/03/android-studio-ndk/</guid>
+      <description>&lt;p&gt;通常我们使用Java来编写Android App，但是在一些特殊场景，比如图像处理方面，Java的效率太低。这时候我们就可以考虑使用C进行开发。NDK是Google为我们提供的一个在Android上使用C开发的工具集合。&lt;/p&gt;</description>
     </item>
     
     <item>
@@ -348,51 +393,6 @@
       
       <guid>hadyang.github.io/2015/06/android-drawerlayout/</guid>
       <description>&lt;p&gt;最近在网上看到谷歌自家的相册应用（Google Photos），它的侧滑栏很吸引我，于是在google了很久之后，终于完成，和大家分享分享。&lt;/p&gt;</description>
-    </item>
-    
-    <item>
-      <title>Android Studio NDK 入门教程</title>
-      <link>hadyang.github.io/1/01/android-studio-ndk/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      
-      <guid>hadyang.github.io/1/01/android-studio-ndk/</guid>
-      <description>&lt;p&gt;通常我们使用Java来编写Android App，但是在一些特殊场景，比如图像处理方面，Java的效率太低。这时候我们就可以考虑使用C进行开发。NDK是Google为我们提供的一个在Android上使用C开发的工具集合。&lt;/p&gt;</description>
-    </item>
-    
-    <item>
-      <title>View的绘制过程</title>
-      <link>hadyang.github.io/1/01/android-view-draw/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      
-      <guid>hadyang.github.io/1/01/android-view-draw/</guid>
-      <description>&lt;p&gt;上次我们分析了Activity的启动过程，我们已经分析到ActivityThread.main函数，接下来两篇文章我们分析Activity的绘制、时间分发过程。以前，Activity的绘制在我的印象中就measure、lyaout、draw三个过程，对于这三个过程具体的调用过程和细节知之甚少，下面我们就来分析一下Activity的绘制过程。&lt;/p&gt;</description>
-    </item>
-    
-    <item>
-      <title>事件分发过程</title>
-      <link>hadyang.github.io/1/01/andorid-touch-event/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      
-      <guid>hadyang.github.io/1/01/andorid-touch-event/</guid>
-      <description>&lt;p&gt;这篇文章我们继续分析Activity的事件分发过程。&lt;/p&gt;</description>
-    </item>
-    
-    <item>
-      <title>深入Java虚拟机读书笔记——垃圾回收</title>
-      <link>hadyang.github.io/1/01/jvm-gc/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      
-      <guid>hadyang.github.io/1/01/jvm-gc/</guid>
-      <description>&lt;p&gt;作为自动管理内存的编程语言，Java为我们做了许多的工作。程序员不需要关心内存分配和回收，这大大提高了程序员的工作效率，同时也减少了内存泄漏的风险。正是由于Java语言的这种特性，导致很多程序员对内存分配没有太深刻的概念，产生OOM后不知从何处修改。我们需要对Java内存管理进行了解，更加合理的利用Java自动管理内存的特性。&lt;/p&gt;</description>
-    </item>
-    
-    <item>
-      <title>深入Java虚拟机读书笔记——类装载、连接和初始化</title>
-      <link>hadyang.github.io/1/01/jvm-class-load-init/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      
-      <guid>hadyang.github.io/1/01/jvm-class-load-init/</guid>
-      <description>&lt;p&gt;在前面的文章《深入Java虚拟机读书笔记——类加载器》中我们介绍了JVM中类加载器，类加载器是JVM中重要的组成部分，当类第一次被使用时，由它负责类的装载、连接和初始化，进而能让我们使用类来生成对象等等。&lt;/p&gt;</description>
     </item>
     
   </channel>

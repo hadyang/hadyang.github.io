@@ -145,11 +145,40 @@
       
       
       
+        <li class="menu-item
+          
+          
+          ">
+          <a href="hadyang.github.io/">Home</a>
+        </li>
+      
+        <li class="menu-item
+          
+          
+          ">
+          <a href="hadyang.github.io/tags/">Tags</a>
+        </li>
+      
+        <li class="menu-item
+          
+          
+          ">
+          <a href="hadyang.github.io/categories/">Categories</a>
+        </li>
+      
     </ul>
   </nav>
   <nav class="social-menu collapsed">
     <h2 class="offscreen">Social Networks</h2>
-    <ul class="social-list"></ul>
+    <ul class="social-list"><li class="social-item">
+          <a href="mailto:shihaoyang129@gmail.com" title="Email" aria-label="Email">
+            <span class="icon icon-email" aria-hidden="true"></span>
+          </a>
+        </li><li class="social-item">
+          <a href="//github.com/hadyang" title="GitHub" aria-label="GitHub">
+            <span class="icon icon-github" aria-hidden="true"></span>
+          </a>
+        </li></ul>
   </nav>
 </header>
 
@@ -159,6 +188,35 @@
     </header>
     
     
+      
+        <article class="post-entry">
+  <header class="post-header">
+    <h3 class="post-title"><a href="hadyang.github.io/2016/06/android-view-draw/" class="post-link">View的绘制过程</a></h3>
+    <p class="post-meta">@ · Jun 1, 2016 · 5 min read</p>
+  </header>
+  
+  <p class="post-summary">上次我们分析了Activity的启动过程，我们已经分析到ActivityThread.main函数，接下来两篇文章我们分析Activity的绘制、时间分发过程。以前，Activity的绘制在我的印象中就measure、lyaout、draw三个过程，对于这三个过程具体的调用过程和细节知之甚少，下面我们就来分析一下Activity的绘制过程。
+</p>
+  <footer class="post-footer">
+    <a class="read-more" href="hadyang.github.io/2016/06/android-view-draw/">Read More →</a>
+  </footer>
+</article>
+
+      
+        <article class="post-entry">
+  <header class="post-header">
+    <h3 class="post-title"><a href="hadyang.github.io/2016/05/activity-startup/" class="post-link">Activity启动过程</a></h3>
+    <p class="post-meta">@ · May 28, 2016 · 7 min read</p>
+  </header>
+  
+  <p class="post-summary">我们进行Android开发的时候，第一个例子就接触过startActivity这个函数，已经使用了很长时间了。今天我们就来看看Activity的启动到底是怎么回事。
+本文略长…
+</p>
+  <footer class="post-footer">
+    <a class="read-more" href="hadyang.github.io/2016/05/activity-startup/">Read More →</a>
+  </footer>
+</article>
+
       
         <article class="post-entry">
   <header class="post-header">
@@ -184,6 +242,20 @@
 </p>
   <footer class="post-footer">
     <a class="read-more" href="hadyang.github.io/2016/05/android-system-startup/">Read More →</a>
+  </footer>
+</article>
+
+      
+        <article class="post-entry">
+  <header class="post-header">
+    <h3 class="post-title"><a href="hadyang.github.io/2016/05/jvm-class-load-init/" class="post-link">深入Java虚拟机读书笔记——类装载、连接和初始化</a></h3>
+    <p class="post-meta">@ · May 3, 2016 · 1 min read</p>
+  </header>
+  
+  <p class="post-summary">在前面的文章《深入Java虚拟机读书笔记——类加载器》中我们介绍了JVM中类加载器，类加载器是JVM中重要的组成部分，当类第一次被使用时，由它负责类的装载、连接和初始化，进而能让我们使用类来生成对象等等。
+</p>
+  <footer class="post-footer">
+    <a class="read-more" href="hadyang.github.io/2016/05/jvm-class-load-init/">Read More →</a>
   </footer>
 </article>
 
@@ -218,6 +290,20 @@
       
         <article class="post-entry">
   <header class="post-header">
+    <h3 class="post-title"><a href="hadyang.github.io/2016/04/jvm-gc/" class="post-link">深入Java虚拟机读书笔记——垃圾回收</a></h3>
+    <p class="post-meta">@ · Apr 27, 2016 · 1 min read</p>
+  </header>
+  
+  <p class="post-summary">作为自动管理内存的编程语言，Java为我们做了许多的工作。程序员不需要关心内存分配和回收，这大大提高了程序员的工作效率，同时也减少了内存泄漏的风险。正是由于Java语言的这种特性，导致很多程序员对内存分配没有太深刻的概念，产生OOM后不知从何处修改。我们需要对Java内存管理进行了解，更加合理的利用Java自动管理内存的特性。
+</p>
+  <footer class="post-footer">
+    <a class="read-more" href="hadyang.github.io/2016/04/jvm-gc/">Read More →</a>
+  </footer>
+</article>
+
+      
+        <article class="post-entry">
+  <header class="post-header">
     <h3 class="post-title"><a href="hadyang.github.io/2016/04/jvm-architecture/" class="post-link">深入Java虚拟机读书笔记——虚拟机体系结构</a></h3>
     <p class="post-meta">@ · Apr 27, 2016 · 1 min read</p>
   </header>
@@ -232,70 +318,14 @@
       
         <article class="post-entry">
   <header class="post-header">
-    <h3 class="post-title"><a href="hadyang.github.io/2016/02/git-proxy/" class="post-link">Git代理设置，加速clone</a></h3>
-    <p class="post-meta">@ · Feb 18, 2016 · 1 min read</p>
-  </header>
-  
-  <p class="post-summary">由于在项目中经常使用到git来获取源码，但是clone的速度确实不敢恭维。本文主要通过ss进行代理，访问速度有500kb/s（个人的网比较渣）。
-</p>
-  <footer class="post-footer">
-    <a class="read-more" href="hadyang.github.io/2016/02/git-proxy/">Read More →</a>
-  </footer>
-</article>
-
-      
-        <article class="post-entry">
-  <header class="post-header">
-    <h3 class="post-title"><a href="hadyang.github.io/2015/06/android-drawerlayout/" class="post-link">仿Google相册的侧滑栏效果--DrawerLayout</a></h3>
-    <p class="post-meta">@ · Jun 17, 2015 · 1 min read</p>
-  </header>
-  
-  <p class="post-summary">最近在网上看到谷歌自家的相册应用（Google Photos），它的侧滑栏很吸引我，于是在google了很久之后，终于完成，和大家分享分享。
-</p>
-  <footer class="post-footer">
-    <a class="read-more" href="hadyang.github.io/2015/06/android-drawerlayout/">Read More →</a>
-  </footer>
-</article>
-
-      
-        <article class="post-entry">
-  <header class="post-header">
-    <h3 class="post-title"><a href="hadyang.github.io/1/01/andorid-touch-event/" class="post-link">事件分发过程</a></h3>
-    <p class="post-meta">@ · Jan 1, 0001 · 5 min read</p>
-  </header>
-  
-  <p class="post-summary">这篇文章我们继续分析Activity的事件分发过程。
-</p>
-  <footer class="post-footer">
-    <a class="read-more" href="hadyang.github.io/1/01/andorid-touch-event/">Read More →</a>
-  </footer>
-</article>
-
-      
-        <article class="post-entry">
-  <header class="post-header">
-    <h3 class="post-title"><a href="hadyang.github.io/1/01/android-view-draw/" class="post-link">View的绘制过程</a></h3>
-    <p class="post-meta">@ · Jan 1, 0001 · 5 min read</p>
-  </header>
-  
-  <p class="post-summary">上次我们分析了Activity的启动过程，我们已经分析到ActivityThread.main函数，接下来两篇文章我们分析Activity的绘制、时间分发过程。以前，Activity的绘制在我的印象中就measure、lyaout、draw三个过程，对于这三个过程具体的调用过程和细节知之甚少，下面我们就来分析一下Activity的绘制过程。
-</p>
-  <footer class="post-footer">
-    <a class="read-more" href="hadyang.github.io/1/01/android-view-draw/">Read More →</a>
-  </footer>
-</article>
-
-      
-        <article class="post-entry">
-  <header class="post-header">
-    <h3 class="post-title"><a href="hadyang.github.io/1/01/android-studio-ndk/" class="post-link">Android Studio NDK 入门教程</a></h3>
-    <p class="post-meta">@ · Jan 1, 0001 · 1 min read</p>
+    <h3 class="post-title"><a href="hadyang.github.io/2016/03/android-studio-ndk/" class="post-link">Android Studio NDK 入门教程</a></h3>
+    <p class="post-meta">@ · Mar 7, 2016 · 1 min read</p>
   </header>
   
   <p class="post-summary">通常我们使用Java来编写Android App，但是在一些特殊场景，比如图像处理方面，Java的效率太低。这时候我们就可以考虑使用C进行开发。NDK是Google为我们提供的一个在Android上使用C开发的工具集合。
 </p>
   <footer class="post-footer">
-    <a class="read-more" href="hadyang.github.io/1/01/android-studio-ndk/">Read More →</a>
+    <a class="read-more" href="hadyang.github.io/2016/03/android-studio-ndk/">Read More →</a>
   </footer>
 </article>
 

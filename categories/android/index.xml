@@ -30,6 +30,24 @@
     </item>
     
     <item>
+      <title>事件分发过程</title>
+      <link>hadyang.github.io/2016/06/andorid-touch-event/</link>
+      <pubDate>Sat, 04 Jun 2016 16:56:59 +0000</pubDate>
+      
+      <guid>hadyang.github.io/2016/06/andorid-touch-event/</guid>
+      <description>&lt;p&gt;这篇文章我们继续分析Activity的事件分发过程。&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>View的绘制过程</title>
+      <link>hadyang.github.io/2016/06/android-view-draw/</link>
+      <pubDate>Wed, 01 Jun 2016 16:47:02 +0000</pubDate>
+      
+      <guid>hadyang.github.io/2016/06/android-view-draw/</guid>
+      <description>&lt;p&gt;上次我们分析了Activity的启动过程，我们已经分析到ActivityThread.main函数，接下来两篇文章我们分析Activity的绘制、时间分发过程。以前，Activity的绘制在我的印象中就measure、lyaout、draw三个过程，对于这三个过程具体的调用过程和细节知之甚少，下面我们就来分析一下Activity的绘制过程。&lt;/p&gt;</description>
+    </item>
+    
+    <item>
       <title>Activity启动过程</title>
       <link>hadyang.github.io/2016/05/activity-startup/</link>
       <pubDate>Sat, 28 May 2016 14:27:13 +0000</pubDate>
@@ -59,39 +77,21 @@
     </item>
     
     <item>
+      <title>Android Studio NDK 入门教程</title>
+      <link>hadyang.github.io/2016/03/android-studio-ndk/</link>
+      <pubDate>Mon, 07 Mar 2016 11:02:53 +0000</pubDate>
+      
+      <guid>hadyang.github.io/2016/03/android-studio-ndk/</guid>
+      <description>&lt;p&gt;通常我们使用Java来编写Android App，但是在一些特殊场景，比如图像处理方面，Java的效率太低。这时候我们就可以考虑使用C进行开发。NDK是Google为我们提供的一个在Android上使用C开发的工具集合。&lt;/p&gt;</description>
+    </item>
+    
+    <item>
       <title>仿Google相册的侧滑栏效果--DrawerLayout</title>
       <link>hadyang.github.io/2015/06/android-drawerlayout/</link>
       <pubDate>Wed, 17 Jun 2015 19:36:21 +0000</pubDate>
       
       <guid>hadyang.github.io/2015/06/android-drawerlayout/</guid>
       <description>&lt;p&gt;最近在网上看到谷歌自家的相册应用（Google Photos），它的侧滑栏很吸引我，于是在google了很久之后，终于完成，和大家分享分享。&lt;/p&gt;</description>
-    </item>
-    
-    <item>
-      <title>Android Studio NDK 入门教程</title>
-      <link>hadyang.github.io/1/01/android-studio-ndk/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      
-      <guid>hadyang.github.io/1/01/android-studio-ndk/</guid>
-      <description>&lt;p&gt;通常我们使用Java来编写Android App，但是在一些特殊场景，比如图像处理方面，Java的效率太低。这时候我们就可以考虑使用C进行开发。NDK是Google为我们提供的一个在Android上使用C开发的工具集合。&lt;/p&gt;</description>
-    </item>
-    
-    <item>
-      <title>View的绘制过程</title>
-      <link>hadyang.github.io/1/01/android-view-draw/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      
-      <guid>hadyang.github.io/1/01/android-view-draw/</guid>
-      <description>&lt;p&gt;上次我们分析了Activity的启动过程，我们已经分析到ActivityThread.main函数，接下来两篇文章我们分析Activity的绘制、时间分发过程。以前，Activity的绘制在我的印象中就measure、lyaout、draw三个过程，对于这三个过程具体的调用过程和细节知之甚少，下面我们就来分析一下Activity的绘制过程。&lt;/p&gt;</description>
-    </item>
-    
-    <item>
-      <title>事件分发过程</title>
-      <link>hadyang.github.io/1/01/andorid-touch-event/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      
-      <guid>hadyang.github.io/1/01/andorid-touch-event/</guid>
-      <description>&lt;p&gt;这篇文章我们继续分析Activity的事件分发过程。&lt;/p&gt;</description>
     </item>
     
   </channel>

@@ -42,7 +42,7 @@
   <meta property="og:title" content="View的绘制过程">
   <meta property="og:description" content="上次我们分析了Activity的启动过程，我们已经分析到ActivityThread.main函数，接下来两篇文章我们分析Activity的绘制、时间分发过程。以前，Activity的绘制在我的印象中就measure、lyaout、draw三个过程，对于这三个过程具体的调用过程和细节知之甚少，下面我们就来分析一下Activity的绘制过程。
 ">
-  <meta property="og:url" content="hadyang.github.io/1/01/android-view-draw/">
+  <meta property="og:url" content="hadyang.github.io/2016/06/android-view-draw/">
   <meta property="og:image" content="/hadyang.github.io/images/avatar.png">
 
 
@@ -51,7 +51,7 @@
 <meta name="generator" content="Hugo 0.54.0">
 
 
-<link rel="canonical" href="hadyang.github.io/1/01/android-view-draw/">
+<link rel="canonical" href="hadyang.github.io/2016/06/android-view-draw/">
 
 <meta name="renderer" content="webkit">
 <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -152,18 +152,47 @@
       
       
       
+        <li class="menu-item
+          
+          
+           is-active">
+          <a href="hadyang.github.io/">Home</a>
+        </li>
+      
+        <li class="menu-item
+          
+          
+          ">
+          <a href="hadyang.github.io/tags/">Tags</a>
+        </li>
+      
+        <li class="menu-item
+          
+          
+          ">
+          <a href="hadyang.github.io/categories/">Categories</a>
+        </li>
+      
     </ul>
   </nav>
   <nav class="social-menu collapsed">
     <h2 class="offscreen">Social Networks</h2>
-    <ul class="social-list"></ul>
+    <ul class="social-list"><li class="social-item">
+          <a href="mailto:shihaoyang129@gmail.com" title="Email" aria-label="Email">
+            <span class="icon icon-email" aria-hidden="true"></span>
+          </a>
+        </li><li class="social-item">
+          <a href="//github.com/hadyang" title="GitHub" aria-label="GitHub">
+            <span class="icon icon-github" aria-hidden="true"></span>
+          </a>
+        </li></ul>
   </nav>
 </header>
 
   <section class="main post-detail">
     <header class="post-header">
       <h1 class="post-title">View的绘制过程</h1>
-      <p class="post-meta">@ · Jan 1, 0001 · 5 min read</p>
+      <p class="post-meta">@ · Jun 1, 2016 · 5 min read</p>
     </header>
     <article class="post-content"><p>上次我们分析了Activity的启动过程，我们已经分析到ActivityThread.main函数，接下来两篇文章我们分析Activity的绘制、时间分发过程。以前，Activity的绘制在我的印象中就measure、lyaout、draw三个过程，对于这三个过程具体的调用过程和细节知之甚少，下面我们就来分析一下Activity的绘制过程。</p>
 
@@ -659,7 +688,7 @@ public void requestLayout() {
       </ul>
       
       <p class="post-copyright">
-        This post was published <strong>737128</strong> days ago, content in the post may be inaccurate, even wrong now, please take risk yourself.
+        This post was published <strong>1012</strong> days ago, content in the post may be inaccurate, even wrong now, please take risk yourself.
       </p>
     </footer>
     

@@ -48,6 +48,24 @@
     </item>
     
     <item>
+      <title>事件分发过程</title>
+      <link>hadyang.github.io/2016/06/andorid-touch-event/</link>
+      <pubDate>Sat, 04 Jun 2016 16:56:59 +0000</pubDate>
+      
+      <guid>hadyang.github.io/2016/06/andorid-touch-event/</guid>
+      <description>&lt;p&gt;这篇文章我们继续分析Activity的事件分发过程。&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>View的绘制过程</title>
+      <link>hadyang.github.io/2016/06/android-view-draw/</link>
+      <pubDate>Wed, 01 Jun 2016 16:47:02 +0000</pubDate>
+      
+      <guid>hadyang.github.io/2016/06/android-view-draw/</guid>
+      <description>&lt;p&gt;上次我们分析了Activity的启动过程，我们已经分析到ActivityThread.main函数，接下来两篇文章我们分析Activity的绘制、时间分发过程。以前，Activity的绘制在我的印象中就measure、lyaout、draw三个过程，对于这三个过程具体的调用过程和细节知之甚少，下面我们就来分析一下Activity的绘制过程。&lt;/p&gt;</description>
+    </item>
+    
+    <item>
       <title>Activity启动过程</title>
       <link>hadyang.github.io/2016/05/activity-startup/</link>
       <pubDate>Sat, 28 May 2016 14:27:13 +0000</pubDate>
@@ -74,24 +92,6 @@
       
       <guid>hadyang.github.io/2016/05/android-system-startup/</guid>
       <description>&lt;p&gt;当我们开机时，首先是启动Linux内核，在Linux内核中首先启动的是init进程，这个进程会去读取配置文件system\core\rootdir\init.rc配置文件，这个文件中配置了Android系统中第一个进程Zygote进程。Android中其他所有进程都是通过fork Zygote进程得来的。&lt;/p&gt;</description>
-    </item>
-    
-    <item>
-      <title>View的绘制过程</title>
-      <link>hadyang.github.io/1/01/android-view-draw/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      
-      <guid>hadyang.github.io/1/01/android-view-draw/</guid>
-      <description>&lt;p&gt;上次我们分析了Activity的启动过程，我们已经分析到ActivityThread.main函数，接下来两篇文章我们分析Activity的绘制、时间分发过程。以前，Activity的绘制在我的印象中就measure、lyaout、draw三个过程，对于这三个过程具体的调用过程和细节知之甚少，下面我们就来分析一下Activity的绘制过程。&lt;/p&gt;</description>
-    </item>
-    
-    <item>
-      <title>事件分发过程</title>
-      <link>hadyang.github.io/1/01/andorid-touch-event/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      
-      <guid>hadyang.github.io/1/01/andorid-touch-event/</guid>
-      <description>&lt;p&gt;这篇文章我们继续分析Activity的事件分发过程。&lt;/p&gt;</description>
     </item>
     
   </channel>
