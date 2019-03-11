@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+
+  <meta charset="utf-8" />
+
+  
+  <title>外观模式</title>
+
+  
+  
+  <link href="//cdn.jsdelivr.net" rel="dns-prefetch">
+  <link href="//cdnjs.cloudflare.com" rel="dns-prefetch">
+  <link href="//at.alicdn.com" rel="dns-prefetch">
+  <link href="//fonts.googleapis.com" rel="dns-prefetch">
+  <link href="//fonts.gstatic.com" rel="dns-prefetch">
+  
+  
+  
+  
+  
+
+  
+
+  
+  
+  <meta name="description" content="外观模式，提供了一个统一的接口，用来访问子系统中的一群接口。外观定义了一个高层接口，使得子系统更容易使用。外观模式是将子系统组合进外观中，然后将工作委托给子系统执行。
+">
+
+  
+  
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:site" content="@gohugoio">
+    <meta name="twitter:title" content="外观模式">
+    <meta name="twitter:description" content="外观模式，提供了一个统一的接口，用来访问子系统中的一群接口。外观定义了一个高层接口，使得子系统更容易使用。外观模式是将子系统组合进外观中，然后将工作委托给子系统执行。
+">
+    <meta name="twitter:image" content="/hadyang.github.io/images/avatar.png">
+  
+
+  
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="外观模式">
+  <meta property="og:description" content="外观模式，提供了一个统一的接口，用来访问子系统中的一群接口。外观定义了一个高层接口，使得子系统更容易使用。外观模式是将子系统组合进外观中，然后将工作委托给子系统执行。
+">
+  <meta property="og:url" content="hadyang.github.io/posts/pattern-facade/">
+  <meta property="og:image" content="/hadyang.github.io/images/avatar.png">
+
+
+
+
+<meta name="generator" content="Hugo 0.54.0">
+
+
+<link rel="canonical" href="hadyang.github.io/posts/pattern-facade/">
+
+<meta name="renderer" content="webkit">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="format-detection" content="telephone=no,email=no,adress=no">
+<meta http-equiv="Cache-Control" content="no-transform">
+
+
+<meta name="robots" content="index,follow">
+<meta name="referrer" content="origin-when-cross-origin">
+
+
+
+
+
+
+
+<meta name="theme-color" content="#02b875">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="HadYang">
+<meta name="msapplication-tooltip" content="HadYang">
+<meta name='msapplication-navbutton-color' content="#02b875">
+<meta name="msapplication-TileColor" content="#02b875">
+<meta name="msapplication-TileImage" content="/hadyang.github.io/icons/icon-144x144.png">
+<link rel="icon" href="/hadyang.github.io/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="/hadyang.github.io/icons/icon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/hadyang.github.io/icons/icon-32x32.png">
+<link rel="icon" sizes="192x192" href="/hadyang.github.io/icons/icon-192x192.png">
+<link rel="apple-touch-icon" href="/hadyang.github.io/icons/icon-152x152.png">
+<link rel="manifest" href="/hadyang.github.io/manifest.json">
+
+
+<link rel="preload" href="/hadyang.github.io/styles/main.min.css" as="style">
+
+<link rel="preload" href="https://fonts.googleapis.com/css?family=Lobster" as="style">
+<link rel="preload" href="/hadyang.github.io/images/avatar.png" as="image">
+<link rel="preload" href="/hadyang.github.io/images/grey-prism.svg" as="image">
+
+
+<style>
+  body {
+    background: rgb(244, 243, 241) url('/hadyang.github.io/images/grey-prism.svg') repeat fixed;
+  }
+</style>
+<link rel="stylesheet" href="/hadyang.github.io/styles/main.min.css">
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lobster">
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/medium-zoom@1.0.2/dist/medium-zoom.min.js"></script>
+
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/video.js@7.3.0/dist/video-js.min.css">
+
+
+
+  
+  
+<!--[if lte IE 8]>
+  <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/videojs-ie8@1.1.2/dist/videojs-ie8.min.js"></script>
+<![endif]-->
+
+<!--[if lte IE 9]>
+  <script src="https://cdn.jsdelivr.net/npm/eligrey-classlist-js-polyfill@1.2.20180112/classList.min.js"></script>
+<![endif]-->
+
+
+</head>
+  <body>
+    
+    <div class="suspension">
+      <a role="button" aria-label="Go to top" title="Go to top" class="to-top is-hide"><span class="icon icon-up" aria-hidden="true"></span></a>
+      
+        
+      
+    </div>
+    
+    
+  <header class="site-header">
+  <img class="avatar" src="/hadyang.github.io/images/avatar.png" alt="Avatar">
+  
+  <h2 class="title">HadYang</h2>
+  
+  <p class="subtitle"></p>
+  <button class="menu-toggle" type="button" aria-label="Main Menu" aria-expanded="false" tab-index="0">
+    <span class="icon icon-menu" aria-hidden="true"></span>
+  </button>
+
+  <nav class="site-menu collapsed">
+    <h2 class="offscreen">Main Menu</h2>
+    <ul class="menu-list">
+      
+      
+      
+      
+    </ul>
+  </nav>
+  <nav class="social-menu collapsed">
+    <h2 class="offscreen">Social Networks</h2>
+    <ul class="social-list"></ul>
+  </nav>
+</header>
+
+  <section class="main post-detail">
+    <header class="post-header">
+      <h1 class="post-title">外观模式</h1>
+      <p class="post-meta">@ · Jul 13, 2016 · 1 min read</p>
+    </header>
+    <article class="post-content"><p>外观模式，提供了一个统一的接口，用来访问子系统中的一群接口。<strong>外观定义了一个高层接口，使得子系统更容易使用</strong>。外观模式是将子系统组合进外观中，然后将工作委托给子系统执行。</p>
+
+<h3 id="结构">结构</h3>
+
+<p><img src="../image/pattern-facade.jpg" alt="" /></p>
+
+<ul>
+<li><code>Facade</code>: 外观角色</li>
+<li><code>SubSystem</code>:子系统角色</li>
+</ul>
+
+<p>外观模式的意图就是 <strong>提供一个简单的接口，让一个子系统更易于使用</strong>。由于外观模式的存在，将客户从一个复杂的子系统中解耦，从而 <strong>使我们可以在不影响客户的情况下对子系统进行升级或替换</strong>。</p>
+
+<h3 id="优点">优点</h3>
+
+<ul>
+<li>对客户屏蔽子系统组件，减少了客户处理的对象数目并使得子系统使用起来更加容易。*通过引入外观模式，客户代码将变得很简单，与之关联的对象也很少*。</li>
+<li>实现了子系统与客户之间的松耦合关系，这使得子系统的组件变化不会影响到调用它的客户类，只需要调整外观类即可。</li>
+<li><strong>只是提供了一个访问子系统的统一入口，并不影响用户直接使用子系统类</strong>。</li>
+</ul>
+
+<h3 id="缺点">缺点</h3>
+
+<ul>
+<li><strong>不能很好地限制客户使用子系统类，如果对客户访问子系统类做太多的限制则减少了可变性和灵活性</strong>。</li>
+<li>在不引入抽象外观类的情况下，增加新的子系统可能需要修改外观类或客户端的源代码，违背了“开闭原则”。</li>
+</ul>
+
+<h3 id="使用场景">使用场景</h3>
+
+<ul>
+<li>当要 <strong>为一个复杂子系统提供一个简单接口时可以使用外观模式</strong>。该接口可以满足大多数用户的需求，而且用户也可以越过外观类直接访问子系统。</li>
+<li><strong>客户程序与多个子系统之间存在很大的依赖性</strong>。引入外观类将子系统与客户以及其他子系统解耦，可以提高子系统的独立性和可移植性。</li>
+<li>在层次化结构中，可以使用外观模式定义系统中每一层的入口，层与层之间不直接产生联系，而通过外观类建立联系，<strong>降低层之间的耦合度</strong>。</li>
+</ul></article>
+    <footer class="post-footer">
+      
+      <ul class="post-tags">
+        
+          <li><a href="/tags/java"><span class="tag">Java</span></a></li>
+        
+      </ul>
+      
+      <p class="post-copyright">
+        This post was published <strong>970</strong> days ago, content in the post may be inaccurate, even wrong now, please take risk yourself.
+      </p>
+    </footer>
+    
+      
+    
+  </section>
+  
+<footer class="site-footer">
+  <p>© 2017-2019 HadYang</p>
+  <p>Powered by <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> with theme <a href="https://github.com/laozhu/hugo-nuo" target="_blank" rel="noopener">Nuo</a>.</p>
+  
+</footer>
+
+
+<script src="https://cdn.jsdelivr.net/npm/smooth-scroll@15.0.0/dist/smooth-scroll.min.js"></script>
+
+
+
+<script async src="https://cdn.jsdelivr.net/npm/video.js@7.3.0/dist/video.min.js"></script>
+
+
+
+
+<script async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+      inlineMath: [['$','$'], ['\\(','\\)']],
+      displayMath: [['$$','$$'], ['\\[','\\]']],
+      processEscapes: true,
+      processEnvironments: true,
+      skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+      TeX: { equationNumbers: { autoNumber: "AMS" },
+      extensions: ["AMSmath.js", "AMSsymbols.js"] }
+    },
+  });
+</script>
+<script type="text/x-mathjax-config">
+  // Fix <code> tags after MathJax finishes running. This is a
+  // hack to overcome a shortcoming of Markdown. Discussion at
+  // https://github.com/mojombo/jekyll/issues/199
+  MathJax.Hub.Queue(() => {
+    MathJax.Hub.getAllJax().map(v => v.SourceElement().parentNode.className += ' has-jax');
+  });
+</script>
+
+
+
+<script src="/hadyang.github.io/scripts/index.min.js"></script>
+
+<script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('\/hadyang.github.io\/service-worker.js').then(function() {
+      console.log('[ServiceWorker] Registered');
+    });
+  }
+</script>
+
+
+
+
+
+
+
+
+  </body>
+</html>

@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+
+  <meta charset="utf-8" />
+
+  
+  <title>装饰模式</title>
+
+  
+  
+  <link href="//cdn.jsdelivr.net" rel="dns-prefetch">
+  <link href="//cdnjs.cloudflare.com" rel="dns-prefetch">
+  <link href="//at.alicdn.com" rel="dns-prefetch">
+  <link href="//fonts.googleapis.com" rel="dns-prefetch">
+  <link href="//fonts.gstatic.com" rel="dns-prefetch">
+  
+  
+  
+  
+  
+
+  
+
+  
+  
+  <meta name="description" content="装饰模式，是面向对象编程领域中，一种动态地往一个类中添加新的行为的设计模式。就功能而言，修饰模式相比生成子类更为灵活，这样可以给某个对象而不是整个类添加一些功能。
+">
+
+  
+  
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:site" content="@gohugoio">
+    <meta name="twitter:title" content="装饰模式">
+    <meta name="twitter:description" content="装饰模式，是面向对象编程领域中，一种动态地往一个类中添加新的行为的设计模式。就功能而言，修饰模式相比生成子类更为灵活，这样可以给某个对象而不是整个类添加一些功能。
+">
+    <meta name="twitter:image" content="/hadyang.github.io/images/avatar.png">
+  
+
+  
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="装饰模式">
+  <meta property="og:description" content="装饰模式，是面向对象编程领域中，一种动态地往一个类中添加新的行为的设计模式。就功能而言，修饰模式相比生成子类更为灵活，这样可以给某个对象而不是整个类添加一些功能。
+">
+  <meta property="og:url" content="hadyang.github.io/posts/pattern-decorator/">
+  <meta property="og:image" content="/hadyang.github.io/images/avatar.png">
+
+
+
+
+<meta name="generator" content="Hugo 0.54.0">
+
+
+<link rel="canonical" href="hadyang.github.io/posts/pattern-decorator/">
+
+<meta name="renderer" content="webkit">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="format-detection" content="telephone=no,email=no,adress=no">
+<meta http-equiv="Cache-Control" content="no-transform">
+
+
+<meta name="robots" content="index,follow">
+<meta name="referrer" content="origin-when-cross-origin">
+
+
+
+
+
+
+
+<meta name="theme-color" content="#02b875">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="HadYang">
+<meta name="msapplication-tooltip" content="HadYang">
+<meta name='msapplication-navbutton-color' content="#02b875">
+<meta name="msapplication-TileColor" content="#02b875">
+<meta name="msapplication-TileImage" content="/hadyang.github.io/icons/icon-144x144.png">
+<link rel="icon" href="/hadyang.github.io/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="/hadyang.github.io/icons/icon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/hadyang.github.io/icons/icon-32x32.png">
+<link rel="icon" sizes="192x192" href="/hadyang.github.io/icons/icon-192x192.png">
+<link rel="apple-touch-icon" href="/hadyang.github.io/icons/icon-152x152.png">
+<link rel="manifest" href="/hadyang.github.io/manifest.json">
+
+
+<link rel="preload" href="/hadyang.github.io/styles/main.min.css" as="style">
+
+<link rel="preload" href="https://fonts.googleapis.com/css?family=Lobster" as="style">
+<link rel="preload" href="/hadyang.github.io/images/avatar.png" as="image">
+<link rel="preload" href="/hadyang.github.io/images/grey-prism.svg" as="image">
+
+
+<style>
+  body {
+    background: rgb(244, 243, 241) url('/hadyang.github.io/images/grey-prism.svg') repeat fixed;
+  }
+</style>
+<link rel="stylesheet" href="/hadyang.github.io/styles/main.min.css">
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lobster">
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/medium-zoom@1.0.2/dist/medium-zoom.min.js"></script>
+
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/video.js@7.3.0/dist/video-js.min.css">
+
+
+
+  
+  
+<!--[if lte IE 8]>
+  <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/videojs-ie8@1.1.2/dist/videojs-ie8.min.js"></script>
+<![endif]-->
+
+<!--[if lte IE 9]>
+  <script src="https://cdn.jsdelivr.net/npm/eligrey-classlist-js-polyfill@1.2.20180112/classList.min.js"></script>
+<![endif]-->
+
+
+</head>
+  <body>
+    
+    <div class="suspension">
+      <a role="button" aria-label="Go to top" title="Go to top" class="to-top is-hide"><span class="icon icon-up" aria-hidden="true"></span></a>
+      
+        
+      
+    </div>
+    
+    
+  <header class="site-header">
+  <img class="avatar" src="/hadyang.github.io/images/avatar.png" alt="Avatar">
+  
+  <h2 class="title">HadYang</h2>
+  
+  <p class="subtitle"></p>
+  <button class="menu-toggle" type="button" aria-label="Main Menu" aria-expanded="false" tab-index="0">
+    <span class="icon icon-menu" aria-hidden="true"></span>
+  </button>
+
+  <nav class="site-menu collapsed">
+    <h2 class="offscreen">Main Menu</h2>
+    <ul class="menu-list">
+      
+      
+      
+      
+    </ul>
+  </nav>
+  <nav class="social-menu collapsed">
+    <h2 class="offscreen">Social Networks</h2>
+    <ul class="social-list"></ul>
+  </nav>
+</header>
+
+  <section class="main post-detail">
+    <header class="post-header">
+      <h1 class="post-title">装饰模式</h1>
+      <p class="post-meta">@ · Jul 11, 2016 · 1 min read</p>
+    </header>
+    <article class="post-content"><p>装饰模式，是面向对象编程领域中，一种动态地往一个类中添加新的行为的设计模式。就功能而言，修饰模式相比生成子类更为灵活，这样可以给某个对象而不是整个类添加一些功能。</p>
+
+<h3 id="结构">结构</h3>
+
+<p>装饰模式通过增加一个装饰类包裹原来的类，包裹的方式一般是通过在将原来的对象作为装饰类的构造函数的参数。装饰类实现新的功能，但是，在不需要用到新功能的地方，它可以直接调用原来的类中的方法。<strong>装饰类必须和原来的类有相同的接口。</strong></p>
+
+<blockquote>
+<p>装饰模式是类继承的另外一种选择。类继承在编译时候增加行为，而装饰模式是在运行时增加行为。</p>
+</blockquote>
+
+<p>在实际应用中，Java I/O模型中使用了大量的装饰模式，下面我们就来看看Java I/O中装饰模式的结构：</p>
+
+<p><img src="../image/pattern-decorator.jpg" alt="" /></p>
+
+<p>其中<code>FilterInputStream</code>、<code>BufferedInputStream</code>都是装饰类，<code>FileInputStream</code>是组件类，也就是被装饰类。组件类和装饰类都继承自一个相同的祖先类，客户端调用装饰类的API，装饰类在完成自己的&rdquo;装饰任务&rdquo;后（或者之前），调用组件类的相关API。通过这样的 <strong>组合和委托</strong> 的方式来扩展组件的行为，这样我们就不需要修改现有的代码，很符合<code>开闭原则</code>。</p>
+
+<h3 id="优点">优点</h3>
+
+<ul>
+<li>装饰模式与继承关系的目的都是要扩展对象的功能，但是 <strong>装饰者可以提供比继承更多的灵活性。</strong></li>
+<li>通过使用不同的具体装饰类以及这些装饰类的排列组合，设计师可以创造出很多不同行为的组合。</li>
+</ul>
+
+<h3 id="缺点">缺点</h3>
+
+<ul>
+<li>这种比继承更加灵活机动的特性，也同时意味着更加多的复杂性。</li>
+<li>装饰模式会导致设计中出现许多小类，如果过度使用，会使程序变得很复杂。</li>
+<li>采用装饰模式在实例化组件时，将增加代码的复杂度，这时我们可以使用工厂模式或者生成器模式。</li>
+</ul>
+
+<h3 id="使用场景">使用场景</h3>
+
+<ul>
+<li>需要 <strong>扩展一个类的功能，或给一个类添加附加职责。</strong></li>
+<li>需要动态的给一个对象添加功能，这些功能可以再动态的撤销。</li>
+<li>需要增加由一些基本功能的排列组合而产生的非常大量的功能，从而使继承关系变的不现实。</li>
+</ul></article>
+    <footer class="post-footer">
+      
+      <ul class="post-tags">
+        
+          <li><a href="/tags/java"><span class="tag">Java</span></a></li>
+        
+          <li><a href="/tags/i/o"><span class="tag">I/O</span></a></li>
+        
+      </ul>
+      
+      <p class="post-copyright">
+        This post was published <strong>972</strong> days ago, content in the post may be inaccurate, even wrong now, please take risk yourself.
+      </p>
+    </footer>
+    
+      
+    
+  </section>
+  
+<footer class="site-footer">
+  <p>© 2017-2019 HadYang</p>
+  <p>Powered by <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> with theme <a href="https://github.com/laozhu/hugo-nuo" target="_blank" rel="noopener">Nuo</a>.</p>
+  
+</footer>
+
+
+<script src="https://cdn.jsdelivr.net/npm/smooth-scroll@15.0.0/dist/smooth-scroll.min.js"></script>
+
+
+
+<script async src="https://cdn.jsdelivr.net/npm/video.js@7.3.0/dist/video.min.js"></script>
+
+
+
+
+<script async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+      inlineMath: [['$','$'], ['\\(','\\)']],
+      displayMath: [['$$','$$'], ['\\[','\\]']],
+      processEscapes: true,
+      processEnvironments: true,
+      skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+      TeX: { equationNumbers: { autoNumber: "AMS" },
+      extensions: ["AMSmath.js", "AMSsymbols.js"] }
+    },
+  });
+</script>
+<script type="text/x-mathjax-config">
+  // Fix <code> tags after MathJax finishes running. This is a
+  // hack to overcome a shortcoming of Markdown. Discussion at
+  // https://github.com/mojombo/jekyll/issues/199
+  MathJax.Hub.Queue(() => {
+    MathJax.Hub.getAllJax().map(v => v.SourceElement().parentNode.className += ' has-jax');
+  });
+</script>
+
+
+
+<script src="/hadyang.github.io/scripts/index.min.js"></script>
+
+<script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('\/hadyang.github.io\/service-worker.js').then(function() {
+      console.log('[ServiceWorker] Registered');
+    });
+  }
+</script>
+
+
+
+
+
+
+
+
+  </body>
+</html>

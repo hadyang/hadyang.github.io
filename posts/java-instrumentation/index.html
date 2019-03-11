@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+
+  <meta charset="utf-8" />
+
+  
+  <title>Java Instrumentation</title>
+
+  
+  
+  <link href="//cdn.jsdelivr.net" rel="dns-prefetch">
+  <link href="//cdnjs.cloudflare.com" rel="dns-prefetch">
+  <link href="//at.alicdn.com" rel="dns-prefetch">
+  <link href="//fonts.googleapis.com" rel="dns-prefetch">
+  <link href="//fonts.gstatic.com" rel="dns-prefetch">
+  
+  
+  
+  
+  
+
+  
+
+  
+  
+  <meta name="description" content="最近在看公司的工具包的时候，发现有个很好用的功能 &amp;ndash; TraceId 和 LogBack 的 MDC 的功能，可以通过一个 TraceId 来跟踪一个请求在不同系统中的执行情况，这可以很好的提高对线上业务排查的效率。但是这项功能的实现比较复杂，利用了一个 Instrumentation 的 JVM 底层代理的功能，Instrumentation是通过JVMTI与JVM进行交互，JVMIT是JVM对外提供的用户接口，JVMTI是基于事件驱动的，JVM每执行到一定的逻辑就会调用一些事件的回调接口，这些接口可以供开发者扩展自己的逻辑。
+">
+
+  
+  
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:site" content="@gohugoio">
+    <meta name="twitter:title" content="Java Instrumentation">
+    <meta name="twitter:description" content="最近在看公司的工具包的时候，发现有个很好用的功能 &amp;ndash; TraceId 和 LogBack 的 MDC 的功能，可以通过一个 TraceId 来跟踪一个请求在不同系统中的执行情况，这可以很好的提高对线上业务排查的效率。但是这项功能的实现比较复杂，利用了一个 Instrumentation 的 JVM 底层代理的功能，Instrumentation是通过JVMTI与JVM进行交互，JVMIT是JVM对外提供的用户接口，JVMTI是基于事件驱动的，JVM每执行到一定的逻辑就会调用一些事件的回调接口，这些接口可以供开发者扩展自己的逻辑。
+">
+    <meta name="twitter:image" content="/hadyang.github.io/images/avatar.png">
+  
+
+  
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="Java Instrumentation">
+  <meta property="og:description" content="最近在看公司的工具包的时候，发现有个很好用的功能 &amp;ndash; TraceId 和 LogBack 的 MDC 的功能，可以通过一个 TraceId 来跟踪一个请求在不同系统中的执行情况，这可以很好的提高对线上业务排查的效率。但是这项功能的实现比较复杂，利用了一个 Instrumentation 的 JVM 底层代理的功能，Instrumentation是通过JVMTI与JVM进行交互，JVMIT是JVM对外提供的用户接口，JVMTI是基于事件驱动的，JVM每执行到一定的逻辑就会调用一些事件的回调接口，这些接口可以供开发者扩展自己的逻辑。
+">
+  <meta property="og:url" content="hadyang.github.io/posts/java-instrumentation/">
+  <meta property="og:image" content="/hadyang.github.io/images/avatar.png">
+
+
+
+
+<meta name="generator" content="Hugo 0.54.0">
+
+
+<link rel="canonical" href="hadyang.github.io/posts/java-instrumentation/">
+
+<meta name="renderer" content="webkit">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="format-detection" content="telephone=no,email=no,adress=no">
+<meta http-equiv="Cache-Control" content="no-transform">
+
+
+<meta name="robots" content="index,follow">
+<meta name="referrer" content="origin-when-cross-origin">
+
+
+
+
+
+
+
+<meta name="theme-color" content="#02b875">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="HadYang">
+<meta name="msapplication-tooltip" content="HadYang">
+<meta name='msapplication-navbutton-color' content="#02b875">
+<meta name="msapplication-TileColor" content="#02b875">
+<meta name="msapplication-TileImage" content="/hadyang.github.io/icons/icon-144x144.png">
+<link rel="icon" href="/hadyang.github.io/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="/hadyang.github.io/icons/icon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/hadyang.github.io/icons/icon-32x32.png">
+<link rel="icon" sizes="192x192" href="/hadyang.github.io/icons/icon-192x192.png">
+<link rel="apple-touch-icon" href="/hadyang.github.io/icons/icon-152x152.png">
+<link rel="manifest" href="/hadyang.github.io/manifest.json">
+
+
+<link rel="preload" href="/hadyang.github.io/styles/main.min.css" as="style">
+
+<link rel="preload" href="https://fonts.googleapis.com/css?family=Lobster" as="style">
+<link rel="preload" href="/hadyang.github.io/images/avatar.png" as="image">
+<link rel="preload" href="/hadyang.github.io/images/grey-prism.svg" as="image">
+
+
+<style>
+  body {
+    background: rgb(244, 243, 241) url('/hadyang.github.io/images/grey-prism.svg') repeat fixed;
+  }
+</style>
+<link rel="stylesheet" href="/hadyang.github.io/styles/main.min.css">
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lobster">
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/medium-zoom@1.0.2/dist/medium-zoom.min.js"></script>
+
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/video.js@7.3.0/dist/video-js.min.css">
+
+
+
+  
+  
+<!--[if lte IE 8]>
+  <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/videojs-ie8@1.1.2/dist/videojs-ie8.min.js"></script>
+<![endif]-->
+
+<!--[if lte IE 9]>
+  <script src="https://cdn.jsdelivr.net/npm/eligrey-classlist-js-polyfill@1.2.20180112/classList.min.js"></script>
+<![endif]-->
+
+
+</head>
+  <body>
+    
+    <div class="suspension">
+      <a role="button" aria-label="Go to top" title="Go to top" class="to-top is-hide"><span class="icon icon-up" aria-hidden="true"></span></a>
+      
+        
+      
+    </div>
+    
+    
+  <header class="site-header">
+  <img class="avatar" src="/hadyang.github.io/images/avatar.png" alt="Avatar">
+  
+  <h2 class="title">HadYang</h2>
+  
+  <p class="subtitle"></p>
+  <button class="menu-toggle" type="button" aria-label="Main Menu" aria-expanded="false" tab-index="0">
+    <span class="icon icon-menu" aria-hidden="true"></span>
+  </button>
+
+  <nav class="site-menu collapsed">
+    <h2 class="offscreen">Main Menu</h2>
+    <ul class="menu-list">
+      
+      
+      
+      
+    </ul>
+  </nav>
+  <nav class="social-menu collapsed">
+    <h2 class="offscreen">Social Networks</h2>
+    <ul class="social-list"></ul>
+  </nav>
+</header>
+
+  <section class="main post-detail">
+    <header class="post-header">
+      <h1 class="post-title">Java Instrumentation</h1>
+      <p class="post-meta">@ · Dec 28, 2016 · 3 min read</p>
+    </header>
+    <article class="post-content"><p>最近在看公司的工具包的时候，发现有个很好用的功能 &ndash; <code>TraceId</code> 和 LogBack 的 <a href="http://logback.qos.ch/manual/mdc.html">MDC</a> 的功能，可以通过一个 <code>TraceId</code> 来跟踪一个请求在不同系统中的执行情况，这可以很好的提高对线上业务排查的效率。但是这项功能的实现比较复杂，利用了一个 <code>Instrumentation</code> 的 JVM 底层代理的功能，<code>Instrumentation</code>是通过JVMTI与JVM进行交互，<code>JVMIT</code>是JVM对外提供的用户接口，<code>JVMTI</code>是基于事件驱动的，JVM每执行到一定的逻辑就会调用一些事件的回调接口，这些接口可以供开发者扩展自己的逻辑。</p>
+
+<p><code>Instrumentation</code> 的最大作用，就是类定义动态改变和操作。在 Java5 及其后续版本当中，开发者可以在一个普通 Java 程序（带有 main 函数的 Java 类）运行时，通过 <code>–javaagent</code> 参数指定一个特定的 jar 文件（包含 <code>Instrumentation</code> 代理）来启动 <code>Instrumentation</code> 的代理程序。</p>
+
+<p>在 Java6 里面，<code>instrumentation</code> 包被赋予了更强大的功能：启动后的 instrument、本地代码（native code）instrument，以及动态改变 classpath 等等。这些改变，意味着 Java 具有了更强的动态控制、解释能力，它使得 Java 语言变得更加灵活多变。</p>
+
+<blockquote>
+<p>本案例中的有些类路径需要写全限定名</p>
+</blockquote>
+
+<h3 id="premain">PreMain</h3>
+
+<p>在 Java5 当中，开发者可以让 Instrumentation 代理在 main 函数运行前执行。这里我们首先编写被代理的程序，在Main函数中调用TransClass.getNumber方法，返回整数 1，在代理程序中我们将返回的 1 变为 2。</p>
+
+<h4 id="transclass">TransClass</h4>
+
+<p>在这里我们通过更换class文件的字节码来实现上面的效果，首先将下面的类编译为.class文件，并且重命名为TransClass2.class，然后将<code>return 2</code>改为<code>return 1</code>，并保存。</p>
+
+<pre><code class="language-java">public class TransClass {
+    public int getNumber() {
+        return 2;
+    }
+}
+</code></pre>
+
+<h4 id="transformer">Transformer</h4>
+
+<p>Transformer是我们执行字节码替换的类，通过transform方法，将TransClass类的字节码替换为TransClass2.class的字节码。</p>
+
+<pre><code class="language-java">public class Transformer implements ClassFileTransformer {
+    public static final String classNumberReturns2 = &quot;TransClass2.class&quot;;
+
+    public static byte[] getBytesFromFile(String fileName) {
+        try {
+            // precondition
+            File file = new File(fileName);
+            InputStream is = new FileInputStream(file);
+            long length = file.length();
+            byte[] bytes = new byte[(int) length];
+
+            // Read in the bytes
+            int offset = 0;
+            int numRead = 0;
+            while (offset &lt; bytes.length
+                    &amp;&amp; (numRead = is.read(bytes, offset, bytes.length - offset)) &gt;= 0) {
+                offset += numRead;
+            }
+
+            if (offset &lt; bytes.length) {
+                throw new IOException(&quot;Could not completely read file &quot;
+                        + file.getName());
+            }
+            is.close();
+            return bytes;
+        } catch (Exception e) {
+            System.out.println(&quot;error occurs in _ClassTransformer!&quot;
+                    + e.getClass().getName());
+            return null;
+        }
+    }
+
+    public byte[] transform(ClassLoader l, String className, Class&lt;?&gt; c,
+                            ProtectionDomain pd, byte[] b) throws IllegalClassFormatException {
+
+        //这里要写全限定名
+        if (!className.equals(&quot;TransClass&quot;)) {
+            return null;
+        }
+
+        return getBytesFromFile(classNumberReturns2);
+    }
+}
+
+</code></pre>
+
+<h4 id="testmaininjar">TestMainInJar</h4>
+
+<p>该类即被代理程序的入口类：</p>
+
+<pre><code class="language-java">public class TestMainInJar {
+
+    public static void main(String[] args) {
+        System.out.println(new TransClass().getNumber());
+    }
+}
+</code></pre>
+
+<h4 id="premain-1">Premain</h4>
+
+<p>该类即代理类：</p>
+
+<pre><code class="language-java">import java.lang.instrument.Instrumentation;
+import java.lang.instrument.UnmodifiableClassException;
+
+public class Premain {
+    public static void premain(String agentArgs, Instrumentation inst)
+            throws ClassNotFoundException, UnmodifiableClassException {
+        System.out.println(&quot;premain&quot;);
+        inst.addTransformer(new Transformer());
+    }
+}
+</code></pre>
+
+<h4 id="manifest-mf">MANIFEST.MF</h4>
+
+<p>在MANIFEST.MF中添加如下内容：</p>
+
+<pre><code>Manifest-Version: 1.0
+Main-Class: TestMainInJar
+Premain-Class: Premain
+</code></pre>
+
+<p>现在在命令行中运行jar包</p>
+
+<pre><code>java -javaagent:TestInstrument.jar -cp TestInstrument.jar TestMainInJar
+</code></pre>
+
+<p>可以看到输出为2，说明TransClass类的字节码替换成功。</p>
+
+<h3 id="agentmain">AgentMain</h3>
+
+<p>在 Java6 的 Instrumentation 当中，有一个跟 premain “并驾齐驱” 的 agentmain 方法，可以在 main 函数开始运行之后再运行。</p>
+
+<p>为了简单起见，我们举例简化如下：依然用类文件替换的方式，将一个返回 1 的函数替换成返回 2 的函数，Attach API 写在一个线程里面，用睡眠等待的方式，每隔半秒时间检查一次所有的 Java 虚拟机，当发现有新的虚拟机出现的时候，就调用 attach 函数，随后再按照 Attach API 文档里面所说的方式装载 Jar 文件。等到 5 秒钟的时候，attach 程序自动结束。而在 main 函数里面，程序每隔半秒钟输出一次返回值（显示出返回值从 1 变成 2）。</p>
+
+<h4 id="agentmain-1">AgentMain</h4>
+
+<pre><code class="language-java">public class AgentMain {
+    public static void agentmain(String agentArgs, Instrumentation inst)
+            throws ClassNotFoundException, UnmodifiableClassException,
+            InterruptedException {
+        inst.addTransformer(new Transformer(), true);
+        inst.retransformClasses(TransClass.class);
+        System.out.println(&quot;Agent Main Done&quot;);
+    }
+}
+</code></pre>
+
+<h4 id="attachthread">AttachThread</h4>
+
+<pre><code class="language-java">// 一个运行 Attach API 的线程子类
+class AttachThread extends Thread {
+    private final List&lt;VirtualMachineDescriptor&gt; listBefore;
+    private final String jar;
+
+    AttachThread(String attachJar, List&lt;VirtualMachineDescriptor&gt; vms) {
+        listBefore = vms;  // 记录程序启动时的 VM 集合
+        jar = attachJar;
+    }
+
+    public void run() {
+        VirtualMachine vm = null;
+        List&lt;VirtualMachineDescriptor&gt; listAfter = null;
+        try {
+            int count = 0;
+            while (true) {
+                listAfter = VirtualMachine.list();
+                for (VirtualMachineDescriptor vmd : listAfter) {
+                    if (!listBefore.contains(vmd)) {
+                        // 如果 VM 有增加，我们就认为是被监控的 VM 启动了
+                        // 这时，我们开始监控这个 VM
+                        vm = VirtualMachine.attach(vmd);
+                        break;
+                    }
+                }
+                Thread.sleep(500);
+                count++;
+                if (null != vm || count &gt;= 10) {
+                    break;
+                }
+            }
+            vm.loadAgent(jar);
+            vm.detach();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    public static void main(String[] args) throws InterruptedException {
+        new AttachThread(&quot;TestInstrument.jar&quot;, VirtualMachine.list()).start();
+
+    }
+}
+</code></pre>
+
+<h4 id="testmaininjar-1">TestMainInJar</h4>
+
+<p>同时我们也需要修改 TestMainInJar 类</p>
+
+<pre><code class="language-java">public class TestMainInJar {
+    public static void main(String[] args) throws InterruptedException {
+        int i = 0;
+        while (i++ &lt; 5) {
+            System.out.println(new TransClass().getNumber());
+            Thread.sleep(500);
+        }
+    }
+}
+</code></pre>
+
+<h4 id="manifest-mf-1">MANIFEST.MF</h4>
+
+<p>MANIFEST.MF修改如下：</p>
+
+<pre><code>Manifest-Version: 1.0
+Main-Class: TestMainInJar
+Premain-Class: Premain
+Agent-Class: AgentMain
+Can-Retransform-Classes: true
+</code></pre>
+
+<p>运行时，可以首先运行上面这个启动新线程的 main 函数</p>
+
+<pre><code class="language-shell">java -cp TestInstrument.jar AttachThread
+</code></pre>
+
+<blockquote>
+<p>在运行的时候如果jar不能运行，提示NoClassDefFoundError:com/sun/tools/attach/VirtualMachie，请确保 $JAVA_HOME/lib/tools.jar在你的CLASSPATH中；如果是Mac系统，请将 $JAVA_HOME/lib/tools.jar 复制到 /Library/Java/Extensions 中。</p>
+</blockquote>
+
+<p>然后，在 5 秒钟内（仅仅简单模拟 JVM 的监控过程）运行如下命令启动测试 Jar 文件 :</p>
+
+<pre><code class="language-shell">java –jar TestInstrument.jar
+</code></pre>
+
+<p>如果时间掌握得不太差的话，程序首先会在屏幕上打出 1，这是改动前的类的输出，然后会打出一些 2，这个表示 agentmain 已经被 Attach API 成功附着到 JVM 上，代理程序生效了，当然，还可以看到“Agent Main Done”字样的输出。</p>
+
+<h3 id="参考文档">参考文档</h3>
+
+<p><a href="https://www.ibm.com/developerworks/cn/java/j-lo-jse61/">Java SE 6 新特性: Instrumentation 新功能</a></p></article>
+    <footer class="post-footer">
+      
+      <ul class="post-tags">
+        
+          <li><a href="/tags/%E8%99%9A%E6%8B%9F%E6%9C%BA"><span class="tag">虚拟机</span></a></li>
+        
+          <li><a href="/tags/%E5%AD%97%E8%8A%82%E7%A0%81"><span class="tag">字节码</span></a></li>
+        
+      </ul>
+      
+      <p class="post-copyright">
+        This post was published <strong>802</strong> days ago, content in the post may be inaccurate, even wrong now, please take risk yourself.
+      </p>
+    </footer>
+    
+      
+    
+  </section>
+  
+<footer class="site-footer">
+  <p>© 2017-2019 HadYang</p>
+  <p>Powered by <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> with theme <a href="https://github.com/laozhu/hugo-nuo" target="_blank" rel="noopener">Nuo</a>.</p>
+  
+</footer>
+
+
+<script src="https://cdn.jsdelivr.net/npm/smooth-scroll@15.0.0/dist/smooth-scroll.min.js"></script>
+
+
+
+<script async src="https://cdn.jsdelivr.net/npm/video.js@7.3.0/dist/video.min.js"></script>
+
+
+
+
+<script async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+      inlineMath: [['$','$'], ['\\(','\\)']],
+      displayMath: [['$$','$$'], ['\\[','\\]']],
+      processEscapes: true,
+      processEnvironments: true,
+      skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+      TeX: { equationNumbers: { autoNumber: "AMS" },
+      extensions: ["AMSmath.js", "AMSsymbols.js"] }
+    },
+  });
+</script>
+<script type="text/x-mathjax-config">
+  // Fix <code> tags after MathJax finishes running. This is a
+  // hack to overcome a shortcoming of Markdown. Discussion at
+  // https://github.com/mojombo/jekyll/issues/199
+  MathJax.Hub.Queue(() => {
+    MathJax.Hub.getAllJax().map(v => v.SourceElement().parentNode.className += ' has-jax');
+  });
+</script>
+
+
+
+<script src="/hadyang.github.io/scripts/index.min.js"></script>
+
+<script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('\/hadyang.github.io\/service-worker.js').then(function() {
+      console.log('[ServiceWorker] Registered');
+    });
+  }
+</script>
+
+
+
+
+
+
+
+
+  </body>
+</html>

@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+
+  <meta charset="utf-8" />
+
+  
+  <title>模板方法模式</title>
+
+  
+  
+  <link href="//cdn.jsdelivr.net" rel="dns-prefetch">
+  <link href="//cdnjs.cloudflare.com" rel="dns-prefetch">
+  <link href="//at.alicdn.com" rel="dns-prefetch">
+  <link href="//fonts.googleapis.com" rel="dns-prefetch">
+  <link href="//fonts.gstatic.com" rel="dns-prefetch">
+  
+  
+  
+  
+  
+
+  
+
+  
+  
+  <meta name="description" content="模板方法模式 定义了一个算法的骨架，并允许子类别为一个或多个步骤提供其实践方式。让子类别在不改变算法架构的情况下，重新定义算法中的某些步骤。
+">
+
+  
+  
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:site" content="@gohugoio">
+    <meta name="twitter:title" content="模板方法模式">
+    <meta name="twitter:description" content="模板方法模式 定义了一个算法的骨架，并允许子类别为一个或多个步骤提供其实践方式。让子类别在不改变算法架构的情况下，重新定义算法中的某些步骤。
+">
+    <meta name="twitter:image" content="/hadyang.github.io/images/avatar.png">
+  
+
+  
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="模板方法模式">
+  <meta property="og:description" content="模板方法模式 定义了一个算法的骨架，并允许子类别为一个或多个步骤提供其实践方式。让子类别在不改变算法架构的情况下，重新定义算法中的某些步骤。
+">
+  <meta property="og:url" content="hadyang.github.io/posts/pattern-template/">
+  <meta property="og:image" content="/hadyang.github.io/images/avatar.png">
+
+
+
+
+<meta name="generator" content="Hugo 0.54.0">
+
+
+<link rel="canonical" href="hadyang.github.io/posts/pattern-template/">
+
+<meta name="renderer" content="webkit">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="format-detection" content="telephone=no,email=no,adress=no">
+<meta http-equiv="Cache-Control" content="no-transform">
+
+
+<meta name="robots" content="index,follow">
+<meta name="referrer" content="origin-when-cross-origin">
+
+
+
+
+
+
+
+<meta name="theme-color" content="#02b875">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="HadYang">
+<meta name="msapplication-tooltip" content="HadYang">
+<meta name='msapplication-navbutton-color' content="#02b875">
+<meta name="msapplication-TileColor" content="#02b875">
+<meta name="msapplication-TileImage" content="/hadyang.github.io/icons/icon-144x144.png">
+<link rel="icon" href="/hadyang.github.io/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="/hadyang.github.io/icons/icon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/hadyang.github.io/icons/icon-32x32.png">
+<link rel="icon" sizes="192x192" href="/hadyang.github.io/icons/icon-192x192.png">
+<link rel="apple-touch-icon" href="/hadyang.github.io/icons/icon-152x152.png">
+<link rel="manifest" href="/hadyang.github.io/manifest.json">
+
+
+<link rel="preload" href="/hadyang.github.io/styles/main.min.css" as="style">
+
+<link rel="preload" href="https://fonts.googleapis.com/css?family=Lobster" as="style">
+<link rel="preload" href="/hadyang.github.io/images/avatar.png" as="image">
+<link rel="preload" href="/hadyang.github.io/images/grey-prism.svg" as="image">
+
+
+<style>
+  body {
+    background: rgb(244, 243, 241) url('/hadyang.github.io/images/grey-prism.svg') repeat fixed;
+  }
+</style>
+<link rel="stylesheet" href="/hadyang.github.io/styles/main.min.css">
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lobster">
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/medium-zoom@1.0.2/dist/medium-zoom.min.js"></script>
+
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/video.js@7.3.0/dist/video-js.min.css">
+
+
+
+  
+  
+<!--[if lte IE 8]>
+  <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/videojs-ie8@1.1.2/dist/videojs-ie8.min.js"></script>
+<![endif]-->
+
+<!--[if lte IE 9]>
+  <script src="https://cdn.jsdelivr.net/npm/eligrey-classlist-js-polyfill@1.2.20180112/classList.min.js"></script>
+<![endif]-->
+
+
+</head>
+  <body>
+    
+    <div class="suspension">
+      <a role="button" aria-label="Go to top" title="Go to top" class="to-top is-hide"><span class="icon icon-up" aria-hidden="true"></span></a>
+      
+        
+      
+    </div>
+    
+    
+  <header class="site-header">
+  <img class="avatar" src="/hadyang.github.io/images/avatar.png" alt="Avatar">
+  
+  <h2 class="title">HadYang</h2>
+  
+  <p class="subtitle"></p>
+  <button class="menu-toggle" type="button" aria-label="Main Menu" aria-expanded="false" tab-index="0">
+    <span class="icon icon-menu" aria-hidden="true"></span>
+  </button>
+
+  <nav class="site-menu collapsed">
+    <h2 class="offscreen">Main Menu</h2>
+    <ul class="menu-list">
+      
+      
+      
+      
+    </ul>
+  </nav>
+  <nav class="social-menu collapsed">
+    <h2 class="offscreen">Social Networks</h2>
+    <ul class="social-list"></ul>
+  </nav>
+</header>
+
+  <section class="main post-detail">
+    <header class="post-header">
+      <h1 class="post-title">模板方法模式</h1>
+      <p class="post-meta">@ · Jul 14, 2016 · 1 min read</p>
+    </header>
+    <article class="post-content"><p>模板方法模式 <strong>定义了一个算法的骨架，并允许子类别为一个或多个步骤提供其实践方式</strong>。让子类别在不改变算法架构的情况下，重新定义算法中的某些步骤。</p>
+
+<p>模板就是一个方法，这个方法将算法定义成一组步骤，其中的任何步骤都可以是抽象的，由子类负责实现。这可以确保算法的结构保持不变，同时子类提供部分实现。下面是模板类的一个示例。</p>
+
+<pre><code class="language-Java">abstract class Game {
+
+    private int playersCount;
+
+    abstract void initializeGame();
+
+    abstract void makePlay(int player);
+
+    abstract boolean endOfGame();
+
+    abstract void printWinner();
+
+    /* 钩子方法 */
+    boolean justOnce() {
+        return false;
+    }
+
+    /* 模板方法 */
+    final void playGame(int playersCount) {
+        for (int i = 0; i &lt; 3; i++) {
+            this.playersCount = playersCount;
+            initializeGame();
+            int j = 0;
+            while (!endOfGame()) {
+                makePlay(j);
+                j = (j + 1) % playersCount;
+            }
+            printWinner();
+
+            if (justOnce())
+                break;
+        }
+    }
+}
+</code></pre>
+
+<p>在使用模板方法的时候，我们还可以采用钩子(<code>hook</code>)方法来对算法的某些步骤进行控制。在上面代码中的第14行就是一个hook方法，它提供了一个默认的实现，<strong>子类可以覆盖这个方法来控制模板方法的流程</strong>。</p>
+
+<h3 id="结构">结构</h3>
+
+<p><img src="../image/pattern-template.jpg" alt="" /></p>
+
+<p>在图中的抽象类包含了模板方法，通过抽象的方式将模板方法和具体操作之间解耦。通常我们会将模板方法设置为<code>final</code>这样可以防止子类修改。</p>
+
+<blockquote>
+<p>在Java API中也有许多模板方法的使用，比如：<code>Comparable</code>接口，这个接口可以实现自定义的排序。</p>
+</blockquote>
+
+<h3 id="模板方法和策略模式">模板方法和策略模式</h3>
+
+<ul>
+<li>策略模式使用的是对象组合，所以更具有弹性，客户端可以根据需求更换。</li>
+<li>在策略模式中，所组合的类实现了整个算法，而模板方法模式只是让子类实现部分的算法。</li>
+<li>模板方法模式对算法有更多的控制权，而且重用的代码更多。</li>
+<li>策略模式和模板方法模式都是封装算法，一个用组合，一个用继承。</li>
+</ul>
+
+<blockquote>
+<p>Tip:工厂方法模式是模板方法的一种特殊版本。</p>
+</blockquote></article>
+    <footer class="post-footer">
+      
+      <ul class="post-tags">
+        
+          <li><a href="/tags/java"><span class="tag">Java</span></a></li>
+        
+      </ul>
+      
+      <p class="post-copyright">
+        This post was published <strong>969</strong> days ago, content in the post may be inaccurate, even wrong now, please take risk yourself.
+      </p>
+    </footer>
+    
+      
+    
+  </section>
+  
+<footer class="site-footer">
+  <p>© 2017-2019 HadYang</p>
+  <p>Powered by <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> with theme <a href="https://github.com/laozhu/hugo-nuo" target="_blank" rel="noopener">Nuo</a>.</p>
+  
+</footer>
+
+
+<script src="https://cdn.jsdelivr.net/npm/smooth-scroll@15.0.0/dist/smooth-scroll.min.js"></script>
+
+
+
+<script async src="https://cdn.jsdelivr.net/npm/video.js@7.3.0/dist/video.min.js"></script>
+
+
+
+
+<script async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+      inlineMath: [['$','$'], ['\\(','\\)']],
+      displayMath: [['$$','$$'], ['\\[','\\]']],
+      processEscapes: true,
+      processEnvironments: true,
+      skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+      TeX: { equationNumbers: { autoNumber: "AMS" },
+      extensions: ["AMSmath.js", "AMSsymbols.js"] }
+    },
+  });
+</script>
+<script type="text/x-mathjax-config">
+  // Fix <code> tags after MathJax finishes running. This is a
+  // hack to overcome a shortcoming of Markdown. Discussion at
+  // https://github.com/mojombo/jekyll/issues/199
+  MathJax.Hub.Queue(() => {
+    MathJax.Hub.getAllJax().map(v => v.SourceElement().parentNode.className += ' has-jax');
+  });
+</script>
+
+
+
+<script src="/hadyang.github.io/scripts/index.min.js"></script>
+
+<script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('\/hadyang.github.io\/service-worker.js').then(function() {
+      console.log('[ServiceWorker] Registered');
+    });
+  }
+</script>
+
+
+
+
+
+
+
+
+  </body>
+</html>

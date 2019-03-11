@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+
+  <meta charset="utf-8" />
+
+  
+  <title>代理模式</title>
+
+  
+  
+  <link href="//cdn.jsdelivr.net" rel="dns-prefetch">
+  <link href="//cdnjs.cloudflare.com" rel="dns-prefetch">
+  <link href="//at.alicdn.com" rel="dns-prefetch">
+  <link href="//fonts.googleapis.com" rel="dns-prefetch">
+  <link href="//fonts.gstatic.com" rel="dns-prefetch">
+  
+  
+  
+  
+  
+
+  
+
+  
+  
+  <meta name="description" content="在某些情况下，一个客户不想或者不能直接引用一个对象，此时可以通过一个称之为代理的第三者来实现间接引用。代理对象可以在客户端和目标对象之间起到中介的作用，并且可以通过代理对象去掉客户不能看到的内容和服务或者添加客户需要的额外服务。代理模式是为另一个对象提供一个替身或者占位符以控制对这个对象的访问。使用代理模式创建代理对象，让代理对象控制某对象的访问，被代理对象可以是远程的对象、创建开销大的对象或者是需要安全控制的对象。
+">
+
+  
+  
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:site" content="@gohugoio">
+    <meta name="twitter:title" content="代理模式">
+    <meta name="twitter:description" content="在某些情况下，一个客户不想或者不能直接引用一个对象，此时可以通过一个称之为代理的第三者来实现间接引用。代理对象可以在客户端和目标对象之间起到中介的作用，并且可以通过代理对象去掉客户不能看到的内容和服务或者添加客户需要的额外服务。代理模式是为另一个对象提供一个替身或者占位符以控制对这个对象的访问。使用代理模式创建代理对象，让代理对象控制某对象的访问，被代理对象可以是远程的对象、创建开销大的对象或者是需要安全控制的对象。
+">
+    <meta name="twitter:image" content="/hadyang.github.io/images/avatar.png">
+  
+
+  
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="代理模式">
+  <meta property="og:description" content="在某些情况下，一个客户不想或者不能直接引用一个对象，此时可以通过一个称之为代理的第三者来实现间接引用。代理对象可以在客户端和目标对象之间起到中介的作用，并且可以通过代理对象去掉客户不能看到的内容和服务或者添加客户需要的额外服务。代理模式是为另一个对象提供一个替身或者占位符以控制对这个对象的访问。使用代理模式创建代理对象，让代理对象控制某对象的访问，被代理对象可以是远程的对象、创建开销大的对象或者是需要安全控制的对象。
+">
+  <meta property="og:url" content="hadyang.github.io/posts/pattern-proxy/">
+  <meta property="og:image" content="/hadyang.github.io/images/avatar.png">
+
+
+
+
+<meta name="generator" content="Hugo 0.54.0">
+
+
+<link rel="canonical" href="hadyang.github.io/posts/pattern-proxy/">
+
+<meta name="renderer" content="webkit">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="format-detection" content="telephone=no,email=no,adress=no">
+<meta http-equiv="Cache-Control" content="no-transform">
+
+
+<meta name="robots" content="index,follow">
+<meta name="referrer" content="origin-when-cross-origin">
+
+
+
+
+
+
+
+<meta name="theme-color" content="#02b875">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="HadYang">
+<meta name="msapplication-tooltip" content="HadYang">
+<meta name='msapplication-navbutton-color' content="#02b875">
+<meta name="msapplication-TileColor" content="#02b875">
+<meta name="msapplication-TileImage" content="/hadyang.github.io/icons/icon-144x144.png">
+<link rel="icon" href="/hadyang.github.io/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="/hadyang.github.io/icons/icon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/hadyang.github.io/icons/icon-32x32.png">
+<link rel="icon" sizes="192x192" href="/hadyang.github.io/icons/icon-192x192.png">
+<link rel="apple-touch-icon" href="/hadyang.github.io/icons/icon-152x152.png">
+<link rel="manifest" href="/hadyang.github.io/manifest.json">
+
+
+<link rel="preload" href="/hadyang.github.io/styles/main.min.css" as="style">
+
+<link rel="preload" href="https://fonts.googleapis.com/css?family=Lobster" as="style">
+<link rel="preload" href="/hadyang.github.io/images/avatar.png" as="image">
+<link rel="preload" href="/hadyang.github.io/images/grey-prism.svg" as="image">
+
+
+<style>
+  body {
+    background: rgb(244, 243, 241) url('/hadyang.github.io/images/grey-prism.svg') repeat fixed;
+  }
+</style>
+<link rel="stylesheet" href="/hadyang.github.io/styles/main.min.css">
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lobster">
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/medium-zoom@1.0.2/dist/medium-zoom.min.js"></script>
+
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/video.js@7.3.0/dist/video-js.min.css">
+
+
+
+  
+  
+<!--[if lte IE 8]>
+  <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/videojs-ie8@1.1.2/dist/videojs-ie8.min.js"></script>
+<![endif]-->
+
+<!--[if lte IE 9]>
+  <script src="https://cdn.jsdelivr.net/npm/eligrey-classlist-js-polyfill@1.2.20180112/classList.min.js"></script>
+<![endif]-->
+
+
+</head>
+  <body>
+    
+    <div class="suspension">
+      <a role="button" aria-label="Go to top" title="Go to top" class="to-top is-hide"><span class="icon icon-up" aria-hidden="true"></span></a>
+      
+        
+      
+    </div>
+    
+    
+  <header class="site-header">
+  <img class="avatar" src="/hadyang.github.io/images/avatar.png" alt="Avatar">
+  
+  <h2 class="title">HadYang</h2>
+  
+  <p class="subtitle"></p>
+  <button class="menu-toggle" type="button" aria-label="Main Menu" aria-expanded="false" tab-index="0">
+    <span class="icon icon-menu" aria-hidden="true"></span>
+  </button>
+
+  <nav class="site-menu collapsed">
+    <h2 class="offscreen">Main Menu</h2>
+    <ul class="menu-list">
+      
+      
+      
+      
+    </ul>
+  </nav>
+  <nav class="social-menu collapsed">
+    <h2 class="offscreen">Social Networks</h2>
+    <ul class="social-list"></ul>
+  </nav>
+</header>
+
+  <section class="main post-detail">
+    <header class="post-header">
+      <h1 class="post-title">代理模式</h1>
+      <p class="post-meta">@ · Jul 15, 2016 · 1 min read</p>
+    </header>
+    <article class="post-content"><p>在某些情况下，一个客户不想或者不能直接引用一个对象，此时可以通过一个称之为<code>代理</code>的第三者来实现间接引用。<strong>代理对象可以在客户端和目标对象之间起到中介的作用，并且可以通过代理对象去掉客户不能看到的内容和服务或者添加客户需要的额外服务</strong>。代理模式是为另一个对象提供一个替身或者占位符以控制对这个对象的访问。使用代理模式创建代理对象，让代理对象控制某对象的访问，被代理对象可以是远程的对象、创建开销大的对象或者是需要安全控制的对象。</p>
+
+<p>根据<code>控制访问</code>的实现的不同，代理模式的变体有很多，我们这里介绍三种：</p>
+
+<ul>
+<li><code>远程代理</code>控制访问远程对象。</li>
+<li><code>虚拟代理</code>控制访问创建开销大的对象。</li>
+<li><code>保护代理</code>基于权限控制对资源的访问。</li>
+</ul>
+
+<h3 id="结构">结构</h3>
+
+<p>这里我们首先看看一般的代理模式的类图：</p>
+
+<p><img src="../image/pattern-proxy-1.jpg" alt="" /></p>
+
+<ul>
+<li><code>RealSubject</code>：通常是真正做事的对象，<code>Proxy</code>会控制对<code>RealSubject</code>的访问。</li>
+<li><code>Proxy</code>：负责创建<code>RealSubject</code>，同时持有<code>RealSubject</code>的引用，可以在必要的时候讲请求转发给<code>RealSubject</code>。</li>
+</ul>
+
+<p><code>RealSubject</code>和<code>Proxy</code>都实现了<code>Subject</code>接口，这样就允许任何客户都可以像处理<code>RealSubject</code>一样地处理<code>Proxy</code>对象。客户必须通过<code>Proxy</code>与<code>RealSubject</code>进行交互。<code>Proxy</code>控制了对<code>RealSubject</code>的访问，在某些情况下，我们可能需要这样的控制。这些情况包括<code>RealSubject</code>是远程对象、<code>RealSubject</code>创建开销大、或者<code>RealSubject</code>需要被保护。</p>
+
+<h3 id="远程代理">远程代理</h3>
+
+<p>远程代理为一个位于不同的地址空间的对象提供一个本地的代理对象，这个不同的地址空间可以是在同一台主机中，也可是在另一台主机中。*远程代理可以将网络的细节隐藏起来*，使得客户端不必考虑网络的存在。<strong>客户完全可以认为被代理的远程业务对象是局域的而不是远程的，而远程代理对象承担了大部分的网络通信工作</strong>。</p>
+
+<p><img src="../image/pattern-proxy-2.jpg" alt="" /></p>
+
+<h3 id="虚拟代理">虚拟代理</h3>
+
+<p><strong>虚拟代理作为创建开销大的对象的代理。虚拟代理通常直到我们真正需要一个对象的时候才创建它</strong>。当对象在创建前和创建中时，由虚拟代理来扮演对象的替身。对象创建后，代理就会将请求直接委托给对象。</p>
+
+<p><code>Copy-on-write</code>：写时复制，是一种计算机程序设计领域的优化策略。其核心思想是，<strong>如果有多个调用者同时要求相同资源（如内存或磁盘上的数据存储），他们会共同获取相同的指针指向相同的资源，直到某个调用者试图修改资源的内容时，系统才会真正复制一份专用副本给该调用者，而其他调用者所见到的最初的资源仍然保持不变</strong>。这过程对其他的调用者都是透明的。此作法主要的优点是如果调用者没有修改该资源，就不会有副本被创建，因此多个调用者只是读取操作时可以共享同一份资源。</p>
+
+<p><code>Copy-on-Write代理</code>：它是虚拟代理的一种，把复制（克隆）操作延迟到只有在客户端真正需要时才执行。一般来说，对象的深克隆是一个开销较大的操作，<code>Copy-on-Write代理</code>可以让这个操作延迟，只有对象被用到的时候才被克隆。</p>
+
+<h3 id="保护代理">保护代理</h3>
+
+<p>保护代理是控制对一个对象的访问，<strong>可以给不同的用户提供不同级别的使用权限</strong>。</p>
+
+<h3 id="区别">区别</h3>
+
+<h4 id="代理模式和装饰者模式">代理模式和装饰者模式</h4>
+
+<p>装饰者模式和代理模式都是用一个对象将另一个对象包裹，然后把调用委托给内部的对象。虽然这两者看起来很像，但是它们的目的却不同。<strong>装饰者模式为对象增加行为，而代理模式是控制对象的访问</strong>。</p>
+
+<h4 id="代理模式和适配器模式">代理模式和适配器模式</h4>
+
+<p>代理模式和适配器模式都是挡在其他对象的前面，并负责将请求转发。但是 <strong>适配器模式会改变对象适配的接口，而代理模式则实现相同的接口</strong>。</p>
+
+<h3 id="优点">优点</h3>
+
+<ul>
+<li>代理模式能够协调调用者和被调用者，在一定程度上降低了系统的耦合度。</li>
+<li>远程代理使得客户端可以访问在远程机器上的对象，远程机器可能具有更好的计算性能与处理速度，可以快速响应并处理客户端请求。</li>
+<li>虚拟代理通过使用一个小对象来代表一个大对象，可以减少系统资源的消耗，对系统进行优化并提高运行速度。</li>
+<li>保护代理可以控制对真实对象的使用权限。</li>
+</ul>
+
+<h3 id="缺点">缺点</h3>
+
+<ul>
+<li>由于在客户端和真实主题之间增加了代理对象，因此有些类型的代理模式可能会造成请求的处理速度变慢。</li>
+<li>实现代理模式需要额外的工作，有些代理模式的实现非常复杂。</li>
+</ul>
+
+<h3 id="其他代理模式">其他代理模式</h3>
+
+<p>代理模式的变体很多，下面我们就来说说其他的代理模式：</p>
+
+<ul>
+<li><code>防火墙代理</code>：控制网络资源的访问，保护<code>Subject</code>免于侵害。</li>
+<li><code>智能引用代理</code>：当<code>Subject</code>被引用时，进行额外的动作，比如计算一个对象的引用次数。</li>
+<li><code>缓存代理</code>：为开销大的运算结果提供暂时的存储，它允许多个客户共享结果，以减少计算或网络延迟。</li>
+<li><code>同步代理</code>：在多线程情况下为<code>Subject</code>提供安全的访问。</li>
+</ul></article>
+    <footer class="post-footer">
+      
+      <ul class="post-tags">
+        
+          <li><a href="/tags/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F"><span class="tag">设计模式</span></a></li>
+        
+      </ul>
+      
+      <p class="post-copyright">
+        This post was published <strong>968</strong> days ago, content in the post may be inaccurate, even wrong now, please take risk yourself.
+      </p>
+    </footer>
+    
+      
+    
+  </section>
+  
+<footer class="site-footer">
+  <p>© 2017-2019 HadYang</p>
+  <p>Powered by <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> with theme <a href="https://github.com/laozhu/hugo-nuo" target="_blank" rel="noopener">Nuo</a>.</p>
+  
+</footer>
+
+
+<script src="https://cdn.jsdelivr.net/npm/smooth-scroll@15.0.0/dist/smooth-scroll.min.js"></script>
+
+
+
+<script async src="https://cdn.jsdelivr.net/npm/video.js@7.3.0/dist/video.min.js"></script>
+
+
+
+
+<script async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+      inlineMath: [['$','$'], ['\\(','\\)']],
+      displayMath: [['$$','$$'], ['\\[','\\]']],
+      processEscapes: true,
+      processEnvironments: true,
+      skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+      TeX: { equationNumbers: { autoNumber: "AMS" },
+      extensions: ["AMSmath.js", "AMSsymbols.js"] }
+    },
+  });
+</script>
+<script type="text/x-mathjax-config">
+  // Fix <code> tags after MathJax finishes running. This is a
+  // hack to overcome a shortcoming of Markdown. Discussion at
+  // https://github.com/mojombo/jekyll/issues/199
+  MathJax.Hub.Queue(() => {
+    MathJax.Hub.getAllJax().map(v => v.SourceElement().parentNode.className += ' has-jax');
+  });
+</script>
+
+
+
+<script src="/hadyang.github.io/scripts/index.min.js"></script>
+
+<script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('\/hadyang.github.io\/service-worker.js').then(function() {
+      console.log('[ServiceWorker] Registered');
+    });
+  }
+</script>
+
+
+
+
+
+
+
+
+  </body>
+</html>

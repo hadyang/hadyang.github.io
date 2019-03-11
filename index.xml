@@ -6,9 +6,394 @@
     <description>Recent content on HadYang</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>zh-CN</language>
+    <lastBuildDate>Sun, 19 Mar 2017 23:13:12 +0000</lastBuildDate>
     
 	<atom:link href="hadyang.github.io/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>拦截器模式</title>
+      <link>hadyang.github.io/posts/pattern-filter/</link>
+      <pubDate>Sun, 19 Mar 2017 23:13:12 +0000</pubDate>
+      
+      <guid>hadyang.github.io/posts/pattern-filter/</guid>
+      <description>&lt;p&gt;拦截器模式在 Web 应用的 Fitler 中有应用，对于流式的数据流处理很有用。比如对于 Shell 命令的管道可以采用拦截器模式，提供一个命令的接口，并使用一个 Chain 来进行管理。&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>Java 正则表达式的匹配模式</title>
+      <link>hadyang.github.io/posts/java-pattrn-flag/</link>
+      <pubDate>Tue, 21 Feb 2017 21:07:15 +0000</pubDate>
+      
+      <guid>hadyang.github.io/posts/java-pattrn-flag/</guid>
+      <description>&lt;p&gt;正则表达式是很强大的，今天先来总结一下Java正则表达式的几种匹配模式。&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>Java Instrumentation</title>
+      <link>hadyang.github.io/posts/java-instrumentation/</link>
+      <pubDate>Wed, 28 Dec 2016 16:16:46 +0000</pubDate>
+      
+      <guid>hadyang.github.io/posts/java-instrumentation/</guid>
+      <description>&lt;p&gt;最近在看公司的工具包的时候，发现有个很好用的功能 &amp;ndash; &lt;code&gt;TraceId&lt;/code&gt; 和 LogBack 的 &lt;a href=&#34;http://logback.qos.ch/manual/mdc.html&#34;&gt;MDC&lt;/a&gt; 的功能，可以通过一个 &lt;code&gt;TraceId&lt;/code&gt; 来跟踪一个请求在不同系统中的执行情况，这可以很好的提高对线上业务排查的效率。但是这项功能的实现比较复杂，利用了一个 &lt;code&gt;Instrumentation&lt;/code&gt; 的 JVM 底层代理的功能，&lt;code&gt;Instrumentation&lt;/code&gt;是通过JVMTI与JVM进行交互，&lt;code&gt;JVMIT&lt;/code&gt;是JVM对外提供的用户接口，&lt;code&gt;JVMTI&lt;/code&gt;是基于事件驱动的，JVM每执行到一定的逻辑就会调用一些事件的回调接口，这些接口可以供开发者扩展自己的逻辑。&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>Idea中通过Maven创建 Archetypes</title>
+      <link>hadyang.github.io/posts/idea-maven-custom-archetypes/</link>
+      <pubDate>Tue, 20 Dec 2016 22:24:49 +0000</pubDate>
+      
+      <guid>hadyang.github.io/posts/idea-maven-custom-archetypes/</guid>
+      <description>&lt;p&gt;最近在做项目的时候发现Web项目中很多配置都是相对固定的，比如Spring，常用的配置都是那些，每次新建工程的时候很是麻烦，为了减少没必要的复制粘贴（提高效率），这里介绍一种自定义 Archetypes 的方法。Archetypes 是Maven中的一种模板，我们可以通过 Archetypes 将常用的配置放在模板里，每次新建项目的时候选择模板就可以了。&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>Java List 遍历方式比较</title>
+      <link>hadyang.github.io/posts/java-list-for/</link>
+      <pubDate>Tue, 13 Dec 2016 09:47:18 +0000</pubDate>
+      
+      <guid>hadyang.github.io/posts/java-list-for/</guid>
+      <description>&lt;p&gt;最近在做项目的时候，有点纠结使用是&lt;code&gt;ArrayList&lt;/code&gt;还是&lt;code&gt;LinkedList&lt;/code&gt;，这两种List实现方式不同，应用于不同场景下，不同的遍历方式对性能和代码的可读性也有很大的影响。&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>缓存算法--LRU &amp;&amp; LFU</title>
+      <link>hadyang.github.io/posts/lru-lfu/</link>
+      <pubDate>Wed, 30 Nov 2016 15:00:06 +0000</pubDate>
+      
+      <guid>hadyang.github.io/posts/lru-lfu/</guid>
+      <description>&lt;p&gt;今天在熟悉公司业务的时候，看到&lt;a href=&#34;http://baike.baidu.com/link?url=njKbC1j8pqxN7q75i8U0db8AAE7uOKCbDWgmG1hVR6Ucm8xR5jiTAR_ACFDUiurrOMAUfIICIKtUziWtTYsvBa&#34;&gt;LFU&lt;/a&gt;算法，十分困惑。觉得和LRU算法差不多，于是仔细研究了一番，发现其实他们的思想是类似的&amp;ndash;通过一种机制来标记缓存中的元素，当缓存满时进行“末位”淘汰。&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>Intellij Idea 修改 Maven 项目默认JDK版本</title>
+      <link>hadyang.github.io/posts/idea-maven-jdk-version/</link>
+      <pubDate>Sat, 19 Nov 2016 19:01:17 +0000</pubDate>
+      
+      <guid>hadyang.github.io/posts/idea-maven-jdk-version/</guid>
+      <description>&lt;p&gt;在使用IDEA创建Maven项目的时候，默认使用JDK 1.5版本，这样很多新版本的特性就不能使用。为了使用新特性（比如：Lambda表达式），必须在创建项目后进行手动修改，这样很麻烦，下面我就来介绍一个一劳永逸的方法。&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>Java泛型--类型擦除</title>
+      <link>hadyang.github.io/posts/java-generic-type-type-erasure/</link>
+      <pubDate>Tue, 15 Nov 2016 19:57:44 +0000</pubDate>
+      
+      <guid>hadyang.github.io/posts/java-generic-type-type-erasure/</guid>
+      <description>&lt;p&gt;从Java1.5开始，Java引入泛型的概念。Java中的泛型和C语言中的模板类有些不同，主要是由于Java在最初版本并没有支持泛型，1.5之后为了实现泛型并且能与旧代码兼容，Java编译器使用了类型擦除机制。&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>Java Enum解析</title>
+      <link>hadyang.github.io/posts/java-enum/</link>
+      <pubDate>Tue, 30 Aug 2016 13:00:06 +0000</pubDate>
+      
+      <guid>hadyang.github.io/posts/java-enum/</guid>
+      <description>&lt;p&gt;最近在刷题的时候碰到一个Enum相关的题目，突然发现自己对Enum类的了解知之甚少，于是这篇文章就通过Java字节码来深入了解Enum类。&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>AsyncTask源码解析</title>
+      <link>hadyang.github.io/posts/asynctask-source/</link>
+      <pubDate>Fri, 19 Aug 2016 16:39:50 +0000</pubDate>
+      
+      <guid>hadyang.github.io/posts/asynctask-source/</guid>
+      <description>&lt;p&gt;&lt;code&gt;AsyncTask&lt;/code&gt;是Android平台提供的一个多线程框架，它可以很简单的用于更新UI线程，你可以在后台执行操作，并将操作的结果Push到UI线程。同时你完全不需要去操作线程和Handler。&lt;code&gt;AsyncTask&lt;/code&gt;与Java中的多线程框架不同，它只适合用于短小的任务（最多几秒钟）。为什么会有这样的要求？这就涉及到内存泄漏，后面我们会说。&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>Volley源码解析</title>
+      <link>hadyang.github.io/posts/android-volley-source/</link>
+      <pubDate>Sat, 23 Jul 2016 22:00:49 +0000</pubDate>
+      
+      <guid>hadyang.github.io/posts/android-volley-source/</guid>
+      <description>&lt;p&gt;最近复习校招的时候，发现很多公司的面试题都有考Volley，今天我们就来学习学习这个当年在2013年 &lt;code&gt;Google I/O&lt;/code&gt; 大会上发布的Android平台网络通信库。&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>代理模式</title>
+      <link>hadyang.github.io/posts/pattern-proxy/</link>
+      <pubDate>Fri, 15 Jul 2016 10:56:57 +0000</pubDate>
+      
+      <guid>hadyang.github.io/posts/pattern-proxy/</guid>
+      <description>&lt;p&gt;在某些情况下，一个客户不想或者不能直接引用一个对象，此时可以通过一个称之为&lt;code&gt;代理&lt;/code&gt;的第三者来实现间接引用。&lt;strong&gt;代理对象可以在客户端和目标对象之间起到中介的作用，并且可以通过代理对象去掉客户不能看到的内容和服务或者添加客户需要的额外服务&lt;/strong&gt;。代理模式是为另一个对象提供一个替身或者占位符以控制对这个对象的访问。使用代理模式创建代理对象，让代理对象控制某对象的访问，被代理对象可以是远程的对象、创建开销大的对象或者是需要安全控制的对象。&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>状态模式</title>
+      <link>hadyang.github.io/posts/pattern-status/</link>
+      <pubDate>Fri, 15 Jul 2016 09:45:55 +0000</pubDate>
+      
+      <guid>hadyang.github.io/posts/pattern-status/</guid>
+      <description>&lt;p&gt;在很多情况下，一个对象的行为取决于一个或多个动态变化的属性，这样的属性叫做状态，这样的对象叫做有状态的对象，这样的对象状态是从事先定义好的一系列值中取出的。*当一个这样的对象与外部事件产生互动时，其内部状态就会改变，从而使得系统的行为也随之发生变化*。&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>组合模式</title>
+      <link>hadyang.github.io/posts/pattern-composite/</link>
+      <pubDate>Thu, 14 Jul 2016 16:31:15 +0000</pubDate>
+      
+      <guid>hadyang.github.io/posts/pattern-composite/</guid>
+      <description>&lt;p&gt;组合模式允许你 &lt;strong&gt;将对象组合成树形结构来表现“整体/部分”层次结构&lt;/strong&gt;。组合能让客户以一致的方式处理个别对象以及对象组合。它使我们树型结构的问题中，模糊了简单元素和复杂元素的概念，客户程序可以向处理简单元素一样来处理复杂元素，从而使得客户程序与复杂元素的内部结构解耦。&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>迭代器模式</title>
+      <link>hadyang.github.io/posts/pattern-iterator/</link>
+      <pubDate>Thu, 14 Jul 2016 10:54:51 +0000</pubDate>
+      
+      <guid>hadyang.github.io/posts/pattern-iterator/</guid>
+      <description>&lt;p&gt;迭代器模式是一种最简单也最常见的设计模式。*它可以让用户通过特定的接口巡访容器中的每一个元素而不用了解底层的实现*。在Java集合框架中扮演着至关重要的作用。&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>模板方法模式</title>
+      <link>hadyang.github.io/posts/pattern-template/</link>
+      <pubDate>Thu, 14 Jul 2016 09:42:14 +0000</pubDate>
+      
+      <guid>hadyang.github.io/posts/pattern-template/</guid>
+      <description>&lt;p&gt;模板方法模式 &lt;strong&gt;定义了一个算法的骨架，并允许子类别为一个或多个步骤提供其实践方式&lt;/strong&gt;。让子类别在不改变算法架构的情况下，重新定义算法中的某些步骤。&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>外观模式</title>
+      <link>hadyang.github.io/posts/pattern-facade/</link>
+      <pubDate>Wed, 13 Jul 2016 18:34:22 +0000</pubDate>
+      
+      <guid>hadyang.github.io/posts/pattern-facade/</guid>
+      <description>&lt;p&gt;外观模式，提供了一个统一的接口，用来访问子系统中的一群接口。&lt;strong&gt;外观定义了一个高层接口，使得子系统更容易使用&lt;/strong&gt;。外观模式是将子系统组合进外观中，然后将工作委托给子系统执行。&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>适配器模式</title>
+      <link>hadyang.github.io/posts/pattern-adapter/</link>
+      <pubDate>Wed, 13 Jul 2016 17:46:09 +0000</pubDate>
+      
+      <guid>hadyang.github.io/posts/pattern-adapter/</guid>
+      <description>&lt;p&gt;适配器模式，&lt;strong&gt;将一个类的接口转接成用户所期待的&lt;/strong&gt;。一个适配使得因接口不兼容而不能在一起工作的类工作在一起，做法是将类自己的接口包裹在一个已存在的类中。&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>命令模式</title>
+      <link>hadyang.github.io/posts/pattern-command/</link>
+      <pubDate>Wed, 13 Jul 2016 11:43:01 +0000</pubDate>
+      
+      <guid>hadyang.github.io/posts/pattern-command/</guid>
+      <description>&lt;p&gt;命令模式是将“请求”封装为对象，我们称之为命令对象，&lt;strong&gt;一个命令对象通过绑定特定的一组动作来封装请求&lt;/strong&gt;。为达到这一目的，命令对象将动作和动作的执行者（即命令的接收者）包进对象中，并暴露出一个&lt;code&gt;execute()&lt;/code&gt;方法，当此方法调用的时候，接收者就执行这些动作。命令模式是一种对象行为型模式，其别名为动作(Action)模式或事务(Transaction)模式。&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>工厂模式</title>
+      <link>hadyang.github.io/posts/pattern-factory/</link>
+      <pubDate>Mon, 11 Jul 2016 18:12:13 +0000</pubDate>
+      
+      <guid>hadyang.github.io/posts/pattern-factory/</guid>
+      <description>&lt;p&gt;在面向对象程序设计中，&lt;code&gt;工厂&lt;/code&gt;通常是一个用来创建其他对象的类或对象。&lt;strong&gt;工厂是构造方法的抽象，用来实现不同的分配方案。&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;工厂通常包含一个或多个方法，用来创建这个工厂所能创建的各种类型的对象。这些方法可能接收参数，用来指定对象创建的方式，最后返回创建的对象。&lt;/p&gt;
+
+&lt;p&gt;有时，特定类型对象的控制过程比简单地创建一个对象更复杂。在这种情况下，工厂就派上用场了。工厂可能会动态地创建产品类的对象，或者从对象池中返回一个对象，或者对所创建的对象进行复杂的配置，或者应用其他的操作。&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>装饰模式</title>
+      <link>hadyang.github.io/posts/pattern-decorator/</link>
+      <pubDate>Mon, 11 Jul 2016 12:17:10 +0000</pubDate>
+      
+      <guid>hadyang.github.io/posts/pattern-decorator/</guid>
+      <description>&lt;p&gt;装饰模式，是面向对象编程领域中，一种动态地往一个类中添加新的行为的设计模式。就功能而言，修饰模式相比生成子类更为灵活，这样可以给某个对象而不是整个类添加一些功能。&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>观察者模式</title>
+      <link>hadyang.github.io/posts/pattern-obvobserver/</link>
+      <pubDate>Sun, 10 Jul 2016 21:47:48 +0000</pubDate>
+      
+      <guid>hadyang.github.io/posts/pattern-obvobserver/</guid>
+      <description>&lt;p&gt;在观察者模式中，一个目标对象管理所有相依于它的观察者对象，并且在它本身的状态改变时主动发出通知。这通常透过呼叫各观察者所提供的方法来实现。此种模式通常被用来实时事件处理系统。&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>策略模式</title>
+      <link>hadyang.github.io/posts/pattern-strategy/</link>
+      <pubDate>Sun, 10 Jul 2016 09:23:15 +0000</pubDate>
+      
+      <guid>hadyang.github.io/posts/pattern-strategy/</guid>
+      <description>&lt;p&gt;策略模式作为一种软件设计模式，指对象有某个行为，但是在不同的场景中，该行为有不同的实现算法。比如每个人都要“交个人所得税”，但是“在美国交个人所得税”和“在中国交个人所得税”就有不同的算税方法。&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>单例模式</title>
+      <link>hadyang.github.io/posts/pattern-singleton/</link>
+      <pubDate>Wed, 06 Jul 2016 21:25:50 +0000</pubDate>
+      
+      <guid>hadyang.github.io/posts/pattern-singleton/</guid>
+      <description>&lt;p&gt;有一定开发经验的人一定都听说过单例模式，可以说单例模式是一种最简单的设计模式，同时使用的也是很多的。单例指仅仅被实例化一次的类，单例模式通常被用来代替那些本质上唯一的系统组件，比如文件系统、管理器等等。&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>IDEA通过Gradle打包可执行Jar</title>
+      <link>hadyang.github.io/posts/idea-build-with-gradle/idea-build-with-gradle/</link>
+      <pubDate>Mon, 04 Jul 2016 08:39:46 +0000</pubDate>
+      
+      <guid>hadyang.github.io/posts/idea-build-with-gradle/idea-build-with-gradle/</guid>
+      <description>&lt;p&gt;前段时间通过IDEA编写Java程序，使用的是Gradle进行依赖管理。在包管理方面Gradle的优势很大，但是在打包可执行Jar包的时候出现不能找到main方法的问题，在这里稍作记录。&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>FlatBuffer初体验</title>
+      <link>hadyang.github.io/posts/flatbuffer-first/</link>
+      <pubDate>Wed, 29 Jun 2016 22:02:58 +0000</pubDate>
+      
+      <guid>hadyang.github.io/posts/flatbuffer-first/</guid>
+      <description>&lt;p&gt;&lt;code&gt;FlatBuffer&lt;/code&gt;是一个跨平台的序列化库，可以在C++,C#, C, Go, Java, JavaScript, PHP, Python语言中使用，最初这个库是Google为游戏开发中所使用，其源代码地址在&lt;a href=&#34;http://github.com/google/flatbuffers&#34;&gt;Github&lt;/a&gt;。FlatBuffer提供了详细的使用文档，可以参考&lt;a href=&#34;http://google.github.io/flatbuffers/index.html&#34;&gt;Google.github.io&lt;/a&gt;主页上的教程。&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>VPS上搭建Hexo静态博客</title>
+      <link>hadyang.github.io/posts/vps-hexo-setting/</link>
+      <pubDate>Thu, 23 Jun 2016 19:33:11 +0000</pubDate>
+      
+      <guid>hadyang.github.io/posts/vps-hexo-setting/</guid>
+      <description>&lt;p&gt;最近在提交百度收录的时候发现github将百度的爬虫给禁掉了，百度收录不了github上的网站。后来试过用CDN但是没有适合，最终还是将博客重新部署在VPS上，这样就解决了百度爬虫的问题。&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>LinkedHashMap源码解析</title>
+      <link>hadyang.github.io/posts/java-linkedhashmap-source/</link>
+      <pubDate>Thu, 23 Jun 2016 13:51:00 +0000</pubDate>
+      
+      <guid>hadyang.github.io/posts/java-linkedhashmap-source/</guid>
+      <description>&lt;p&gt;&lt;code&gt;LinkedHashMap&lt;/code&gt;是&lt;code&gt;HashMap&lt;/code&gt;的子类，其与HashMap最大的区别就是 &lt;strong&gt;使用了一个双向链表对结点进行存储，通过这个链表可以实现Map中的数据有序&lt;/strong&gt;。在HashMap中遍历数据是根据key的哈希值遍历的，&lt;code&gt;LinkedHashMap&lt;/code&gt;可以根据key插入的顺序或者结点的访问顺序进行遍历。当我们需要记录插入Map结点的顺序时，可以使用&lt;code&gt;LinkedHashMap&lt;/code&gt;。同时&lt;code&gt;LinkedHashMap&lt;/code&gt;是线程不同步的，如果需要进行同步可以使用&lt;code&gt;Collections.synchronizedMap(new LinkedHashMap(...))&lt;/code&gt;。&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>HashMap源码解析</title>
+      <link>hadyang.github.io/posts/java-hashmap-source/</link>
+      <pubDate>Tue, 07 Jun 2016 22:17:51 +0000</pubDate>
+      
+      <guid>hadyang.github.io/posts/java-hashmap-source/</guid>
+      <description>&lt;p&gt;HashMap作为Java Map集合下常用类，我们在使用时对其中的原理知道的很少，最近看了HashMap的源码后觉得还是不难理解，在这里对HashMap做一个分析。&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>Activity启动过程</title>
+      <link>hadyang.github.io/posts/activity-startup/</link>
+      <pubDate>Sat, 28 May 2016 14:27:13 +0000</pubDate>
+      
+      <guid>hadyang.github.io/posts/activity-startup/</guid>
+      <description>&lt;p&gt;我们进行Android开发的时候，第一个例子就接触过&lt;code&gt;startActivity&lt;/code&gt;这个函数，已经使用了很长时间了。今天我们就来看看Activity的启动到底是怎么回事。&lt;/p&gt;
+
+&lt;p&gt;本文略长&amp;hellip;&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>启动Launcher</title>
+      <link>hadyang.github.io/posts/android-launcher-startup/</link>
+      <pubDate>Fri, 27 May 2016 12:14:44 +0000</pubDate>
+      
+      <guid>hadyang.github.io/posts/android-launcher-startup/</guid>
+      <description>&lt;p&gt;在上一篇文章《Android系统开机过程分析》中，我们分析了从init进程到系统服务启动的整个过程，虽然写的很简单（很多东西了解的不是很全面，后面会慢慢修改），但是整个启动过程还是很复杂，涉及的东西很多。今天我们来分析一下Android系统中用户第一个看见的App&amp;ndash;Launcher的启动过程。&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>Android系统开机过程分析</title>
+      <link>hadyang.github.io/posts/android-system-startup/</link>
+      <pubDate>Wed, 25 May 2016 18:43:53 +0000</pubDate>
+      
+      <guid>hadyang.github.io/posts/android-system-startup/</guid>
+      <description>&lt;p&gt;当我们开机时，首先是启动Linux内核，在Linux内核中首先启动的是init进程，这个进程会去读取配置文件system\core\rootdir\init.rc配置文件，这个文件中配置了Android系统中第一个进程Zygote进程。Android中其他所有进程都是通过fork Zygote进程得来的。&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>深入Java虚拟机读书笔记——对象的生命周期</title>
+      <link>hadyang.github.io/posts/jvm-object-life-cycle/</link>
+      <pubDate>Sat, 30 Apr 2016 13:30:28 +0000</pubDate>
+      
+      <guid>hadyang.github.io/posts/jvm-object-life-cycle/</guid>
+      <description>&lt;p&gt;一旦一个类被装载、连接和初始化，它就随时可以被使用。程序可以访问它的静态字段，调用它的静态方法，或者创建它的实例。作为Java程序员有必要了解Java对象的生命周期。&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>深入Java虚拟机读书笔记——类加载器</title>
+      <link>hadyang.github.io/posts/jvm-class-loader/</link>
+      <pubDate>Fri, 29 Apr 2016 22:05:19 +0000</pubDate>
+      
+      <guid>hadyang.github.io/posts/jvm-class-loader/</guid>
+      <description>&lt;p&gt;在前面一篇的《深入Java虚拟机读书笔记——虚拟机体系结构》中，提到了类加载器，类加载器是JVM重要的组成部分，在类第一次被使用时，类加载器会将类的class文件加载到JVM中，这个class文件包含了类的基本信息：方法、域、继承等等。&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>深入Java虚拟机读书笔记——虚拟机体系结构</title>
+      <link>hadyang.github.io/posts/jvm-architecture/</link>
+      <pubDate>Wed, 27 Apr 2016 16:00:05 +0000</pubDate>
+      
+      <guid>hadyang.github.io/posts/jvm-architecture/</guid>
+      <description>&lt;p&gt;最近在逛知乎的时候，看到有人推荐这本《深入Java虚拟机》，这几天一直在看这本书，虽然这本书里使用的JVM版本比较低，但是讲的内容还是很有营养的。在看这本书的时候学习到很多东西，在这里写一下，方便以后学习：）&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>Git代理设置，加速clone</title>
+      <link>hadyang.github.io/posts/git-proxy/</link>
+      <pubDate>Thu, 18 Feb 2016 09:02:53 +0000</pubDate>
+      
+      <guid>hadyang.github.io/posts/git-proxy/</guid>
+      <description>&lt;p&gt;由于在项目中经常使用到git来获取源码，但是clone的速度确实不敢恭维。本文主要通过ss进行代理，访问速度有500kb/s（个人的网比较渣）。&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>仿Google相册的侧滑栏效果--DrawerLayout</title>
+      <link>hadyang.github.io/posts/android-drawerlayout/</link>
+      <pubDate>Wed, 17 Jun 2015 19:36:21 +0000</pubDate>
+      
+      <guid>hadyang.github.io/posts/android-drawerlayout/</guid>
+      <description>&lt;p&gt;最近在网上看到谷歌自家的相册应用（Google Photos），它的侧滑栏很吸引我，于是在google了很久之后，终于完成，和大家分享分享。&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>Android Studio NDK 入门教程</title>
+      <link>hadyang.github.io/posts/android-studio-ndk/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>hadyang.github.io/posts/android-studio-ndk/</guid>
+      <description>&lt;p&gt;通常我们使用Java来编写Android App，但是在一些特殊场景，比如图像处理方面，Java的效率太低。这时候我们就可以考虑使用C进行开发。NDK是Google为我们提供的一个在Android上使用C开发的工具集合。&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>View的绘制过程</title>
+      <link>hadyang.github.io/posts/android-view-draw/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>hadyang.github.io/posts/android-view-draw/</guid>
+      <description>&lt;p&gt;上次我们分析了Activity的启动过程，我们已经分析到ActivityThread.main函数，接下来两篇文章我们分析Activity的绘制、时间分发过程。以前，Activity的绘制在我的印象中就measure、lyaout、draw三个过程，对于这三个过程具体的调用过程和细节知之甚少，下面我们就来分析一下Activity的绘制过程。&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>事件分发过程</title>
+      <link>hadyang.github.io/posts/andorid-touch-event/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>hadyang.github.io/posts/andorid-touch-event/</guid>
+      <description>&lt;p&gt;这篇文章我们继续分析Activity的事件分发过程。&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>深入Java虚拟机读书笔记——垃圾回收</title>
+      <link>hadyang.github.io/posts/jvm-gc/jvm-gc/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>hadyang.github.io/posts/jvm-gc/jvm-gc/</guid>
+      <description>&lt;p&gt;作为自动管理内存的编程语言，Java为我们做了许多的工作。程序员不需要关心内存分配和回收，这大大提高了程序员的工作效率，同时也减少了内存泄漏的风险。正是由于Java语言的这种特性，导致很多程序员对内存分配没有太深刻的概念，产生OOM后不知从何处修改。我们需要对Java内存管理进行了解，更加合理的利用Java自动管理内存的特性。&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>深入Java虚拟机读书笔记——类装载、连接和初始化</title>
+      <link>hadyang.github.io/posts/jvm-class-load-init/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>hadyang.github.io/posts/jvm-class-load-init/</guid>
+      <description>&lt;p&gt;在前面的文章《深入Java虚拟机读书笔记——类加载器》中我们介绍了JVM中类加载器，类加载器是JVM中重要的组成部分，当类第一次被使用时，由它负责类的装载、连接和初始化，进而能让我们使用类来生成对象等等。&lt;/p&gt;</description>
+    </item>
     
   </channel>
 </rss>

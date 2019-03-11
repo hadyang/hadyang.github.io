@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Git on HadYang</title>
+    <link>hadyang.github.io/categories/git/</link>
+    <description>Recent content in Git on HadYang</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh-CN</language>
+    <lastBuildDate>Thu, 18 Feb 2016 09:02:53 +0000</lastBuildDate>
+    
+	<atom:link href="hadyang.github.io/categories/git/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Git代理设置，加速clone</title>
+      <link>hadyang.github.io/posts/git-proxy/</link>
+      <pubDate>Thu, 18 Feb 2016 09:02:53 +0000</pubDate>
+      
+      <guid>hadyang.github.io/posts/git-proxy/</guid>
+      <description>&lt;p&gt;由于在项目中经常使用到git来获取源码，但是clone的速度确实不敢恭维。本文主要通过ss进行代理，访问速度有500kb/s（个人的网比较渣）。&lt;/p&gt;</description>
+    </item>
+    
+  </channel>
+</rss>

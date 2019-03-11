@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Ndk on HadYang</title>
+    <link>hadyang.github.io/tags/ndk/</link>
+    <description>Recent content in Ndk on HadYang</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh-CN</language>
+    
+	<atom:link href="hadyang.github.io/tags/ndk/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Android Studio NDK 入门教程</title>
+      <link>hadyang.github.io/posts/android-studio-ndk/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>hadyang.github.io/posts/android-studio-ndk/</guid>
+      <description>&lt;p&gt;通常我们使用Java来编写Android App，但是在一些特殊场景，比如图像处理方面，Java的效率太低。这时候我们就可以考虑使用C进行开发。NDK是Google为我们提供的一个在Android上使用C开发的工具集合。&lt;/p&gt;</description>
+    </item>
+    
+  </channel>
+</rss>

@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+
+  <meta charset="utf-8" />
+
+  
+  <title>HashMap源码解析</title>
+
+  
+  
+  <link href="//cdn.jsdelivr.net" rel="dns-prefetch">
+  <link href="//cdnjs.cloudflare.com" rel="dns-prefetch">
+  <link href="//at.alicdn.com" rel="dns-prefetch">
+  <link href="//fonts.googleapis.com" rel="dns-prefetch">
+  <link href="//fonts.gstatic.com" rel="dns-prefetch">
+  
+  
+  
+  
+  
+
+  
+
+  
+  
+  <meta name="description" content="HashMap作为Java Map集合下常用类，我们在使用时对其中的原理知道的很少，最近看了HashMap的源码后觉得还是不难理解，在这里对HashMap做一个分析。
+">
+
+  
+  
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:site" content="@gohugoio">
+    <meta name="twitter:title" content="HashMap源码解析">
+    <meta name="twitter:description" content="HashMap作为Java Map集合下常用类，我们在使用时对其中的原理知道的很少，最近看了HashMap的源码后觉得还是不难理解，在这里对HashMap做一个分析。
+">
+    <meta name="twitter:image" content="/hadyang.github.io/images/avatar.png">
+  
+
+  
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="HashMap源码解析">
+  <meta property="og:description" content="HashMap作为Java Map集合下常用类，我们在使用时对其中的原理知道的很少，最近看了HashMap的源码后觉得还是不难理解，在这里对HashMap做一个分析。
+">
+  <meta property="og:url" content="hadyang.github.io/posts/java-hashmap-source/">
+  <meta property="og:image" content="/hadyang.github.io/images/avatar.png">
+
+
+
+
+<meta name="generator" content="Hugo 0.54.0">
+
+
+<link rel="canonical" href="hadyang.github.io/posts/java-hashmap-source/">
+
+<meta name="renderer" content="webkit">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="format-detection" content="telephone=no,email=no,adress=no">
+<meta http-equiv="Cache-Control" content="no-transform">
+
+
+<meta name="robots" content="index,follow">
+<meta name="referrer" content="origin-when-cross-origin">
+
+
+
+
+
+
+
+<meta name="theme-color" content="#02b875">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="HadYang">
+<meta name="msapplication-tooltip" content="HadYang">
+<meta name='msapplication-navbutton-color' content="#02b875">
+<meta name="msapplication-TileColor" content="#02b875">
+<meta name="msapplication-TileImage" content="/hadyang.github.io/icons/icon-144x144.png">
+<link rel="icon" href="/hadyang.github.io/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="/hadyang.github.io/icons/icon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/hadyang.github.io/icons/icon-32x32.png">
+<link rel="icon" sizes="192x192" href="/hadyang.github.io/icons/icon-192x192.png">
+<link rel="apple-touch-icon" href="/hadyang.github.io/icons/icon-152x152.png">
+<link rel="manifest" href="/hadyang.github.io/manifest.json">
+
+
+<link rel="preload" href="/hadyang.github.io/styles/main.min.css" as="style">
+
+<link rel="preload" href="https://fonts.googleapis.com/css?family=Lobster" as="style">
+<link rel="preload" href="/hadyang.github.io/images/avatar.png" as="image">
+<link rel="preload" href="/hadyang.github.io/images/grey-prism.svg" as="image">
+
+
+<style>
+  body {
+    background: rgb(244, 243, 241) url('/hadyang.github.io/images/grey-prism.svg') repeat fixed;
+  }
+</style>
+<link rel="stylesheet" href="/hadyang.github.io/styles/main.min.css">
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lobster">
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/medium-zoom@1.0.2/dist/medium-zoom.min.js"></script>
+
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/video.js@7.3.0/dist/video-js.min.css">
+
+
+
+  
+  
+<!--[if lte IE 8]>
+  <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/videojs-ie8@1.1.2/dist/videojs-ie8.min.js"></script>
+<![endif]-->
+
+<!--[if lte IE 9]>
+  <script src="https://cdn.jsdelivr.net/npm/eligrey-classlist-js-polyfill@1.2.20180112/classList.min.js"></script>
+<![endif]-->
+
+
+</head>
+  <body>
+    
+    <div class="suspension">
+      <a role="button" aria-label="Go to top" title="Go to top" class="to-top is-hide"><span class="icon icon-up" aria-hidden="true"></span></a>
+      
+        
+      
+    </div>
+    
+    
+  <header class="site-header">
+  <img class="avatar" src="/hadyang.github.io/images/avatar.png" alt="Avatar">
+  
+  <h2 class="title">HadYang</h2>
+  
+  <p class="subtitle"></p>
+  <button class="menu-toggle" type="button" aria-label="Main Menu" aria-expanded="false" tab-index="0">
+    <span class="icon icon-menu" aria-hidden="true"></span>
+  </button>
+
+  <nav class="site-menu collapsed">
+    <h2 class="offscreen">Main Menu</h2>
+    <ul class="menu-list">
+      
+      
+      
+      
+    </ul>
+  </nav>
+  <nav class="social-menu collapsed">
+    <h2 class="offscreen">Social Networks</h2>
+    <ul class="social-list"></ul>
+  </nav>
+</header>
+
+  <section class="main post-detail">
+    <header class="post-header">
+      <h1 class="post-title">HashMap源码解析</h1>
+      <p class="post-meta">@ · Jun 7, 2016 · 3 min read</p>
+    </header>
+    <article class="post-content"><p>HashMap作为Java Map集合下常用类，我们在使用时对其中的原理知道的很少，最近看了HashMap的源码后觉得还是不难理解，在这里对HashMap做一个分析。</p>
+
+<h3 id="hashmap-node">HashMap.Node</h3>
+
+<p>在HashMap中，有一个十分重要的类&ndash;HashMap.Node，根据源码中的注释我们可以知道Node类是HashMap的基本结点，适用于大多数的HashMap。通过Node类的源码我们可以很容易的看出：这是一个单链表，在每个Node对象中都存储了下一个链表结点的引用。</p>
+
+<pre><code class="language-Java">/**
+* Basic hash bin node, used for most entries.  (See below for
+* TreeNode subclass, and in LinkedHashMap for its Entry subclass.)
+*/
+static class Node&lt;K,V&gt; implements Map.Entry&lt;K,V&gt;{
+  final int hash;
+  final K key;
+  V value;
+  Node&lt;K,V&gt; next;
+  ...
+  public final boolean equals(Object o) {
+      if (o == this)
+          return true;
+      if (o instanceof Map.Entry) {
+          Map.Entry&lt;?,?&gt; e = (Map.Entry&lt;?,?&gt;)o;
+          if (Objects.equals(key, e.getKey()) &amp;&amp;
+              Objects.equals(value, e.getValue()))
+                  return true;
+            }
+      return false;
+    }
+}
+</code></pre>
+
+<h3 id="loadfactor-capacity">LoadFactor &amp; Capacity</h3>
+
+<pre><code class="language-Java">/**
+* The table, initialized on first use, and resized as
+* necessary. When allocated, length is always a power of two.
+* (We also tolerate length zero in some operations to allow
+* bootstrapping mechanics that are currently not needed.)
+*/
+transient Node&lt;K,V&gt;[] table;
+</code></pre>
+
+<p><img src="../image/hashmap-structure.png" alt="" /></p>
+
+<p>在HashMap内部使用数组来存储Node对象，那数组的大小是怎么确定的呢？HashMap中有一个<code>DEFAULT_INITIAL_CAPACITY</code>的常量，定义了默认的数组大小，当然你也可以通过构造函数传入你想要的初始容量大小。</p>
+
+<pre><code class="language-Java">/**
+* The default initial capacity - MUST be a power of two.
+*/
+static final int DEFAULT_INITIAL_CAPACITY = 1 &lt;&lt; 4; // aka 16
+</code></pre>
+
+<p>在上面的代码中明确写出了数组的容量必须为2的整数次方。这里为什么这样规定，我猜想是为了优化计算时间，因为对2的整数次方的乘除可以使用位运算，对HashMap的效率有一定的提高。</p>
+
+<p>HashMap的构造函数中还有一个参数<code>loadFactor</code>，这个参数被称为加载因子。最初我在看到这个参数时是一头雾水，并没能发现这个参数的作用，后来在<code>HashMap.resize</code>方法中发现了它。学过散列表的人都知道哈希冲突，对于同一个哈希函数，散列表容量越小越容易发生哈希冲突，发生哈希冲突后就降低了散列表快速查找的优势。<code>loadFactor</code>就是解决散列表容量和HashMap中元素个数关系的一个指标，当超过这个指标后就扩大HashMap的容量。</p>
+
+<h3 id="存放元素">存放元素</h3>
+
+<p>向HashMap存放元素是调用<code>HashMap.put</code>函数，最终会调用<code>HashMap.putVal</code>方法。HashMap顾名思义是根据key的hash值进行存储，那么hash值时如何计算的呢？</p>
+
+<pre><code class="language-Java">static final int hash(Object key) {
+    int h;
+    return (key == null) ? 0 : (h = key.hashCode()) ^ (h &gt;&gt;&gt; 16);
+}
+</code></pre>
+
+<p>在HashMap中的静态方法hash对key的hash值进行计算，在这里我们可以看到：null的hash值是0，否则取hashCode 异或 自己的高16位，这样做的目的是减少哈希冲突。这个函数的具体分析可以参考<a href="http://blog.csdn.net/anxpp/article/details/51234835">HashMap源码之hash()函数分析（JDK 1.8）</a>。</p>
+
+<pre><code class="language-Java">final V putVal(int hash, K key, V value, boolean onlyIfAbsent,
+               boolean evict) {
+    Node&lt;K,V&gt;[] tab; Node&lt;K,V&gt; p; int n, i;
+
+    //新建的HashMap 第一次都会走这个分支，table没有初始化。
+    if ((tab = table) == null || (n = tab.length) == 0)
+        n = (tab = resize()).length;
+
+    //(n - 1) &amp; hash 相当于哈希函数，用位运算代替取模运算
+    //如果没有发生哈希冲突，直接新建一个Node对象并存储在tab[i]位置上
+    if ((p = tab[i = (n - 1) &amp; hash]) == null)
+        //HashMap的子类可以通过重写newNode方法修改结点类型
+        tab[i] = newNode(hash, key, value, null);
+
+    //在tab[i]上发生哈希冲突
+    else {
+        Node&lt;K,V&gt; e; K k;
+        //tab[i]上存在一个Node对象和需要存储的Node对象相同，更新它的值，并返回旧值
+        if (p.hash == hash &amp;&amp;
+            ((k = p.key) == key || (key != null &amp;&amp; key.equals(k))))
+            e = p;
+
+        //如果tab[i]上的Node对象是TreeNode的实例，则该HashMap为LinkedHashMap的实例
+        else if (p instanceof TreeNode)
+            e = ((TreeNode&lt;K,V&gt;)p).putTreeVal(this, tab, hash, key, value);
+
+        //从tab[i]开始遍历单链表，在单链表的最后插入新的元素
+        else {
+            for (int binCount = 0; ; ++binCount) {
+                if ((e = p.next) == null) {
+                    p.next = newNode(hash, key, value, null);
+                    if (binCount &gt;= TREEIFY_THRESHOLD - 1) // -1 for 1st
+                        treeifyBin(tab, hash);
+                    break;
+                }
+                if (e.hash == hash &amp;&amp;
+                    ((k = e.key) == key || (key != null &amp;&amp; key.equals(k))))
+                    break;
+                p = e;
+            }
+        }
+        if (e != null) { // existing mapping for key
+            V oldValue = e.value;
+            if (!onlyIfAbsent || oldValue == null)
+                e.value = value;
+            ...
+            return oldValue;
+        }
+    }
+    ...
+    //threshold = capacity * loadFactor，这个变量在resize中赋值
+    //threshold的文档说明：The next size value at which to resize (capacity * load factor).
+    if (++size &gt; threshold)
+        resize();
+    ...
+    return null;
+}
+</code></pre>
+
+<p>在上面的代码中，我们看到了HashMap存储元素的基本流程，其中包含了哈希冲突的解决方法，即采用拉链法。下面我们来看看一个重要的函数&ndash;<code>resize</code>。</p>
+
+<h3 id="resize">Resize</h3>
+
+<pre><code class="language-Java">final Node&lt;K,V&gt;[] resize() {
+    Node&lt;K,V&gt;[] oldTab = table;
+    int oldCap = (oldTab == null) ? 0 : oldTab.length;
+    int oldThr = threshold;
+    int newCap, newThr = 0;
+    if (oldCap &gt; 0) {
+        if (oldCap &gt;= MAXIMUM_CAPACITY) {
+            threshold = Integer.MAX_VALUE;
+            return oldTab;
+        }
+
+        //扩张HashMap的容量，这里可以看出HashMap中新容量是将旧容量直接乘2得到的
+        //在扩容的同时将threshold（扩容门限值）增加
+        else if ((newCap = oldCap &lt;&lt; 1) &lt; MAXIMUM_CAPACITY &amp;&amp;
+                 oldCap &gt;= DEFAULT_INITIAL_CAPACITY)
+            newThr = oldThr &lt;&lt; 1;
+    }
+    else if (oldThr &gt; 0)
+        newCap = oldThr;
+    //第一次调用resize时走这条分支，将capacity 和 threshold都设为默认值
+    //在这里可以看到threshold的计算方法：capacity * loadFactor
+    else {
+        newCap = DEFAULT_INITIAL_CAPACITY;
+        newThr = (int)(DEFAULT_LOAD_FACTOR * DEFAULT_INITIAL_CAPACITY);
+    }
+    if (newThr == 0) {
+        float ft = (float)newCap * loadFactor;
+        newThr = (newCap &lt; MAXIMUM_CAPACITY &amp;&amp; ft &lt; (float)MAXIMUM_CAPACITY ?
+                  (int)ft : Integer.MAX_VALUE);
+    }
+    threshold = newThr;
+
+    //创建新容量大小的Node对象数组，并将旧数组中的数据复制到新的数组中
+    @SuppressWarnings({&quot;rawtypes&quot;,&quot;unchecked&quot;})
+        Node&lt;K,V&gt;[] newTab = (Node&lt;K,V&gt;[])new Node[newCap];
+    table = newTab;
+    if (oldTab != null) {
+        for (int j = 0; j &lt; oldCap; ++j) {
+            ...
+        }
+    }
+    return newTab;
+}
+</code></pre></article>
+    <footer class="post-footer">
+      
+      <ul class="post-tags">
+        
+          <li><a href="/tags/%E6%BA%90%E7%A0%81"><span class="tag">源码</span></a></li>
+        
+          <li><a href="/tags/%E9%9B%86%E5%90%88"><span class="tag">集合</span></a></li>
+        
+      </ul>
+      
+      <p class="post-copyright">
+        This post was published <strong>1006</strong> days ago, content in the post may be inaccurate, even wrong now, please take risk yourself.
+      </p>
+    </footer>
+    
+      
+    
+  </section>
+  
+<footer class="site-footer">
+  <p>© 2017-2019 HadYang</p>
+  <p>Powered by <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> with theme <a href="https://github.com/laozhu/hugo-nuo" target="_blank" rel="noopener">Nuo</a>.</p>
+  
+</footer>
+
+
+<script src="https://cdn.jsdelivr.net/npm/smooth-scroll@15.0.0/dist/smooth-scroll.min.js"></script>
+
+
+
+<script async src="https://cdn.jsdelivr.net/npm/video.js@7.3.0/dist/video.min.js"></script>
+
+
+
+
+<script async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+      inlineMath: [['$','$'], ['\\(','\\)']],
+      displayMath: [['$$','$$'], ['\\[','\\]']],
+      processEscapes: true,
+      processEnvironments: true,
+      skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+      TeX: { equationNumbers: { autoNumber: "AMS" },
+      extensions: ["AMSmath.js", "AMSsymbols.js"] }
+    },
+  });
+</script>
+<script type="text/x-mathjax-config">
+  // Fix <code> tags after MathJax finishes running. This is a
+  // hack to overcome a shortcoming of Markdown. Discussion at
+  // https://github.com/mojombo/jekyll/issues/199
+  MathJax.Hub.Queue(() => {
+    MathJax.Hub.getAllJax().map(v => v.SourceElement().parentNode.className += ' has-jax');
+  });
+</script>
+
+
+
+<script src="/hadyang.github.io/scripts/index.min.js"></script>
+
+<script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('\/hadyang.github.io\/service-worker.js').then(function() {
+      console.log('[ServiceWorker] Registered');
+    });
+  }
+</script>
+
+
+
+
+
+
+
+
+  </body>
+</html>
