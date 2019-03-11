@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+
+  <meta charset="utf-8" />
+
+  
+  <title>启动Launcher</title>
+
+  
+  
+  <link href="//cdn.jsdelivr.net" rel="dns-prefetch">
+  <link href="//cdnjs.cloudflare.com" rel="dns-prefetch">
+  <link href="//at.alicdn.com" rel="dns-prefetch">
+  <link href="//fonts.googleapis.com" rel="dns-prefetch">
+  <link href="//fonts.gstatic.com" rel="dns-prefetch">
+  
+  
+  
+  
+  
+
+  
+
+  
+  
+  <meta name="description" content="在上一篇文章《Android系统开机过程分析》中，我们分析了从init进程到系统服务启动的整个过程，虽然写的很简单（很多东西了解的不是很全面，后面会慢慢修改），但是整个启动过程还是很复杂，涉及的东西很多。今天我们来分析一下Android系统中用户第一个看见的App&amp;ndash;Launcher的启动过程。
+">
+
+  
+  
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:site" content="@gohugoio">
+    <meta name="twitter:title" content="启动Launcher">
+    <meta name="twitter:description" content="在上一篇文章《Android系统开机过程分析》中，我们分析了从init进程到系统服务启动的整个过程，虽然写的很简单（很多东西了解的不是很全面，后面会慢慢修改），但是整个启动过程还是很复杂，涉及的东西很多。今天我们来分析一下Android系统中用户第一个看见的App&amp;ndash;Launcher的启动过程。
+">
+    <meta name="twitter:image" content="/hadyang.github.io/images/avatar.png">
+  
+
+  
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="启动Launcher">
+  <meta property="og:description" content="在上一篇文章《Android系统开机过程分析》中，我们分析了从init进程到系统服务启动的整个过程，虽然写的很简单（很多东西了解的不是很全面，后面会慢慢修改），但是整个启动过程还是很复杂，涉及的东西很多。今天我们来分析一下Android系统中用户第一个看见的App&amp;ndash;Launcher的启动过程。
+">
+  <meta property="og:url" content="hadyang.github.io/2016/05/android-launcher-startup/">
+  <meta property="og:image" content="/hadyang.github.io/images/avatar.png">
+
+
+
+
+<meta name="generator" content="Hugo 0.54.0">
+
+
+<link rel="canonical" href="hadyang.github.io/2016/05/android-launcher-startup/">
+
+<meta name="renderer" content="webkit">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="format-detection" content="telephone=no,email=no,adress=no">
+<meta http-equiv="Cache-Control" content="no-transform">
+
+
+<meta name="robots" content="index,follow">
+<meta name="referrer" content="origin-when-cross-origin">
+
+
+
+
+
+
+
+<meta name="theme-color" content="#02b875">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="HadYang">
+<meta name="msapplication-tooltip" content="HadYang">
+<meta name='msapplication-navbutton-color' content="#02b875">
+<meta name="msapplication-TileColor" content="#02b875">
+<meta name="msapplication-TileImage" content="/hadyang.github.io/icons/icon-144x144.png">
+<link rel="icon" href="/hadyang.github.io/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="/hadyang.github.io/icons/icon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/hadyang.github.io/icons/icon-32x32.png">
+<link rel="icon" sizes="192x192" href="/hadyang.github.io/icons/icon-192x192.png">
+<link rel="apple-touch-icon" href="/hadyang.github.io/icons/icon-152x152.png">
+<link rel="manifest" href="/hadyang.github.io/manifest.json">
+
+
+<link rel="preload" href="/hadyang.github.io/styles/main.min.css" as="style">
+
+<link rel="preload" href="https://fonts.googleapis.com/css?family=Lobster" as="style">
+<link rel="preload" href="/hadyang.github.io/images/avatar.png" as="image">
+<link rel="preload" href="/hadyang.github.io/images/grey-prism.svg" as="image">
+
+
+<style>
+  body {
+    background: rgb(244, 243, 241) url('/hadyang.github.io/images/grey-prism.svg') repeat fixed;
+  }
+</style>
+<link rel="stylesheet" href="/hadyang.github.io/styles/main.min.css">
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lobster">
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/medium-zoom@1.0.2/dist/medium-zoom.min.js"></script>
+
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/video.js@7.3.0/dist/video-js.min.css">
+
+
+
+  
+  
+<!--[if lte IE 8]>
+  <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/videojs-ie8@1.1.2/dist/videojs-ie8.min.js"></script>
+<![endif]-->
+
+<!--[if lte IE 9]>
+  <script src="https://cdn.jsdelivr.net/npm/eligrey-classlist-js-polyfill@1.2.20180112/classList.min.js"></script>
+<![endif]-->
+
+
+</head>
+  <body>
+    
+    <div class="suspension">
+      <a role="button" aria-label="Go to top" title="Go to top" class="to-top is-hide"><span class="icon icon-up" aria-hidden="true"></span></a>
+      
+        
+      
+    </div>
+    
+    
+  <header class="site-header">
+  <img class="avatar" src="/hadyang.github.io/images/avatar.png" alt="Avatar">
+  
+  <h2 class="title">HadYang</h2>
+  
+  <p class="subtitle"></p>
+  <button class="menu-toggle" type="button" aria-label="Main Menu" aria-expanded="false" tab-index="0">
+    <span class="icon icon-menu" aria-hidden="true"></span>
+  </button>
+
+  <nav class="site-menu collapsed">
+    <h2 class="offscreen">Main Menu</h2>
+    <ul class="menu-list">
+      
+      
+      
+      
+    </ul>
+  </nav>
+  <nav class="social-menu collapsed">
+    <h2 class="offscreen">Social Networks</h2>
+    <ul class="social-list"></ul>
+  </nav>
+</header>
+
+  <section class="main post-detail">
+    <header class="post-header">
+      <h1 class="post-title">启动Launcher</h1>
+      <p class="post-meta">@ · May 27, 2016 · 2 min read</p>
+    </header>
+    <article class="post-content"><p>在上一篇文章《Android系统开机过程分析》中，我们分析了从init进程到系统服务启动的整个过程，虽然写的很简单（很多东西了解的不是很全面，后面会慢慢修改），但是整个启动过程还是很复杂，涉及的东西很多。今天我们来分析一下Android系统中用户第一个看见的App&ndash;Launcher的启动过程。</p>
+
+<p>从《Android系统开机过程分析》这篇文章中的Step9开始，接着分析。</p>
+
+<ul>
+<li>Step0 &ndash; SystemServer.run</li>
+</ul>
+
+<pre><code class="language-Java">private void run() {
+    try {
+        //Step9.1
+        startBootstrapServices();
+        //Step9.2
+        startCoreServices();
+        //启动其他服务，包括网络、彩信等等，还启动了Launcher
+        //Step1
+        startOtherServices();
+    } catch (Throwable ex) {
+        ...
+        throw ex;
+    } finally {
+        ...
+    }
+}
+</code></pre>
+
+<ul>
+<li>Step1 &ndash; SystemServer.startOtherServices</li>
+</ul>
+
+<pre><code class="language-Java">private void startOtherServices() {
+        ...
+        //Step2
+        mActivityManagerService.systemReady(new Runnable() {
+            @Override
+            public void run() {
+                ...
+                try {
+            //启动SystemUIService
+                    startSystemUi(context);
+                } catch (Throwable e) {
+                    reportWtf(&quot;starting System UI&quot;, e);
+                }
+                ...
+        });
+    }
+</code></pre>
+
+<ul>
+<li>Step2 &ndash; ActivityManagerService.systemReady</li>
+</ul>
+
+<pre><code class="language-Java">//com.android.server.am.ActivityManagerService.java
+public void systemReady(final Runnable goingCallback) {
+        synchronized(this) {
+            if (mSystemReady) {
+                // If we're done calling all the receivers, run the next &quot;boot phase&quot; passed in
+                // by the SystemServer
+                if (goingCallback != null) {
+                    goingCallback.run();
+                }
+                return;
+            }
+
+            ...
+           //Step3
+           startHomeActivityLocked(mCurrentUserId, &quot;systemReady&quot;);
+}
+</code></pre>
+
+<ul>
+<li>Step3 &ndash; ActivityManagerService.startHomeActivityLocked</li>
+</ul>
+
+<pre><code class="language-Java">boolean startHomeActivityLocked(int userId, String reason) {
+        ...
+        //Step3.1
+        Intent intent = getHomeIntent();
+        //通过上一步获取的intent来解析有哪些Launcher应用
+        ActivityInfo aInfo =
+            resolveActivityInfo(intent, STOCK_PM_FLAGS, userId);
+        if (aInfo != null) {
+            ...
+            if (app == null || app.instrumentationClass == null) {
+                intent.setFlags(intent.getFlags() | Intent.FLAG_ACTIVITY_NEW_TASK);
+                //Step4
+                mStackSupervisor.startHomeActivity(intent, aInfo, reason);
+            }
+        }
+        return true;
+    }
+</code></pre>
+
+<ul>
+<li>Step3.1 &ndash; ActivityManagerService.getHomeIntent</li>
+</ul>
+
+<pre><code class="language-Java">Intent getHomeIntent() {
+        //mTopAction==action.main
+        //mTopData==null
+        Intent intent = new Intent(mTopAction, mTopData != null ? Uri.parse(mTopData) : null);
+        intent.setComponent(mTopComponent);
+        if (mFactoryTest != FactoryTest.FACTORY_TEST_LOW_LEVEL) {
+             //在Launcher的主Activity有`android.intent.category.HOME`属性
+            intent.addCategory(Intent.CATEGORY_HOME);
+        }
+        return intent;
+}
+</code></pre>
+
+<ul>
+<li>Step4 &ndash; ActivityStackSupervisor.startHomeActivity</li>
+</ul>
+
+<pre><code class="language-Java">void startHomeActivity(Intent intent, ActivityInfo aInfo, String reason) {
+        //将Home所在的Activity栈移动到前台
+        moveHomeStackTaskToTop(HOME_ACTIVITY_TYPE, reason);
+
+        //下面就进入到Activity的启动过程
+        startActivityLocked(null /* caller */, intent, null /* resolvedType */, aInfo,
+                null /* voiceSession */, null /* voiceInteractor */, null /* resultTo */,
+                null /* resultWho */, 0 /* requestCode */, 0 /* callingPid */, 0 /* callingUid */,
+                null /* callingPackage */, 0 /* realCallingPid */, 0 /* realCallingUid */,
+                0 /* startFlags */, null /* options */, false /* ignoreTargetSecurity */,
+                false /* componentSpecified */,
+                null /* outActivity */, null /* container */,  null /* inTask */);
+
+          ...   
+}
+</code></pre></article>
+    <footer class="post-footer">
+      
+      <ul class="post-tags">
+        
+          <li><a href="/tags/%E6%BA%90%E7%A0%81"><span class="tag">源码</span></a></li>
+        
+      </ul>
+      
+      <p class="post-copyright">
+        This post was published <strong>1017</strong> days ago, content in the post may be inaccurate, even wrong now, please take risk yourself.
+      </p>
+    </footer>
+    
+      
+    
+  </section>
+  
+<footer class="site-footer">
+  <p>© 2017-2019 HadYang</p>
+  <p>Powered by <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> with theme <a href="https://github.com/laozhu/hugo-nuo" target="_blank" rel="noopener">Nuo</a>.</p>
+  
+</footer>
+
+
+<script src="https://cdn.jsdelivr.net/npm/smooth-scroll@15.0.0/dist/smooth-scroll.min.js"></script>
+
+
+
+<script async src="https://cdn.jsdelivr.net/npm/video.js@7.3.0/dist/video.min.js"></script>
+
+
+
+
+<script async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+      inlineMath: [['$','$'], ['\\(','\\)']],
+      displayMath: [['$$','$$'], ['\\[','\\]']],
+      processEscapes: true,
+      processEnvironments: true,
+      skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+      TeX: { equationNumbers: { autoNumber: "AMS" },
+      extensions: ["AMSmath.js", "AMSsymbols.js"] }
+    },
+  });
+</script>
+<script type="text/x-mathjax-config">
+  // Fix <code> tags after MathJax finishes running. This is a
+  // hack to overcome a shortcoming of Markdown. Discussion at
+  // https://github.com/mojombo/jekyll/issues/199
+  MathJax.Hub.Queue(() => {
+    MathJax.Hub.getAllJax().map(v => v.SourceElement().parentNode.className += ' has-jax');
+  });
+</script>
+
+
+
+<script src="/hadyang.github.io/scripts/index.min.js"></script>
+
+<script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('\/hadyang.github.io\/service-worker.js').then(function() {
+      console.log('[ServiceWorker] Registered');
+    });
+  }
+</script>
+
+
+
+
+
+
+
+
+  </body>
+</html>

@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+
+  <meta charset="utf-8" />
+
+  
+  <title>Java Enum解析</title>
+
+  
+  
+  <link href="//cdn.jsdelivr.net" rel="dns-prefetch">
+  <link href="//cdnjs.cloudflare.com" rel="dns-prefetch">
+  <link href="//at.alicdn.com" rel="dns-prefetch">
+  <link href="//fonts.googleapis.com" rel="dns-prefetch">
+  <link href="//fonts.gstatic.com" rel="dns-prefetch">
+  
+  
+  
+  
+  
+
+  
+
+  
+  
+  <meta name="description" content="最近在刷题的时候碰到一个Enum相关的题目，突然发现自己对Enum类的了解知之甚少，于是这篇文章就通过Java字节码来深入了解Enum类。
+">
+
+  
+  
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:site" content="@gohugoio">
+    <meta name="twitter:title" content="Java Enum解析">
+    <meta name="twitter:description" content="最近在刷题的时候碰到一个Enum相关的题目，突然发现自己对Enum类的了解知之甚少，于是这篇文章就通过Java字节码来深入了解Enum类。
+">
+    <meta name="twitter:image" content="/hadyang.github.io/images/avatar.png">
+  
+
+  
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="Java Enum解析">
+  <meta property="og:description" content="最近在刷题的时候碰到一个Enum相关的题目，突然发现自己对Enum类的了解知之甚少，于是这篇文章就通过Java字节码来深入了解Enum类。
+">
+  <meta property="og:url" content="hadyang.github.io/2016/08/java-enum/">
+  <meta property="og:image" content="/hadyang.github.io/images/avatar.png">
+
+
+
+
+<meta name="generator" content="Hugo 0.54.0">
+
+
+<link rel="canonical" href="hadyang.github.io/2016/08/java-enum/">
+
+<meta name="renderer" content="webkit">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="format-detection" content="telephone=no,email=no,adress=no">
+<meta http-equiv="Cache-Control" content="no-transform">
+
+
+<meta name="robots" content="index,follow">
+<meta name="referrer" content="origin-when-cross-origin">
+
+
+
+
+
+
+
+<meta name="theme-color" content="#02b875">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="HadYang">
+<meta name="msapplication-tooltip" content="HadYang">
+<meta name='msapplication-navbutton-color' content="#02b875">
+<meta name="msapplication-TileColor" content="#02b875">
+<meta name="msapplication-TileImage" content="/hadyang.github.io/icons/icon-144x144.png">
+<link rel="icon" href="/hadyang.github.io/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="/hadyang.github.io/icons/icon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/hadyang.github.io/icons/icon-32x32.png">
+<link rel="icon" sizes="192x192" href="/hadyang.github.io/icons/icon-192x192.png">
+<link rel="apple-touch-icon" href="/hadyang.github.io/icons/icon-152x152.png">
+<link rel="manifest" href="/hadyang.github.io/manifest.json">
+
+
+<link rel="preload" href="/hadyang.github.io/styles/main.min.css" as="style">
+
+<link rel="preload" href="https://fonts.googleapis.com/css?family=Lobster" as="style">
+<link rel="preload" href="/hadyang.github.io/images/avatar.png" as="image">
+<link rel="preload" href="/hadyang.github.io/images/grey-prism.svg" as="image">
+
+
+<style>
+  body {
+    background: rgb(244, 243, 241) url('/hadyang.github.io/images/grey-prism.svg') repeat fixed;
+  }
+</style>
+<link rel="stylesheet" href="/hadyang.github.io/styles/main.min.css">
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lobster">
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/medium-zoom@1.0.2/dist/medium-zoom.min.js"></script>
+
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/video.js@7.3.0/dist/video-js.min.css">
+
+
+
+  
+  
+<!--[if lte IE 8]>
+  <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/videojs-ie8@1.1.2/dist/videojs-ie8.min.js"></script>
+<![endif]-->
+
+<!--[if lte IE 9]>
+  <script src="https://cdn.jsdelivr.net/npm/eligrey-classlist-js-polyfill@1.2.20180112/classList.min.js"></script>
+<![endif]-->
+
+
+</head>
+  <body>
+    
+    <div class="suspension">
+      <a role="button" aria-label="Go to top" title="Go to top" class="to-top is-hide"><span class="icon icon-up" aria-hidden="true"></span></a>
+      
+        
+      
+    </div>
+    
+    
+  <header class="site-header">
+  <img class="avatar" src="/hadyang.github.io/images/avatar.png" alt="Avatar">
+  
+  <h2 class="title">HadYang</h2>
+  
+  <p class="subtitle"></p>
+  <button class="menu-toggle" type="button" aria-label="Main Menu" aria-expanded="false" tab-index="0">
+    <span class="icon icon-menu" aria-hidden="true"></span>
+  </button>
+
+  <nav class="site-menu collapsed">
+    <h2 class="offscreen">Main Menu</h2>
+    <ul class="menu-list">
+      
+      
+      
+      
+    </ul>
+  </nav>
+  <nav class="social-menu collapsed">
+    <h2 class="offscreen">Social Networks</h2>
+    <ul class="social-list"></ul>
+  </nav>
+</header>
+
+  <section class="main post-detail">
+    <header class="post-header">
+      <h1 class="post-title">Java Enum解析</h1>
+      <p class="post-meta">@ · Aug 30, 2016 · 2 min read</p>
+    </header>
+    <article class="post-content"><p>最近在刷题的时候碰到一个Enum相关的题目，突然发现自己对Enum类的了解知之甚少，于是这篇文章就通过Java字节码来深入了解Enum类。</p>
+
+<p><code>Enum</code> 的全称为 <code>enumeration</code>， 是 <code>JDK 1.5</code> 中引入的新特性，存放在 <code>java.lang</code> 包中。一般用来表示一组相同类型的常量。如性别、日期、月份、颜色等。对这些属性用常量的好处是显而易见的，不仅可以保证单例，且比较时候可以用 <code>==</code> 来替换 <code>equals()</code> 。</p>
+
+<h3 id="字节码">字节码</h3>
+
+<p>我们通过下面的示例代码来了解Enum：</p>
+
+<pre><code class="language-Java">enum Status {
+    A,
+
+    B,
+
+    C
+}
+</code></pre>
+
+<p>通过 javac 命令将<code>Status</code>类编译为<code>.class</code>文件，然后通过 <code>javap -p -v Status.class</code>查看字节码：</p>
+
+<pre><code>Classfile /E:/Project/Idea/Offer/src/Status.class
+  Last modified 2016-8-30; size 798 bytes
+  MD5 checksum 821f46a14a69308237f81a6f4e4503f1
+  Compiled from &quot;Status.java&quot;
+final class Status extends java.lang.Enum&lt;Status&gt;
+  minor version: 0
+  major version: 52
+  flags: ACC_FINAL, ACC_SUPER, ACC_ENUM
+
+Constant pool:
+//此处省略常量池，我们主要看下面的字节码
+
+{
+  public static final Status A;
+    descriptor: LStatus;
+    flags: ACC_PUBLIC, ACC_STATIC, ACC_FINAL, ACC_ENUM
+
+  public static final Status B;
+    descriptor: LStatus;
+    flags: ACC_PUBLIC, ACC_STATIC, ACC_FINAL, ACC_ENUM
+
+  public static final Status C;
+    descriptor: LStatus;
+    flags: ACC_PUBLIC, ACC_STATIC, ACC_FINAL, ACC_ENUM
+
+  private static final Status[] $VALUES;
+    descriptor: [LStatus;
+    flags: ACC_PRIVATE, ACC_STATIC, ACC_FINAL, ACC_SYNTHETIC
+
+  //编译器添加的values方法
+  public static Status[] values();
+    descriptor: ()[LStatus;
+    flags: ACC_PUBLIC, ACC_STATIC
+    Code:
+      stack=1, locals=0, args_size=0
+         0: getstatic     #1                  // Field $VALUES:[LStatus;
+         3: invokevirtual #2                  // Method &quot;[LStatus;&quot;.clone:()Ljava/lang/Object;
+         6: checkcast     #3                  // class &quot;[LStatus;&quot;
+         9: areturn
+      LineNumberTable:
+        line 4: 0
+
+  //通过给定的枚举变量名，返回一个枚举变量
+  public static Status valueOf(java.lang.String);
+    descriptor: (Ljava/lang/String;)LStatus;
+    flags: ACC_PUBLIC, ACC_STATIC
+    Code:
+      stack=2, locals=1, args_size=1
+         0: ldc           #4                  // class Status
+         2: aload_0
+         3: invokestatic  #5                  // Method java/lang/Enum.valueOf:(Ljava/lang/Class;Ljava/lang/String;)Ljava/lang/Enum;
+         6: checkcast     #4                  // class Status
+         9: areturn
+      LineNumberTable:
+        line 4: 0
+
+  //枚举类的构造函数默认是私有的
+  private Status();
+    descriptor: (Ljava/lang/String;I)V
+    flags: ACC_PRIVATE
+    Code:
+      stack=3, locals=3, args_size=3
+         0: aload_0
+         1: aload_1
+         2: iload_2
+         3: invokespecial #6                  // Method java/lang/Enum.&quot;&lt;init&gt;&quot;:(Ljava/lang/String;I)V
+         6: return
+      LineNumberTable:
+        line 4: 0
+    Signature: #30                          // ()V
+
+  //初始化枚举变量以及$VALUES数组
+  static {};
+    descriptor: ()V
+    flags: ACC_STATIC
+    Code:
+      stack=4, locals=0, args_size=0
+         0: new           #4                  // class Status
+         3: dup
+         4: ldc           #7                  // String A
+         6: iconst_0
+         7: invokespecial #8                  // Method &quot;&lt;init&gt;&quot;:(Ljava/lang/String;I)V
+        10: putstatic     #9                  // Field A:LStatus;
+        13: new           #4                  // class Status
+        16: dup
+        17: ldc           #10                 // String B
+        19: iconst_1
+        20: invokespecial #8                  // Method &quot;&lt;init&gt;&quot;:(Ljava/lang/String;I)V
+        23: putstatic     #11                 // Field B:LStatus;
+        26: new           #4                  // class Status
+        29: dup
+        30: ldc           #12                 // String C
+        32: iconst_2
+        33: invokespecial #8                  // Method &quot;&lt;init&gt;&quot;:(Ljava/lang/String;I)V
+        36: putstatic     #13                 // Field C:LStatus;
+        39: iconst_3
+        40: anewarray     #4                  // class Status
+        43: dup
+        44: iconst_0
+        45: getstatic     #9                  // Field A:LStatus;
+        48: aastore
+        49: dup
+        50: iconst_1
+        51: getstatic     #11                 // Field B:LStatus;
+        54: aastore
+        55: dup
+        56: iconst_2
+        57: getstatic     #13                 // Field C:LStatus;
+        60: aastore
+        61: putstatic     #1                  // Field $VALUES:[LStatus;
+        64: return
+      LineNumberTable:
+        line 5: 0
+        line 7: 13
+        line 9: 26
+        line 4: 39
+}
+Signature: #32                          // Ljava/lang/Enum&lt;LStatus;&gt;;
+SourceFile: &quot;Status.java&quot;
+</code></pre>
+
+<p>在上面代码的 <code>第5行</code> ，我们可以发现<code>Status</code>类继承自<code>Enum</code>类，其中的泛型就是<code>Status</code>类自己。从 <code>第13行</code>开始，我们可以看到<code>A</code>，<code>B</code>，<code>C</code>三个枚举变量被定义为 <code>final static Status</code>类型。同时编译器还为我们添加了一个<code>$VALUES</code>的数组，这个数组包含<code>Status</code>中所有枚举变量。当我们调用<code>values()</code>方法时就会通过数组克隆，返回一个枚举变量的数组。</p>
+
+<p>在字节码的<code>static</code>初始化块中，我们可以看到：<strong>在类加载的时候，会将每个枚举变量新建一个<code>Status</code>并赋值</strong>，同时也会初始化<code>$VALUES</code>数组。</p></article>
+    <footer class="post-footer">
+      
+      <ul class="post-tags">
+        
+          <li><a href="/tags/%E8%99%9A%E6%8B%9F%E6%9C%BA"><span class="tag">虚拟机</span></a></li>
+        
+          <li><a href="/tags/%E5%AD%97%E8%8A%82%E7%A0%81"><span class="tag">字节码</span></a></li>
+        
+      </ul>
+      
+      <p class="post-copyright">
+        This post was published <strong>922</strong> days ago, content in the post may be inaccurate, even wrong now, please take risk yourself.
+      </p>
+    </footer>
+    
+      
+    
+  </section>
+  
+<footer class="site-footer">
+  <p>© 2017-2019 HadYang</p>
+  <p>Powered by <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> with theme <a href="https://github.com/laozhu/hugo-nuo" target="_blank" rel="noopener">Nuo</a>.</p>
+  
+</footer>
+
+
+<script src="https://cdn.jsdelivr.net/npm/smooth-scroll@15.0.0/dist/smooth-scroll.min.js"></script>
+
+
+
+<script async src="https://cdn.jsdelivr.net/npm/video.js@7.3.0/dist/video.min.js"></script>
+
+
+
+
+<script async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+      inlineMath: [['$','$'], ['\\(','\\)']],
+      displayMath: [['$$','$$'], ['\\[','\\]']],
+      processEscapes: true,
+      processEnvironments: true,
+      skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+      TeX: { equationNumbers: { autoNumber: "AMS" },
+      extensions: ["AMSmath.js", "AMSsymbols.js"] }
+    },
+  });
+</script>
+<script type="text/x-mathjax-config">
+  // Fix <code> tags after MathJax finishes running. This is a
+  // hack to overcome a shortcoming of Markdown. Discussion at
+  // https://github.com/mojombo/jekyll/issues/199
+  MathJax.Hub.Queue(() => {
+    MathJax.Hub.getAllJax().map(v => v.SourceElement().parentNode.className += ' has-jax');
+  });
+</script>
+
+
+
+<script src="/hadyang.github.io/scripts/index.min.js"></script>
+
+<script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('\/hadyang.github.io\/service-worker.js').then(function() {
+      console.log('[ServiceWorker] Registered');
+    });
+  }
+</script>
+
+
+
+
+
+
+
+
+  </body>
+</html>

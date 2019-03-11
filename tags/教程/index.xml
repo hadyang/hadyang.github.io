@@ -13,64 +13,64 @@
     
     <item>
       <title>Idea中通过Maven创建 Archetypes</title>
-      <link>hadyang.github.io/posts/idea-maven-custom-archetypes/</link>
+      <link>hadyang.github.io/2016/12/idea-maven-custom-archetypes/</link>
       <pubDate>Tue, 20 Dec 2016 22:24:49 +0000</pubDate>
       
-      <guid>hadyang.github.io/posts/idea-maven-custom-archetypes/</guid>
+      <guid>hadyang.github.io/2016/12/idea-maven-custom-archetypes/</guid>
       <description>&lt;p&gt;最近在做项目的时候发现Web项目中很多配置都是相对固定的，比如Spring，常用的配置都是那些，每次新建工程的时候很是麻烦，为了减少没必要的复制粘贴（提高效率），这里介绍一种自定义 Archetypes 的方法。Archetypes 是Maven中的一种模板，我们可以通过 Archetypes 将常用的配置放在模板里，每次新建项目的时候选择模板就可以了。&lt;/p&gt;</description>
     </item>
     
     <item>
       <title>Intellij Idea 修改 Maven 项目默认JDK版本</title>
-      <link>hadyang.github.io/posts/idea-maven-jdk-version/</link>
+      <link>hadyang.github.io/2016/11/idea-maven-jdk-version/</link>
       <pubDate>Sat, 19 Nov 2016 19:01:17 +0000</pubDate>
       
-      <guid>hadyang.github.io/posts/idea-maven-jdk-version/</guid>
+      <guid>hadyang.github.io/2016/11/idea-maven-jdk-version/</guid>
       <description>&lt;p&gt;在使用IDEA创建Maven项目的时候，默认使用JDK 1.5版本，这样很多新版本的特性就不能使用。为了使用新特性（比如：Lambda表达式），必须在创建项目后进行手动修改，这样很麻烦，下面我就来介绍一个一劳永逸的方法。&lt;/p&gt;</description>
     </item>
     
     <item>
       <title>IDEA通过Gradle打包可执行Jar</title>
-      <link>hadyang.github.io/posts/idea-build-with-gradle/idea-build-with-gradle/</link>
+      <link>hadyang.github.io/2016/07/idea-build-with-gradle/</link>
       <pubDate>Mon, 04 Jul 2016 08:39:46 +0000</pubDate>
       
-      <guid>hadyang.github.io/posts/idea-build-with-gradle/idea-build-with-gradle/</guid>
+      <guid>hadyang.github.io/2016/07/idea-build-with-gradle/</guid>
       <description>&lt;p&gt;前段时间通过IDEA编写Java程序，使用的是Gradle进行依赖管理。在包管理方面Gradle的优势很大，但是在打包可执行Jar包的时候出现不能找到main方法的问题，在这里稍作记录。&lt;/p&gt;</description>
     </item>
     
     <item>
       <title>FlatBuffer初体验</title>
-      <link>hadyang.github.io/posts/flatbuffer-first/</link>
+      <link>hadyang.github.io/2016/06/flatbuffer-first/</link>
       <pubDate>Wed, 29 Jun 2016 22:02:58 +0000</pubDate>
       
-      <guid>hadyang.github.io/posts/flatbuffer-first/</guid>
+      <guid>hadyang.github.io/2016/06/flatbuffer-first/</guid>
       <description>&lt;p&gt;&lt;code&gt;FlatBuffer&lt;/code&gt;是一个跨平台的序列化库，可以在C++,C#, C, Go, Java, JavaScript, PHP, Python语言中使用，最初这个库是Google为游戏开发中所使用，其源代码地址在&lt;a href=&#34;http://github.com/google/flatbuffers&#34;&gt;Github&lt;/a&gt;。FlatBuffer提供了详细的使用文档，可以参考&lt;a href=&#34;http://google.github.io/flatbuffers/index.html&#34;&gt;Google.github.io&lt;/a&gt;主页上的教程。&lt;/p&gt;</description>
     </item>
     
     <item>
       <title>VPS上搭建Hexo静态博客</title>
-      <link>hadyang.github.io/posts/vps-hexo-setting/</link>
+      <link>hadyang.github.io/2016/06/vps-hexo-setting/</link>
       <pubDate>Thu, 23 Jun 2016 19:33:11 +0000</pubDate>
       
-      <guid>hadyang.github.io/posts/vps-hexo-setting/</guid>
+      <guid>hadyang.github.io/2016/06/vps-hexo-setting/</guid>
       <description>&lt;p&gt;最近在提交百度收录的时候发现github将百度的爬虫给禁掉了，百度收录不了github上的网站。后来试过用CDN但是没有适合，最终还是将博客重新部署在VPS上，这样就解决了百度爬虫的问题。&lt;/p&gt;</description>
     </item>
     
     <item>
       <title>Git代理设置，加速clone</title>
-      <link>hadyang.github.io/posts/git-proxy/</link>
+      <link>hadyang.github.io/2016/02/git-proxy/</link>
       <pubDate>Thu, 18 Feb 2016 09:02:53 +0000</pubDate>
       
-      <guid>hadyang.github.io/posts/git-proxy/</guid>
+      <guid>hadyang.github.io/2016/02/git-proxy/</guid>
       <description>&lt;p&gt;由于在项目中经常使用到git来获取源码，但是clone的速度确实不敢恭维。本文主要通过ss进行代理，访问速度有500kb/s（个人的网比较渣）。&lt;/p&gt;</description>
     </item>
     
     <item>
       <title>仿Google相册的侧滑栏效果--DrawerLayout</title>
-      <link>hadyang.github.io/posts/android-drawerlayout/</link>
+      <link>hadyang.github.io/2015/06/android-drawerlayout/</link>
       <pubDate>Wed, 17 Jun 2015 19:36:21 +0000</pubDate>
       
-      <guid>hadyang.github.io/posts/android-drawerlayout/</guid>
+      <guid>hadyang.github.io/2015/06/android-drawerlayout/</guid>
       <description>&lt;p&gt;最近在网上看到谷歌自家的相册应用（Google Photos），它的侧滑栏很吸引我，于是在google了很久之后，终于完成，和大家分享分享。&lt;/p&gt;</description>
     </item>
     

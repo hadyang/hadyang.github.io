@@ -13,73 +13,73 @@
     
     <item>
       <title>Java Instrumentation</title>
-      <link>hadyang.github.io/posts/java-instrumentation/</link>
+      <link>hadyang.github.io/2016/12/java-instrumentation/</link>
       <pubDate>Wed, 28 Dec 2016 16:16:46 +0000</pubDate>
       
-      <guid>hadyang.github.io/posts/java-instrumentation/</guid>
+      <guid>hadyang.github.io/2016/12/java-instrumentation/</guid>
       <description>&lt;p&gt;最近在看公司的工具包的时候，发现有个很好用的功能 &amp;ndash; &lt;code&gt;TraceId&lt;/code&gt; 和 LogBack 的 &lt;a href=&#34;http://logback.qos.ch/manual/mdc.html&#34;&gt;MDC&lt;/a&gt; 的功能，可以通过一个 &lt;code&gt;TraceId&lt;/code&gt; 来跟踪一个请求在不同系统中的执行情况，这可以很好的提高对线上业务排查的效率。但是这项功能的实现比较复杂，利用了一个 &lt;code&gt;Instrumentation&lt;/code&gt; 的 JVM 底层代理的功能，&lt;code&gt;Instrumentation&lt;/code&gt;是通过JVMTI与JVM进行交互，&lt;code&gt;JVMIT&lt;/code&gt;是JVM对外提供的用户接口，&lt;code&gt;JVMTI&lt;/code&gt;是基于事件驱动的，JVM每执行到一定的逻辑就会调用一些事件的回调接口，这些接口可以供开发者扩展自己的逻辑。&lt;/p&gt;</description>
     </item>
     
     <item>
       <title>Java泛型--类型擦除</title>
-      <link>hadyang.github.io/posts/java-generic-type-type-erasure/</link>
+      <link>hadyang.github.io/2016/11/java-generic-type-type-erasure/</link>
       <pubDate>Tue, 15 Nov 2016 19:57:44 +0000</pubDate>
       
-      <guid>hadyang.github.io/posts/java-generic-type-type-erasure/</guid>
+      <guid>hadyang.github.io/2016/11/java-generic-type-type-erasure/</guid>
       <description>&lt;p&gt;从Java1.5开始，Java引入泛型的概念。Java中的泛型和C语言中的模板类有些不同，主要是由于Java在最初版本并没有支持泛型，1.5之后为了实现泛型并且能与旧代码兼容，Java编译器使用了类型擦除机制。&lt;/p&gt;</description>
     </item>
     
     <item>
       <title>Java Enum解析</title>
-      <link>hadyang.github.io/posts/java-enum/</link>
+      <link>hadyang.github.io/2016/08/java-enum/</link>
       <pubDate>Tue, 30 Aug 2016 13:00:06 +0000</pubDate>
       
-      <guid>hadyang.github.io/posts/java-enum/</guid>
+      <guid>hadyang.github.io/2016/08/java-enum/</guid>
       <description>&lt;p&gt;最近在刷题的时候碰到一个Enum相关的题目，突然发现自己对Enum类的了解知之甚少，于是这篇文章就通过Java字节码来深入了解Enum类。&lt;/p&gt;</description>
     </item>
     
     <item>
       <title>深入Java虚拟机读书笔记——对象的生命周期</title>
-      <link>hadyang.github.io/posts/jvm-object-life-cycle/</link>
+      <link>hadyang.github.io/2016/04/jvm-object-life-cycle/</link>
       <pubDate>Sat, 30 Apr 2016 13:30:28 +0000</pubDate>
       
-      <guid>hadyang.github.io/posts/jvm-object-life-cycle/</guid>
+      <guid>hadyang.github.io/2016/04/jvm-object-life-cycle/</guid>
       <description>&lt;p&gt;一旦一个类被装载、连接和初始化，它就随时可以被使用。程序可以访问它的静态字段，调用它的静态方法，或者创建它的实例。作为Java程序员有必要了解Java对象的生命周期。&lt;/p&gt;</description>
     </item>
     
     <item>
       <title>深入Java虚拟机读书笔记——类加载器</title>
-      <link>hadyang.github.io/posts/jvm-class-loader/</link>
+      <link>hadyang.github.io/2016/04/jvm-class-loader/</link>
       <pubDate>Fri, 29 Apr 2016 22:05:19 +0000</pubDate>
       
-      <guid>hadyang.github.io/posts/jvm-class-loader/</guid>
+      <guid>hadyang.github.io/2016/04/jvm-class-loader/</guid>
       <description>&lt;p&gt;在前面一篇的《深入Java虚拟机读书笔记——虚拟机体系结构》中，提到了类加载器，类加载器是JVM重要的组成部分，在类第一次被使用时，类加载器会将类的class文件加载到JVM中，这个class文件包含了类的基本信息：方法、域、继承等等。&lt;/p&gt;</description>
     </item>
     
     <item>
       <title>深入Java虚拟机读书笔记——虚拟机体系结构</title>
-      <link>hadyang.github.io/posts/jvm-architecture/</link>
+      <link>hadyang.github.io/2016/04/jvm-architecture/</link>
       <pubDate>Wed, 27 Apr 2016 16:00:05 +0000</pubDate>
       
-      <guid>hadyang.github.io/posts/jvm-architecture/</guid>
+      <guid>hadyang.github.io/2016/04/jvm-architecture/</guid>
       <description>&lt;p&gt;最近在逛知乎的时候，看到有人推荐这本《深入Java虚拟机》，这几天一直在看这本书，虽然这本书里使用的JVM版本比较低，但是讲的内容还是很有营养的。在看这本书的时候学习到很多东西，在这里写一下，方便以后学习：）&lt;/p&gt;</description>
     </item>
     
     <item>
       <title>深入Java虚拟机读书笔记——垃圾回收</title>
-      <link>hadyang.github.io/posts/jvm-gc/jvm-gc/</link>
+      <link>hadyang.github.io/1/01/jvm-gc/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
-      <guid>hadyang.github.io/posts/jvm-gc/jvm-gc/</guid>
+      <guid>hadyang.github.io/1/01/jvm-gc/</guid>
       <description>&lt;p&gt;作为自动管理内存的编程语言，Java为我们做了许多的工作。程序员不需要关心内存分配和回收，这大大提高了程序员的工作效率，同时也减少了内存泄漏的风险。正是由于Java语言的这种特性，导致很多程序员对内存分配没有太深刻的概念，产生OOM后不知从何处修改。我们需要对Java内存管理进行了解，更加合理的利用Java自动管理内存的特性。&lt;/p&gt;</description>
     </item>
     
     <item>
       <title>深入Java虚拟机读书笔记——类装载、连接和初始化</title>
-      <link>hadyang.github.io/posts/jvm-class-load-init/</link>
+      <link>hadyang.github.io/1/01/jvm-class-load-init/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
-      <guid>hadyang.github.io/posts/jvm-class-load-init/</guid>
+      <guid>hadyang.github.io/1/01/jvm-class-load-init/</guid>
       <description>&lt;p&gt;在前面的文章《深入Java虚拟机读书笔记——类加载器》中我们介绍了JVM中类加载器，类加载器是JVM中重要的组成部分，当类第一次被使用时，由它负责类的装载、连接和初始化，进而能让我们使用类来生成对象等等。&lt;/p&gt;</description>
     </item>
     

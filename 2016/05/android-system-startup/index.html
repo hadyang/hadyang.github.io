@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+
+  <meta charset="utf-8" />
+
+  
+  <title>Android系统开机过程分析</title>
+
+  
+  
+  <link href="//cdn.jsdelivr.net" rel="dns-prefetch">
+  <link href="//cdnjs.cloudflare.com" rel="dns-prefetch">
+  <link href="//at.alicdn.com" rel="dns-prefetch">
+  <link href="//fonts.googleapis.com" rel="dns-prefetch">
+  <link href="//fonts.gstatic.com" rel="dns-prefetch">
+  
+  
+  
+  
+  
+
+  
+
+  
+  
+  <meta name="description" content="当我们开机时，首先是启动Linux内核，在Linux内核中首先启动的是init进程，这个进程会去读取配置文件system\core\rootdir\init.rc配置文件，这个文件中配置了Android系统中第一个进程Zygote进程。Android中其他所有进程都是通过fork Zygote进程得来的。
+">
+
+  
+  
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:site" content="@gohugoio">
+    <meta name="twitter:title" content="Android系统开机过程分析">
+    <meta name="twitter:description" content="当我们开机时，首先是启动Linux内核，在Linux内核中首先启动的是init进程，这个进程会去读取配置文件system\core\rootdir\init.rc配置文件，这个文件中配置了Android系统中第一个进程Zygote进程。Android中其他所有进程都是通过fork Zygote进程得来的。
+">
+    <meta name="twitter:image" content="/hadyang.github.io/images/avatar.png">
+  
+
+  
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="Android系统开机过程分析">
+  <meta property="og:description" content="当我们开机时，首先是启动Linux内核，在Linux内核中首先启动的是init进程，这个进程会去读取配置文件system\core\rootdir\init.rc配置文件，这个文件中配置了Android系统中第一个进程Zygote进程。Android中其他所有进程都是通过fork Zygote进程得来的。
+">
+  <meta property="og:url" content="hadyang.github.io/2016/05/android-system-startup/">
+  <meta property="og:image" content="/hadyang.github.io/images/avatar.png">
+
+
+
+
+<meta name="generator" content="Hugo 0.54.0">
+
+
+<link rel="canonical" href="hadyang.github.io/2016/05/android-system-startup/">
+
+<meta name="renderer" content="webkit">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="format-detection" content="telephone=no,email=no,adress=no">
+<meta http-equiv="Cache-Control" content="no-transform">
+
+
+<meta name="robots" content="index,follow">
+<meta name="referrer" content="origin-when-cross-origin">
+
+
+
+
+
+
+
+<meta name="theme-color" content="#02b875">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="HadYang">
+<meta name="msapplication-tooltip" content="HadYang">
+<meta name='msapplication-navbutton-color' content="#02b875">
+<meta name="msapplication-TileColor" content="#02b875">
+<meta name="msapplication-TileImage" content="/hadyang.github.io/icons/icon-144x144.png">
+<link rel="icon" href="/hadyang.github.io/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="/hadyang.github.io/icons/icon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/hadyang.github.io/icons/icon-32x32.png">
+<link rel="icon" sizes="192x192" href="/hadyang.github.io/icons/icon-192x192.png">
+<link rel="apple-touch-icon" href="/hadyang.github.io/icons/icon-152x152.png">
+<link rel="manifest" href="/hadyang.github.io/manifest.json">
+
+
+<link rel="preload" href="/hadyang.github.io/styles/main.min.css" as="style">
+
+<link rel="preload" href="https://fonts.googleapis.com/css?family=Lobster" as="style">
+<link rel="preload" href="/hadyang.github.io/images/avatar.png" as="image">
+<link rel="preload" href="/hadyang.github.io/images/grey-prism.svg" as="image">
+
+
+<style>
+  body {
+    background: rgb(244, 243, 241) url('/hadyang.github.io/images/grey-prism.svg') repeat fixed;
+  }
+</style>
+<link rel="stylesheet" href="/hadyang.github.io/styles/main.min.css">
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lobster">
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/medium-zoom@1.0.2/dist/medium-zoom.min.js"></script>
+
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/video.js@7.3.0/dist/video-js.min.css">
+
+
+
+  
+  
+<!--[if lte IE 8]>
+  <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/videojs-ie8@1.1.2/dist/videojs-ie8.min.js"></script>
+<![endif]-->
+
+<!--[if lte IE 9]>
+  <script src="https://cdn.jsdelivr.net/npm/eligrey-classlist-js-polyfill@1.2.20180112/classList.min.js"></script>
+<![endif]-->
+
+
+</head>
+  <body>
+    
+    <div class="suspension">
+      <a role="button" aria-label="Go to top" title="Go to top" class="to-top is-hide"><span class="icon icon-up" aria-hidden="true"></span></a>
+      
+        
+      
+    </div>
+    
+    
+  <header class="site-header">
+  <img class="avatar" src="/hadyang.github.io/images/avatar.png" alt="Avatar">
+  
+  <h2 class="title">HadYang</h2>
+  
+  <p class="subtitle"></p>
+  <button class="menu-toggle" type="button" aria-label="Main Menu" aria-expanded="false" tab-index="0">
+    <span class="icon icon-menu" aria-hidden="true"></span>
+  </button>
+
+  <nav class="site-menu collapsed">
+    <h2 class="offscreen">Main Menu</h2>
+    <ul class="menu-list">
+      
+      
+      
+      
+    </ul>
+  </nav>
+  <nav class="social-menu collapsed">
+    <h2 class="offscreen">Social Networks</h2>
+    <ul class="social-list"></ul>
+  </nav>
+</header>
+
+  <section class="main post-detail">
+    <header class="post-header">
+      <h1 class="post-title">Android系统开机过程分析</h1>
+      <p class="post-meta">@ · May 25, 2016 · 6 min read</p>
+    </header>
+    <article class="post-content"><p>当我们开机时，首先是启动Linux内核，在Linux内核中首先启动的是init进程，这个进程会去读取配置文件system\core\rootdir\init.rc配置文件，这个文件中配置了Android系统中第一个进程Zygote进程。Android中其他所有进程都是通过fork Zygote进程得来的。</p>
+
+<p>在这里我只是先简单的分析代码中Android系统启动的大体过程：）</p>
+
+<ul>
+<li>Step1 &ndash; init.rc</li>
+</ul>
+
+<pre><code>...
+service zygote /system/bin/app_process -Xzygote /system/bin --zygote --start-system-server
+    socket zygote stream 666
+    onrestart write /sys/android_power/request_state wake
+    onrestart write /sys/power/state on
+    onrestart restart media
+
+...
+</code></pre>
+
+<ul>
+<li>Step2 &ndash; init.c</li>
+</ul>
+
+<pre><code class="language-C">void service_start(struct service *svc, const char *dynamic_args)
+{
+    pid_t pid;
+
+    ...
+
+    pid = fork();//创建子进程
+
+    if (pid == 0) {//进入这个分支说明函数是在子进程中返回的，新的子进程就是zygote
+        struct socketinfo *si;
+
+        ...
+
+        //创建通信使用的socket
+        for (si = svc-&gt;sockets; si; si = si-&gt;next) {
+            int s = create_socket(si-&gt;name,
+                                  !strcmp(si-&gt;type, &quot;dgram&quot;) ?
+                                  SOCK_DGRAM : SOCK_STREAM,
+                                  si-&gt;perm, si-&gt;uid, si-&gt;gid);
+            if (s &gt;= 0) {
+                publish_socket(si-&gt;name, s);//发布到系统中
+            }
+        }
+
+        ...
+
+        //检查启动参数，如果没有就加载zygote应用程序文件
+        if (!dynamic_args) {
+            if (execve(svc-&gt;args[0], (char**) svc-&gt;args, (char**) ENV) &lt; 0) {
+                ERROR(&quot;cannot execve('%s'): %s\n&quot;, svc-&gt;args[0], strerror(errno));
+            }
+        } else {
+        //否则就将参数合并到arg_ptrs数组中，在加载zygote应用程序文件
+            char *arg_ptrs[SVC_MAXARGS+1];
+            int arg_idx = svc-&gt;nargs;
+            char *tmp = strdup(dynamic_args);
+            char *next = tmp;
+            char *bword;
+
+            /* Copy the static arguments */
+            memcpy(arg_ptrs, svc-&gt;args, (svc-&gt;nargs * sizeof(char *)));
+
+            while((bword = strsep(&amp;next, &quot; &quot;))) {
+                arg_ptrs[arg_idx++] = bword;
+                if (arg_idx == SVC_MAXARGS)
+                    break;
+            }
+            arg_ptrs[arg_idx] = '\0';
+            //Step3
+            execve(svc-&gt;args[0], (char**) arg_ptrs, (char**) ENV);
+        }
+        _exit(127);
+    }
+}
+</code></pre>
+
+<ul>
+<li>Step3 &ndash; App_main.cpp</li>
+</ul>
+
+<pre><code class="language-C++">int main(int argc, char* const argv[])
+{
+    ...
+
+    //创建AppRuntime，android运行时环境
+    AppRuntime runtime(argv[0], computeArgBlockSize(argc, argv));
+
+    ...
+    int i;
+    ...
+    ++i;  // Skip unused &quot;parent dir&quot; argument.
+
+    //检查启动参数
+    while (i &lt; argc) {
+        const char* arg = argv[i++];
+        if (strcmp(arg, &quot;--zygote&quot;) == 0) {
+            zygote = true;
+
+            //zygote进程名字
+            niceName = ZYGOTE_NICE_NAME;
+        } else if (strcmp(arg, &quot;--start-system-server&quot;) == 0) {
+            startSystemServer = true;
+        } else if (strcmp(arg, &quot;--application&quot;) == 0) {
+            application = true;
+        } else if (strncmp(arg, &quot;--nice-name=&quot;, 12) == 0) {
+            niceName.setTo(arg + 12);
+        } else if (strncmp(arg, &quot;--&quot;, 2) != 0) {
+            className.setTo(arg);
+            break;
+        } else {
+            --i;
+            break;
+        }
+    }
+
+    ...
+
+    if (!niceName.isEmpty()) {
+        runtime.setArgv0(niceName.string());
+        //设置zygote进程名
+        set_process_name(niceName.string());
+    }
+
+    //zygote进程进入第一个分支
+    if (zygote) {
+        InitializeNativeLoader();
+        //Step3
+        runtime.start(&quot;com.android.internal.os.ZygoteInit&quot;, args, zygote);
+    } else if (className) {
+        runtime.start(&quot;com.android.internal.os.RuntimeInit&quot;, args, zygote);
+    } else {
+        fprintf(stderr, &quot;Error: no class name or --zygote supplied.\n&quot;);
+        app_usage();
+        LOG_ALWAYS_FATAL(&quot;app_process: no class name or --zygote supplied.&quot;);
+        return 10;
+    }
+}
+</code></pre>
+
+<ul>
+<li>Step3 &ndash; AndroidRuntime.start</li>
+</ul>
+
+<p>AppRuntime.start继承自AndroidRuntime.start</p>
+
+<pre><code class="language-C++">void AndroidRuntime::start(const char* className, const Vector&lt;String8&gt;&amp; options, bool zygote)
+{
+
+    JniInvocation jni_invocation;
+    jni_invocation.Init(NULL);
+    JNIEnv* env;
+    //启动虚拟机
+    if (startVm(&amp;mJavaVM, &amp;env, zygote) != 0) {
+        return;
+    }
+    onVmCreated(env);
+
+    //在虚拟机中注册JNI方法
+    if (startReg(env) &lt; 0) {
+        ALOGE(&quot;Unable to register all android natives\n&quot;);
+        return;
+    }
+
+    ...
+    jmethodID startMeth = env-&gt;GetStaticMethodID(startClass, &quot;main&quot;,
+        &quot;([Ljava/lang/String;)V&quot;);
+    if (startMeth == NULL) {
+        ALOGE(&quot;JavaVM unable to find main() in '%s'\n&quot;, className);
+    } else {
+        //进入ZygoteInit.main
+        //Step4
+        env-&gt;CallStaticVoidMethod(startClass, startMeth, strArray);
+    }
+
+}
+</code></pre>
+
+<ul>
+<li>Step4 &ndash; ZygoteInit.main</li>
+</ul>
+
+<pre><code class="language-Java">//com.android.internal.os.ZygoteInit.java
+public static void main(String argv[]) {
+        try {
+            ...
+            //创建Server端socket，用来等待AMS请求
+            //Step4.1
+            registerZygoteSocket(socketName);
+
+            ...
+            //这里startSystemServer==true
+            if (startSystemServer) {
+                //Step4.2
+                startSystemServer(abiList, socketName);
+            }
+            ...
+            //等待AMS请求
+            //Step4.3
+            runSelectLoop(abiList);
+            ...
+        }
+    }
+</code></pre>
+
+<ul>
+<li>Step4.1 &ndash; ZygoteInit.registerZygoteSocket</li>
+</ul>
+
+<pre><code class="language-Java">private static final String ANDROID_SOCKET_PREFIX = &quot;ANDROID_SOCKET_&quot;;
+
+private static void registerZygoteSocket(String socketName) {
+        if (sServerSocket == null) {
+            int fileDesc;
+            //获取socket描述字符串
+            final String fullSocketName = ANDROID_SOCKET_PREFIX + socketName;
+            try {
+                //获取socket文件描述符
+                String env = System.getenv(fullSocketName);
+                fileDesc = Integer.parseInt(env);
+            } catch (RuntimeException ex) {
+                throw new RuntimeException(fullSocketName + &quot; unset or invalid&quot;, ex);
+            }
+
+            try {
+                FileDescriptor fd = new FileDescriptor();
+                fd.setInt$(fileDesc);
+                //根据文件描述符创建server端socket
+                sServerSocket = new LocalServerSocket(fd);
+            } catch (IOException ex) {
+                throw new RuntimeException(
+                        &quot;Error binding to local socket '&quot; + fileDesc + &quot;'&quot;, ex);
+            }
+        }
+    }
+</code></pre>
+
+<ul>
+<li>STep4.2 &ndash; ZygoteInit.startSystemServer</li>
+</ul>
+
+<pre><code class="language-Java">private static boolean startSystemServer(String abiList, String socketName)
+            throws MethodAndArgsCaller, RuntimeException {
+        ...
+        /* Hardcoded command line to start the system server */
+        //服务启动参数
+        String args[] = {
+            &quot;--setuid=1000&quot;,
+            &quot;--setgid=1000&quot;,
+            &quot;--setgroups=1001,1002,1003,1004,1005,1006,1007,1008,1009,1010,1018,1021,1032,3001,3002,3003,3006,3007,3009,3010&quot;,
+            &quot;--capabilities=&quot; + capabilities + &quot;,&quot; + capabilities,
+            &quot;--nice-name=system_server&quot;,
+            &quot;--runtime-args&quot;,
+            &quot;com.android.server.SystemServer&quot;,
+        };
+        ZygoteConnection.Arguments parsedArgs = null;
+
+        int pid;
+        try {
+            ...
+            /* Request to fork the system server process */
+            //通过fork创建服务
+            pid = Zygote.forkSystemServer(
+                    parsedArgs.uid, parsedArgs.gid,
+                    parsedArgs.gids,
+                    parsedArgs.debugFlags,
+                    null,
+                    parsedArgs.permittedCapabilities,
+                    parsedArgs.effectiveCapabilities);
+        } catch (IllegalArgumentException ex) {
+            throw new RuntimeException(ex);
+        }
+        /* For child process */
+        if (pid == 0) {
+            if (hasSecondZygote(abiList)) {
+                waitForSecondaryZygote(socketName);
+            }
+            //Step5
+            handleSystemServerProcess(parsedArgs);
+        }
+        return true;
+    }
+</code></pre>
+
+<ul>
+<li>Step4.3 &ndash; ZygoteInit.runSelectLoop</li>
+</ul>
+
+<pre><code class="language-Java">private static void runSelectLoop(String abiList) throws MethodAndArgsCaller {
+        ArrayList&lt;FileDescriptor&gt; fds = new ArrayList&lt;FileDescriptor&gt;();
+        ArrayList&lt;ZygoteConnection&gt; peers = new ArrayList&lt;ZygoteConnection&gt;();
+
+        fds.add(sServerSocket.getFileDescriptor());
+        peers.add(null);
+
+        //循环等待请求
+        while (true) {
+            StructPollfd[] pollFds = new StructPollfd[fds.size()];
+            for (int i = 0; i &lt; pollFds.length; ++i) {
+                pollFds[i] = new StructPollfd();
+                pollFds[i].fd = fds.get(i);
+                pollFds[i].events = (short) POLLIN;
+            }
+            try {
+                Os.poll(pollFds, -1);
+            } catch (ErrnoException ex) {
+                throw new RuntimeException(&quot;poll failed&quot;, ex);
+            }
+            for (int i = pollFds.length - 1; i &gt;= 0; --i) {
+                if ((pollFds[i].revents &amp; POLLIN) == 0) {
+                    continue;
+                }
+                if (i == 0) {
+                    ZygoteConnection newPeer = acceptCommandPeer(abiList);
+                    peers.add(newPeer);
+                    fds.add(newPeer.getFileDesciptor());
+                } else {
+                    //收到请求创建进程
+                    boolean done = peers.get(i).runOnce();
+                    if (done) {
+                        peers.remove(i);
+                        fds.remove(i);
+                    }
+                }
+            }
+        }
+    }
+</code></pre>
+
+<ul>
+<li>Step5 ZygoteInit.handleSystemServerProcess</li>
+</ul>
+
+<pre><code class="language-Java">private static void handleSystemServerProcess(ZygoteConnection.Arguments parsedArgs)
+            throws ZygoteInit.MethodAndArgsCaller {
+
+        //由于system进程复制了zygote进程的地址空间，因此它也会获得zygote进程在启动过程中创建的socket，
+        //由于system进程不需要这个socket，所以关闭
+        closeServerSocket();
+        ...
+        //Step6
+        RuntimeInit.zygoteInit(parsedArgs.targetSdkVersion, parsedArgs.remainingArgs, cl);
+}
+</code></pre>
+
+<ul>
+<li>Step6 &ndash; RuntimeInit.zygoteInit</li>
+</ul>
+
+<pre><code class="language-Java">public static final void zygoteInit(int targetSdkVersion, String[] argv, ClassLoader classLoader)
+            throws ZygoteInit.MethodAndArgsCaller {
+        //初始化时区，键盘布局等通用信息      
+        commonInit();
+        //在system进程中启动一个binder线程池
+        nativeZygoteInit();
+        //Step7
+        applicationInit(targetSdkVersion, argv, classLoader);
+}
+</code></pre>
+
+<ul>
+<li>Step7 &ndash; RuntimeInit.applicationInit</li>
+</ul>
+
+<pre><code class="language-Java">private static void applicationInit(int targetSdkVersion, String[] argv, ClassLoader classLoader)
+            throws ZygoteInit.MethodAndArgsCaller {
+
+        // We want to be fairly aggressive about heap utilization, to avoid
+        // holding on to a lot of memory that isn't needed.
+        VMRuntime.getRuntime().setTargetHeapUtilization(0.75f);
+        VMRuntime.getRuntime().setTargetSdkVersion(targetSdkVersion);
+        ...
+        // Remaining arguments are passed to the start class's static main
+        //进入com.android.server.SystemServer.main
+        //Step8
+        invokeStaticMain(args.startClass, args.startArgs, classLoader);
+}
+</code></pre>
+
+<ul>
+<li>Step8 &ndash; SystemServer.main</li>
+</ul>
+
+<pre><code class="language-Java">//com.android.server.SystemServer.java
+public static void main(String[] args) {
+        //Step9
+        new SystemServer().run();
+}
+</code></pre>
+
+<ul>
+<li>Step9 &ndash; SystemServer.run</li>
+</ul>
+
+<pre><code class="language-Java">private void run() {
+        try {
+            ...
+
+            // Here we go!
+            Slog.i(TAG, &quot;Entered the Android system server!&quot;);
+
+            ...
+
+            // Initialize native services.
+            System.loadLibrary(&quot;android_servers&quot;);
+
+            ...
+
+            // Initialize the system context.
+            createSystemContext();
+
+            // Create the system service manager.
+            mSystemServiceManager = new SystemServiceManager(mSystemContext);
+
+            LocalServices.addService(SystemServiceManager.class, mSystemServiceManager);
+
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_SYSTEM_SERVER);
+        }
+
+        // Start services.
+        try {
+            //Step9.1
+            startBootstrapServices();
+            //Step9.2
+            startCoreServices();
+            //启动其他服务，包括网络、彩信等等，还启动了Launcher
+            startOtherServices();
+        } catch (Throwable ex) {
+            ...
+            throw ex;
+        } finally {
+            ...
+        }
+        // Loop forever.
+        Looper.loop();
+        throw new RuntimeException(&quot;Main thread loop unexpectedly exited&quot;);
+}
+</code></pre>
+
+<ul>
+<li>Step9.1 &ndash; SystemServer.startBootstrapServices</li>
+</ul>
+
+<pre><code class="language-Java">private void startBootstrapServices() {
+        //启动Installer Server
+        Installer installer = mSystemServiceManager.startService(Installer.class);
+
+        // 启动AMS
+        mActivityManagerService = mSystemServiceManager.startService(
+                ActivityManagerService.Lifecycle.class).getService();
+        mActivityManagerService.setSystemServiceManager(mSystemServiceManager);
+        mActivityManagerService.setInstaller(installer);
+
+        //启动PMS
+        mPowerManagerService = mSystemServiceManager.startService(PowerManagerService.class);
+
+        ...
+
+        // Manages LEDs and display backlight so we need it to bring up the display.
+        mSystemServiceManager.startService(LightsService.class);
+
+        // Display manager is needed to provide display metrics before package manager
+        // starts up.
+        mDisplayManagerService = mSystemServiceManager.startService(DisplayManagerService.class);
+
+        // Only run &quot;core&quot; apps if we're encrypting the device.
+        String cryptState = SystemProperties.get(&quot;vold.decrypt&quot;);
+        if (ENCRYPTING_STATE.equals(cryptState)) {
+            Slog.w(TAG, &quot;Detected encryption in progress - only parsing core apps&quot;);
+            mOnlyCore = true;
+        } else if (ENCRYPTED_STATE.equals(cryptState)) {
+            Slog.w(TAG, &quot;Device encrypted - only parsing core apps&quot;);
+            mOnlyCore = true;
+        }
+
+        // Start the package manager.
+        traceBeginAndSlog(&quot;StartPackageManagerService&quot;);
+        mPackageManagerService = PackageManagerService.main(mSystemContext, installer,
+                mFactoryTestMode != FactoryTest.FACTORY_TEST_OFF, mOnlyCore);
+        mFirstBoot = mPackageManagerService.isFirstBoot();
+        mPackageManager = mSystemContext.getPackageManager();
+
+        ServiceManager.addService(Context.USER_SERVICE, UserManagerService.getInstance());
+
+        // Initialize attribute cache used to cache resources from packages.
+        AttributeCache.init(mSystemContext);
+
+        // Set up the Application instance for the system process and get started.
+        mActivityManagerService.setSystemProcess();
+
+        //启动传感器服务
+        startSensorService();
+    }
+
+</code></pre>
+
+<ul>
+<li>Step9.2 &ndash; SystemServer.startCoreServices</li>
+</ul>
+
+<pre><code class="language-Java">private void startCoreServices() {
+        // Tracks the battery level.  Requires LightService.
+        mSystemServiceManager.startService(BatteryService.class);
+
+        // Tracks application usage stats.
+        mSystemServiceManager.startService(UsageStatsService.class);
+        mActivityManagerService.setUsageStatsManager(
+                LocalServices.getService(UsageStatsManagerInternal.class));
+        // Update after UsageStatsService is available, needed before performBootDexOpt.
+        mPackageManagerService.getUsageStatsIfNoPackageUsageInfo();
+
+        // Tracks whether the updatable WebView is in a ready state and watches for update installs.
+        mSystemServiceManager.startService(WebViewUpdateService.class);
+    }
+</code></pre></article>
+    <footer class="post-footer">
+      
+      <ul class="post-tags">
+        
+          <li><a href="/tags/%E6%BA%90%E7%A0%81"><span class="tag">源码</span></a></li>
+        
+      </ul>
+      
+      <p class="post-copyright">
+        This post was published <strong>1019</strong> days ago, content in the post may be inaccurate, even wrong now, please take risk yourself.
+      </p>
+    </footer>
+    
+      
+    
+  </section>
+  
+<footer class="site-footer">
+  <p>© 2017-2019 HadYang</p>
+  <p>Powered by <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> with theme <a href="https://github.com/laozhu/hugo-nuo" target="_blank" rel="noopener">Nuo</a>.</p>
+  
+</footer>
+
+
+<script src="https://cdn.jsdelivr.net/npm/smooth-scroll@15.0.0/dist/smooth-scroll.min.js"></script>
+
+
+
+<script async src="https://cdn.jsdelivr.net/npm/video.js@7.3.0/dist/video.min.js"></script>
+
+
+
+
+<script async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+      inlineMath: [['$','$'], ['\\(','\\)']],
+      displayMath: [['$$','$$'], ['\\[','\\]']],
+      processEscapes: true,
+      processEnvironments: true,
+      skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+      TeX: { equationNumbers: { autoNumber: "AMS" },
+      extensions: ["AMSmath.js", "AMSsymbols.js"] }
+    },
+  });
+</script>
+<script type="text/x-mathjax-config">
+  // Fix <code> tags after MathJax finishes running. This is a
+  // hack to overcome a shortcoming of Markdown. Discussion at
+  // https://github.com/mojombo/jekyll/issues/199
+  MathJax.Hub.Queue(() => {
+    MathJax.Hub.getAllJax().map(v => v.SourceElement().parentNode.className += ' has-jax');
+  });
+</script>
+
+
+
+<script src="/hadyang.github.io/scripts/index.min.js"></script>
+
+<script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('\/hadyang.github.io\/service-worker.js').then(function() {
+      console.log('[ServiceWorker] Registered');
+    });
+  }
+</script>
+
+
+
+
+
+
+
+
+  </body>
+</html>

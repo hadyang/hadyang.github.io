@@ -13,10 +13,10 @@
     
     <item>
       <title>观察者模式</title>
-      <link>hadyang.github.io/posts/pattern-obvobserver/</link>
+      <link>hadyang.github.io/2016/07/pattern-obvobserver/</link>
       <pubDate>Sun, 10 Jul 2016 21:47:48 +0000</pubDate>
       
-      <guid>hadyang.github.io/posts/pattern-obvobserver/</guid>
+      <guid>hadyang.github.io/2016/07/pattern-obvobserver/</guid>
       <description>&lt;p&gt;在观察者模式中，一个目标对象管理所有相依于它的观察者对象，并且在它本身的状态改变时主动发出通知。这通常透过呼叫各观察者所提供的方法来实现。此种模式通常被用来实时事件处理系统。&lt;/p&gt;</description>
     </item>
     

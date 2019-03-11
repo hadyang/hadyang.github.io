@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+
+  <meta charset="utf-8" />
+
+  
+  <title>Java泛型--类型擦除</title>
+
+  
+  
+  <link href="//cdn.jsdelivr.net" rel="dns-prefetch">
+  <link href="//cdnjs.cloudflare.com" rel="dns-prefetch">
+  <link href="//at.alicdn.com" rel="dns-prefetch">
+  <link href="//fonts.googleapis.com" rel="dns-prefetch">
+  <link href="//fonts.gstatic.com" rel="dns-prefetch">
+  
+  
+  
+  
+  
+
+  
+
+  
+  
+  <meta name="description" content="从Java1.5开始，Java引入泛型的概念。Java中的泛型和C语言中的模板类有些不同，主要是由于Java在最初版本并没有支持泛型，1.5之后为了实现泛型并且能与旧代码兼容，Java编译器使用了类型擦除机制。
+">
+
+  
+  
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:site" content="@gohugoio">
+    <meta name="twitter:title" content="Java泛型--类型擦除">
+    <meta name="twitter:description" content="从Java1.5开始，Java引入泛型的概念。Java中的泛型和C语言中的模板类有些不同，主要是由于Java在最初版本并没有支持泛型，1.5之后为了实现泛型并且能与旧代码兼容，Java编译器使用了类型擦除机制。
+">
+    <meta name="twitter:image" content="/hadyang.github.io/images/avatar.png">
+  
+
+  
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="Java泛型--类型擦除">
+  <meta property="og:description" content="从Java1.5开始，Java引入泛型的概念。Java中的泛型和C语言中的模板类有些不同，主要是由于Java在最初版本并没有支持泛型，1.5之后为了实现泛型并且能与旧代码兼容，Java编译器使用了类型擦除机制。
+">
+  <meta property="og:url" content="hadyang.github.io/2016/11/java-generic-type-type-erasure/">
+  <meta property="og:image" content="/hadyang.github.io/images/avatar.png">
+
+
+
+
+<meta name="generator" content="Hugo 0.54.0">
+
+
+<link rel="canonical" href="hadyang.github.io/2016/11/java-generic-type-type-erasure/">
+
+<meta name="renderer" content="webkit">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="format-detection" content="telephone=no,email=no,adress=no">
+<meta http-equiv="Cache-Control" content="no-transform">
+
+
+<meta name="robots" content="index,follow">
+<meta name="referrer" content="origin-when-cross-origin">
+
+
+
+
+
+
+
+<meta name="theme-color" content="#02b875">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="HadYang">
+<meta name="msapplication-tooltip" content="HadYang">
+<meta name='msapplication-navbutton-color' content="#02b875">
+<meta name="msapplication-TileColor" content="#02b875">
+<meta name="msapplication-TileImage" content="/hadyang.github.io/icons/icon-144x144.png">
+<link rel="icon" href="/hadyang.github.io/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="/hadyang.github.io/icons/icon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/hadyang.github.io/icons/icon-32x32.png">
+<link rel="icon" sizes="192x192" href="/hadyang.github.io/icons/icon-192x192.png">
+<link rel="apple-touch-icon" href="/hadyang.github.io/icons/icon-152x152.png">
+<link rel="manifest" href="/hadyang.github.io/manifest.json">
+
+
+<link rel="preload" href="/hadyang.github.io/styles/main.min.css" as="style">
+
+<link rel="preload" href="https://fonts.googleapis.com/css?family=Lobster" as="style">
+<link rel="preload" href="/hadyang.github.io/images/avatar.png" as="image">
+<link rel="preload" href="/hadyang.github.io/images/grey-prism.svg" as="image">
+
+
+<style>
+  body {
+    background: rgb(244, 243, 241) url('/hadyang.github.io/images/grey-prism.svg') repeat fixed;
+  }
+</style>
+<link rel="stylesheet" href="/hadyang.github.io/styles/main.min.css">
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lobster">
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/medium-zoom@1.0.2/dist/medium-zoom.min.js"></script>
+
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/video.js@7.3.0/dist/video-js.min.css">
+
+
+
+  
+  
+<!--[if lte IE 8]>
+  <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/videojs-ie8@1.1.2/dist/videojs-ie8.min.js"></script>
+<![endif]-->
+
+<!--[if lte IE 9]>
+  <script src="https://cdn.jsdelivr.net/npm/eligrey-classlist-js-polyfill@1.2.20180112/classList.min.js"></script>
+<![endif]-->
+
+
+</head>
+  <body>
+    
+    <div class="suspension">
+      <a role="button" aria-label="Go to top" title="Go to top" class="to-top is-hide"><span class="icon icon-up" aria-hidden="true"></span></a>
+      
+        
+      
+    </div>
+    
+    
+  <header class="site-header">
+  <img class="avatar" src="/hadyang.github.io/images/avatar.png" alt="Avatar">
+  
+  <h2 class="title">HadYang</h2>
+  
+  <p class="subtitle"></p>
+  <button class="menu-toggle" type="button" aria-label="Main Menu" aria-expanded="false" tab-index="0">
+    <span class="icon icon-menu" aria-hidden="true"></span>
+  </button>
+
+  <nav class="site-menu collapsed">
+    <h2 class="offscreen">Main Menu</h2>
+    <ul class="menu-list">
+      
+      
+      
+      
+    </ul>
+  </nav>
+  <nav class="social-menu collapsed">
+    <h2 class="offscreen">Social Networks</h2>
+    <ul class="social-list"></ul>
+  </nav>
+</header>
+
+  <section class="main post-detail">
+    <header class="post-header">
+      <h1 class="post-title">Java泛型--类型擦除</h1>
+      <p class="post-meta">@ · Nov 15, 2016 · 2 min read</p>
+    </header>
+    <article class="post-content"><p>从Java1.5开始，Java引入泛型的概念。Java中的泛型和C语言中的模板类有些不同，主要是由于Java在最初版本并没有支持泛型，1.5之后为了实现泛型并且能与旧代码兼容，Java编译器使用了类型擦除机制。</p>
+
+<h3 id="泛型类型">泛型类型</h3>
+
+<p>在进一步介绍类型擦除之前，我们首先来了解一下什么是泛型。<strong>泛型是一个泛化（一般化）的类或者接口，并且拥有参数化类型</strong>。下面的Box类是一个非泛型类：</p>
+
+<pre><code class="language-Java">public class Box {
+    private Object object;
+
+    public void set(Object object) { this.object = object; }
+    public Object get() { return object; }
+}
+</code></pre>
+
+<p>可以看到，为了支持所有的类型，Box中使用 Object 来存储变量，这样会导致大量的类型转换，比如当我们取出 Box 中的数据时，就需要将 Object 类型转换为我们需要的类型，如果转换错误还会抛出异常。</p>
+
+<p>当我们使用泛型的时候，代码就会更加优雅：</p>
+
+<pre><code class="language-Java">public class Box&lt;T&gt; {
+    // T stands for &quot;Type&quot;
+    private T t;
+
+    public void set(T t) { this.t = t; }
+    public T get() { return t; }
+}
+
+public class Main{
+  public static void main(String[] args) {
+    Box&lt;String&gt; box = new Box&lt;&gt;();
+    System.out.println(box.get());
+  }
+}
+</code></pre>
+
+<p>在使用泛型后，原来的 Object 都替换为 T，虽然变化不大，但是我们就不需要大量的类型转换。在 Main 函数中我们通过 <code>Box&lt;String&gt; box = new Box&lt;&gt;();</code>来创建 Box 实例。</p>
+
+<blockquote>
+<p><code>Box&lt;String&gt;</code>中的 String 我们称之为实参，T 我们称之为形参。</p>
+</blockquote>
+
+<h3 id="泛型方法">泛型方法</h3>
+
+<p><strong>泛型方法拥有自己的类型参数，与声明泛型类型相似，但是这个类型参数的作用域仅限于声明该类型参数的方法内，静态和非静态的泛型方法都是允许的，同时也可以定义泛型构造方法</strong>。</p>
+
+<pre><code class="language-Java">public static &lt;T&gt; void out(T t){
+    //do something
+}
+</code></pre>
+
+<h3 id="类型擦除">类型擦除</h3>
+
+<p>Java的类型擦除通过以下方式来实现泛型：</p>
+
+<ul>
+<li>将所有泛型类型和泛型方法的类型参数替换为它们的边界或者 Object，因此，所产生的字节码只包含原始的类、接口和方法。</li>
+<li>为保证类型安全，编译器会在必要的时候插入类型转换的代码。</li>
+<li>为保证泛型类型的继承结构不被破环，编译器会在必要的时候插入桥接方法。</li>
+</ul>
+
+<p>对于类型擦除的影响，我们可以通过代码进行验证：</p>
+
+<pre><code class="language-Java">public static void main(String[] args) throws NoSuchMethodException {
+    List&lt;Integer&gt; integers = new ArrayList&lt;&gt;();
+    List&lt;String&gt; strings = new ArrayList&lt;&gt;();
+
+    System.out.println(integers.getClass() == strings.getClass());
+    System.out.println(integers.getClass());
+    System.out.println(Arrays.toString(integers.getClass().getTypeParameters()));
+    System.out.println(Arrays.toString(strings.getClass().getTypeParameters()));
+}
+</code></pre>
+
+<p>在上面的代码中，我们新建了两个泛型的 List ，通过比较它们的 Class 对象来进行验证，下面我们来看看输出结果：</p>
+
+<pre><code>true
+class java.util.ArrayList
+[E]
+[E]
+</code></pre>
+
+<p>可以看到，List<Integer> 和 List<String> 的 Class 对象是相同的，都为ArrayList。而且打印的类型参数也同为 <code>[E]</code> ，所以JVM不能知道 ArrayList 中存储的类型，即类型擦除确实将泛型的信息擦除掉了。</p>
+
+<h3 id="泛型信息真的全部被擦除了吗">泛型信息真的全部被擦除了吗？</h3>
+
+<p>考虑如下代码：</p>
+
+<pre><code class="language-Java">public class Main {
+
+    public static void main(String[] args) throws NoSuchMethodException {
+        Method method = Main.class.getMethod(&quot;say&quot;, List.class);
+
+        Type[] genericParameterTypes = method.getGenericParameterTypes();
+
+        for(Type genericParameterType : genericParameterTypes){
+            if(genericParameterType instanceof ParameterizedType){
+                ParameterizedType aType = (ParameterizedType) genericParameterType;
+                Type[] parameterArgTypes = aType.getActualTypeArguments();
+                for(Type parameterArgType : parameterArgTypes){
+                    Class parameterArgClass = (Class) parameterArgType;
+                    System.out.println(&quot;parameterArgClass = &quot; + parameterArgClass);
+                }
+            }
+        }
+    }
+
+    public void say(List&lt;String&gt; list){
+            System.out.println(list.size());
+    }
+}
+</code></pre>
+
+<p>你猜到输出了么？</p>
+
+<pre><code>parameterArgClass = class java.lang.String
+</code></pre>
+
+<p>类型信息居然没有被删除，还可以通过反射获取，这是不是很颠覆？但是当你仔细想想就可以明白，这是由于 <code>say</code> 方法本身并不是泛型方法。对于 say 方法来说，它的参数类型始终为 <code>List&lt;String&gt;</code>。但是其方法签名为<code>(Ljava/util/List;)V</code>，即如下方法是不能重载的：</p>
+
+<pre><code class="language-Java">public void say(List&lt;Integer&gt; list){
+  System.out.println(list.size());
+}
+</code></pre>
+
+<blockquote>
+<p>这个方法是不能重载的</p>
+</blockquote>
+
+<p>参考文章：<a href="https://docs.oracle.com/javase/tutorial/java/generics/erasure.html">Java Documentation Type Erasure</a></p></article>
+    <footer class="post-footer">
+      
+      <ul class="post-tags">
+        
+          <li><a href="/tags/%E6%B3%9B%E5%9E%8B"><span class="tag">泛型</span></a></li>
+        
+          <li><a href="/tags/%E8%99%9A%E6%8B%9F%E6%9C%BA"><span class="tag">虚拟机</span></a></li>
+        
+      </ul>
+      
+      <p class="post-copyright">
+        This post was published <strong>845</strong> days ago, content in the post may be inaccurate, even wrong now, please take risk yourself.
+      </p>
+    </footer>
+    
+      
+    
+  </section>
+  
+<footer class="site-footer">
+  <p>© 2017-2019 HadYang</p>
+  <p>Powered by <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> with theme <a href="https://github.com/laozhu/hugo-nuo" target="_blank" rel="noopener">Nuo</a>.</p>
+  
+</footer>
+
+
+<script src="https://cdn.jsdelivr.net/npm/smooth-scroll@15.0.0/dist/smooth-scroll.min.js"></script>
+
+
+
+<script async src="https://cdn.jsdelivr.net/npm/video.js@7.3.0/dist/video.min.js"></script>
+
+
+
+
+<script async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+      inlineMath: [['$','$'], ['\\(','\\)']],
+      displayMath: [['$$','$$'], ['\\[','\\]']],
+      processEscapes: true,
+      processEnvironments: true,
+      skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+      TeX: { equationNumbers: { autoNumber: "AMS" },
+      extensions: ["AMSmath.js", "AMSsymbols.js"] }
+    },
+  });
+</script>
+<script type="text/x-mathjax-config">
+  // Fix <code> tags after MathJax finishes running. This is a
+  // hack to overcome a shortcoming of Markdown. Discussion at
+  // https://github.com/mojombo/jekyll/issues/199
+  MathJax.Hub.Queue(() => {
+    MathJax.Hub.getAllJax().map(v => v.SourceElement().parentNode.className += ' has-jax');
+  });
+</script>
+
+
+
+<script src="/hadyang.github.io/scripts/index.min.js"></script>
+
+<script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('\/hadyang.github.io\/service-worker.js').then(function() {
+      console.log('[ServiceWorker] Registered');
+    });
+  }
+</script>
+
+
+
+
+
+
+
+
+  </body>
+</html>

@@ -13,10 +13,10 @@
     
     <item>
       <title>Java泛型--类型擦除</title>
-      <link>hadyang.github.io/posts/java-generic-type-type-erasure/</link>
+      <link>hadyang.github.io/2016/11/java-generic-type-type-erasure/</link>
       <pubDate>Tue, 15 Nov 2016 19:57:44 +0000</pubDate>
       
-      <guid>hadyang.github.io/posts/java-generic-type-type-erasure/</guid>
+      <guid>hadyang.github.io/2016/11/java-generic-type-type-erasure/</guid>
       <description>&lt;p&gt;从Java1.5开始，Java引入泛型的概念。Java中的泛型和C语言中的模板类有些不同，主要是由于Java在最初版本并没有支持泛型，1.5之后为了实现泛型并且能与旧代码兼容，Java编译器使用了类型擦除机制。&lt;/p&gt;</description>
     </item>
     

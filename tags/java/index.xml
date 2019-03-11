@@ -6,98 +6,98 @@
     <description>Recent content in Java on HadYang</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>zh-CN</language>
-    <lastBuildDate>Sun, 19 Mar 2017 23:13:12 +0000</lastBuildDate>
+    <lastBuildDate>Sun, 19 Mar 2017 12:56:10 +0000</lastBuildDate>
     
 	<atom:link href="hadyang.github.io/tags/java/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
       <title>拦截器模式</title>
-      <link>hadyang.github.io/posts/pattern-filter/</link>
-      <pubDate>Sun, 19 Mar 2017 23:13:12 +0000</pubDate>
+      <link>hadyang.github.io/2017/03/pattern-filter/</link>
+      <pubDate>Sun, 19 Mar 2017 12:56:10 +0000</pubDate>
       
-      <guid>hadyang.github.io/posts/pattern-filter/</guid>
+      <guid>hadyang.github.io/2017/03/pattern-filter/</guid>
       <description>&lt;p&gt;拦截器模式在 Web 应用的 Fitler 中有应用，对于流式的数据流处理很有用。比如对于 Shell 命令的管道可以采用拦截器模式，提供一个命令的接口，并使用一个 Chain 来进行管理。&lt;/p&gt;</description>
     </item>
     
     <item>
       <title>缓存算法--LRU &amp;&amp; LFU</title>
-      <link>hadyang.github.io/posts/lru-lfu/</link>
+      <link>hadyang.github.io/2016/11/lru-lfu/</link>
       <pubDate>Wed, 30 Nov 2016 15:00:06 +0000</pubDate>
       
-      <guid>hadyang.github.io/posts/lru-lfu/</guid>
+      <guid>hadyang.github.io/2016/11/lru-lfu/</guid>
       <description>&lt;p&gt;今天在熟悉公司业务的时候，看到&lt;a href=&#34;http://baike.baidu.com/link?url=njKbC1j8pqxN7q75i8U0db8AAE7uOKCbDWgmG1hVR6Ucm8xR5jiTAR_ACFDUiurrOMAUfIICIKtUziWtTYsvBa&#34;&gt;LFU&lt;/a&gt;算法，十分困惑。觉得和LRU算法差不多，于是仔细研究了一番，发现其实他们的思想是类似的&amp;ndash;通过一种机制来标记缓存中的元素，当缓存满时进行“末位”淘汰。&lt;/p&gt;</description>
     </item>
     
     <item>
       <title>状态模式</title>
-      <link>hadyang.github.io/posts/pattern-status/</link>
+      <link>hadyang.github.io/2016/07/pattern-status/</link>
       <pubDate>Fri, 15 Jul 2016 09:45:55 +0000</pubDate>
       
-      <guid>hadyang.github.io/posts/pattern-status/</guid>
+      <guid>hadyang.github.io/2016/07/pattern-status/</guid>
       <description>&lt;p&gt;在很多情况下，一个对象的行为取决于一个或多个动态变化的属性，这样的属性叫做状态，这样的对象叫做有状态的对象，这样的对象状态是从事先定义好的一系列值中取出的。*当一个这样的对象与外部事件产生互动时，其内部状态就会改变，从而使得系统的行为也随之发生变化*。&lt;/p&gt;</description>
     </item>
     
     <item>
       <title>组合模式</title>
-      <link>hadyang.github.io/posts/pattern-composite/</link>
+      <link>hadyang.github.io/2016/07/pattern-composite/</link>
       <pubDate>Thu, 14 Jul 2016 16:31:15 +0000</pubDate>
       
-      <guid>hadyang.github.io/posts/pattern-composite/</guid>
+      <guid>hadyang.github.io/2016/07/pattern-composite/</guid>
       <description>&lt;p&gt;组合模式允许你 &lt;strong&gt;将对象组合成树形结构来表现“整体/部分”层次结构&lt;/strong&gt;。组合能让客户以一致的方式处理个别对象以及对象组合。它使我们树型结构的问题中，模糊了简单元素和复杂元素的概念，客户程序可以向处理简单元素一样来处理复杂元素，从而使得客户程序与复杂元素的内部结构解耦。&lt;/p&gt;</description>
     </item>
     
     <item>
       <title>迭代器模式</title>
-      <link>hadyang.github.io/posts/pattern-iterator/</link>
+      <link>hadyang.github.io/2016/07/pattern-iterator/</link>
       <pubDate>Thu, 14 Jul 2016 10:54:51 +0000</pubDate>
       
-      <guid>hadyang.github.io/posts/pattern-iterator/</guid>
+      <guid>hadyang.github.io/2016/07/pattern-iterator/</guid>
       <description>&lt;p&gt;迭代器模式是一种最简单也最常见的设计模式。*它可以让用户通过特定的接口巡访容器中的每一个元素而不用了解底层的实现*。在Java集合框架中扮演着至关重要的作用。&lt;/p&gt;</description>
     </item>
     
     <item>
       <title>模板方法模式</title>
-      <link>hadyang.github.io/posts/pattern-template/</link>
+      <link>hadyang.github.io/2016/07/pattern-template/</link>
       <pubDate>Thu, 14 Jul 2016 09:42:14 +0000</pubDate>
       
-      <guid>hadyang.github.io/posts/pattern-template/</guid>
+      <guid>hadyang.github.io/2016/07/pattern-template/</guid>
       <description>&lt;p&gt;模板方法模式 &lt;strong&gt;定义了一个算法的骨架，并允许子类别为一个或多个步骤提供其实践方式&lt;/strong&gt;。让子类别在不改变算法架构的情况下，重新定义算法中的某些步骤。&lt;/p&gt;</description>
     </item>
     
     <item>
       <title>外观模式</title>
-      <link>hadyang.github.io/posts/pattern-facade/</link>
+      <link>hadyang.github.io/2016/07/pattern-facade/</link>
       <pubDate>Wed, 13 Jul 2016 18:34:22 +0000</pubDate>
       
-      <guid>hadyang.github.io/posts/pattern-facade/</guid>
+      <guid>hadyang.github.io/2016/07/pattern-facade/</guid>
       <description>&lt;p&gt;外观模式，提供了一个统一的接口，用来访问子系统中的一群接口。&lt;strong&gt;外观定义了一个高层接口，使得子系统更容易使用&lt;/strong&gt;。外观模式是将子系统组合进外观中，然后将工作委托给子系统执行。&lt;/p&gt;</description>
     </item>
     
     <item>
       <title>适配器模式</title>
-      <link>hadyang.github.io/posts/pattern-adapter/</link>
+      <link>hadyang.github.io/2016/07/pattern-adapter/</link>
       <pubDate>Wed, 13 Jul 2016 17:46:09 +0000</pubDate>
       
-      <guid>hadyang.github.io/posts/pattern-adapter/</guid>
+      <guid>hadyang.github.io/2016/07/pattern-adapter/</guid>
       <description>&lt;p&gt;适配器模式，&lt;strong&gt;将一个类的接口转接成用户所期待的&lt;/strong&gt;。一个适配使得因接口不兼容而不能在一起工作的类工作在一起，做法是将类自己的接口包裹在一个已存在的类中。&lt;/p&gt;</description>
     </item>
     
     <item>
       <title>命令模式</title>
-      <link>hadyang.github.io/posts/pattern-command/</link>
+      <link>hadyang.github.io/2016/07/pattern-command/</link>
       <pubDate>Wed, 13 Jul 2016 11:43:01 +0000</pubDate>
       
-      <guid>hadyang.github.io/posts/pattern-command/</guid>
+      <guid>hadyang.github.io/2016/07/pattern-command/</guid>
       <description>&lt;p&gt;命令模式是将“请求”封装为对象，我们称之为命令对象，&lt;strong&gt;一个命令对象通过绑定特定的一组动作来封装请求&lt;/strong&gt;。为达到这一目的，命令对象将动作和动作的执行者（即命令的接收者）包进对象中，并暴露出一个&lt;code&gt;execute()&lt;/code&gt;方法，当此方法调用的时候，接收者就执行这些动作。命令模式是一种对象行为型模式，其别名为动作(Action)模式或事务(Transaction)模式。&lt;/p&gt;</description>
     </item>
     
     <item>
       <title>工厂模式</title>
-      <link>hadyang.github.io/posts/pattern-factory/</link>
+      <link>hadyang.github.io/2016/07/pattern-factory/</link>
       <pubDate>Mon, 11 Jul 2016 18:12:13 +0000</pubDate>
       
-      <guid>hadyang.github.io/posts/pattern-factory/</guid>
+      <guid>hadyang.github.io/2016/07/pattern-factory/</guid>
       <description>&lt;p&gt;在面向对象程序设计中，&lt;code&gt;工厂&lt;/code&gt;通常是一个用来创建其他对象的类或对象。&lt;strong&gt;工厂是构造方法的抽象，用来实现不同的分配方案。&lt;/strong&gt;&lt;/p&gt;
 
 &lt;p&gt;工厂通常包含一个或多个方法，用来创建这个工厂所能创建的各种类型的对象。这些方法可能接收参数，用来指定对象创建的方式，最后返回创建的对象。&lt;/p&gt;
@@ -107,37 +107,37 @@
     
     <item>
       <title>装饰模式</title>
-      <link>hadyang.github.io/posts/pattern-decorator/</link>
+      <link>hadyang.github.io/2016/07/pattern-decorator/</link>
       <pubDate>Mon, 11 Jul 2016 12:17:10 +0000</pubDate>
       
-      <guid>hadyang.github.io/posts/pattern-decorator/</guid>
+      <guid>hadyang.github.io/2016/07/pattern-decorator/</guid>
       <description>&lt;p&gt;装饰模式，是面向对象编程领域中，一种动态地往一个类中添加新的行为的设计模式。就功能而言，修饰模式相比生成子类更为灵活，这样可以给某个对象而不是整个类添加一些功能。&lt;/p&gt;</description>
     </item>
     
     <item>
       <title>观察者模式</title>
-      <link>hadyang.github.io/posts/pattern-obvobserver/</link>
+      <link>hadyang.github.io/2016/07/pattern-obvobserver/</link>
       <pubDate>Sun, 10 Jul 2016 21:47:48 +0000</pubDate>
       
-      <guid>hadyang.github.io/posts/pattern-obvobserver/</guid>
+      <guid>hadyang.github.io/2016/07/pattern-obvobserver/</guid>
       <description>&lt;p&gt;在观察者模式中，一个目标对象管理所有相依于它的观察者对象，并且在它本身的状态改变时主动发出通知。这通常透过呼叫各观察者所提供的方法来实现。此种模式通常被用来实时事件处理系统。&lt;/p&gt;</description>
     </item>
     
     <item>
       <title>策略模式</title>
-      <link>hadyang.github.io/posts/pattern-strategy/</link>
+      <link>hadyang.github.io/2016/07/pattern-strategy/</link>
       <pubDate>Sun, 10 Jul 2016 09:23:15 +0000</pubDate>
       
-      <guid>hadyang.github.io/posts/pattern-strategy/</guid>
+      <guid>hadyang.github.io/2016/07/pattern-strategy/</guid>
       <description>&lt;p&gt;策略模式作为一种软件设计模式，指对象有某个行为，但是在不同的场景中，该行为有不同的实现算法。比如每个人都要“交个人所得税”，但是“在美国交个人所得税”和“在中国交个人所得税”就有不同的算税方法。&lt;/p&gt;</description>
     </item>
     
     <item>
       <title>单例模式</title>
-      <link>hadyang.github.io/posts/pattern-singleton/</link>
+      <link>hadyang.github.io/2016/07/pattern-singleton/</link>
       <pubDate>Wed, 06 Jul 2016 21:25:50 +0000</pubDate>
       
-      <guid>hadyang.github.io/posts/pattern-singleton/</guid>
+      <guid>hadyang.github.io/2016/07/pattern-singleton/</guid>
       <description>&lt;p&gt;有一定开发经验的人一定都听说过单例模式，可以说单例模式是一种最简单的设计模式，同时使用的也是很多的。单例指仅仅被实例化一次的类，单例模式通常被用来代替那些本质上唯一的系统组件，比如文件系统、管理器等等。&lt;/p&gt;</description>
     </item>
     

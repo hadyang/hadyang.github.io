@@ -13,10 +13,10 @@
     
     <item>
       <title>IDEA通过Gradle打包可执行Jar</title>
-      <link>hadyang.github.io/posts/idea-build-with-gradle/idea-build-with-gradle/</link>
+      <link>hadyang.github.io/2016/07/idea-build-with-gradle/</link>
       <pubDate>Mon, 04 Jul 2016 08:39:46 +0000</pubDate>
       
-      <guid>hadyang.github.io/posts/idea-build-with-gradle/idea-build-with-gradle/</guid>
+      <guid>hadyang.github.io/2016/07/idea-build-with-gradle/</guid>
       <description>&lt;p&gt;前段时间通过IDEA编写Java程序，使用的是Gradle进行依赖管理。在包管理方面Gradle的优势很大，但是在打包可执行Jar包的时候出现不能找到main方法的问题，在这里稍作记录。&lt;/p&gt;</description>
     </item>
     

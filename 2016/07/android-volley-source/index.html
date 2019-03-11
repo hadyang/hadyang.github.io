@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+
+  <meta charset="utf-8" />
+
+  
+  <title>Volley源码解析</title>
+
+  
+  
+  <link href="//cdn.jsdelivr.net" rel="dns-prefetch">
+  <link href="//cdnjs.cloudflare.com" rel="dns-prefetch">
+  <link href="//at.alicdn.com" rel="dns-prefetch">
+  <link href="//fonts.googleapis.com" rel="dns-prefetch">
+  <link href="//fonts.gstatic.com" rel="dns-prefetch">
+  
+  
+  
+  
+  
+
+  
+
+  
+  
+  <meta name="description" content="最近复习校招的时候，发现很多公司的面试题都有考Volley，今天我们就来学习学习这个当年在2013年 Google I/O 大会上发布的Android平台网络通信库。
+">
+
+  
+  
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:site" content="@gohugoio">
+    <meta name="twitter:title" content="Volley源码解析">
+    <meta name="twitter:description" content="最近复习校招的时候，发现很多公司的面试题都有考Volley，今天我们就来学习学习这个当年在2013年 Google I/O 大会上发布的Android平台网络通信库。
+">
+    <meta name="twitter:image" content="/hadyang.github.io/images/avatar.png">
+  
+
+  
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="Volley源码解析">
+  <meta property="og:description" content="最近复习校招的时候，发现很多公司的面试题都有考Volley，今天我们就来学习学习这个当年在2013年 Google I/O 大会上发布的Android平台网络通信库。
+">
+  <meta property="og:url" content="hadyang.github.io/2016/07/android-volley-source/">
+  <meta property="og:image" content="/hadyang.github.io/images/avatar.png">
+
+
+
+
+<meta name="generator" content="Hugo 0.54.0">
+
+
+<link rel="canonical" href="hadyang.github.io/2016/07/android-volley-source/">
+
+<meta name="renderer" content="webkit">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="format-detection" content="telephone=no,email=no,adress=no">
+<meta http-equiv="Cache-Control" content="no-transform">
+
+
+<meta name="robots" content="index,follow">
+<meta name="referrer" content="origin-when-cross-origin">
+
+
+
+
+
+
+
+<meta name="theme-color" content="#02b875">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="HadYang">
+<meta name="msapplication-tooltip" content="HadYang">
+<meta name='msapplication-navbutton-color' content="#02b875">
+<meta name="msapplication-TileColor" content="#02b875">
+<meta name="msapplication-TileImage" content="/hadyang.github.io/icons/icon-144x144.png">
+<link rel="icon" href="/hadyang.github.io/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="/hadyang.github.io/icons/icon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/hadyang.github.io/icons/icon-32x32.png">
+<link rel="icon" sizes="192x192" href="/hadyang.github.io/icons/icon-192x192.png">
+<link rel="apple-touch-icon" href="/hadyang.github.io/icons/icon-152x152.png">
+<link rel="manifest" href="/hadyang.github.io/manifest.json">
+
+
+<link rel="preload" href="/hadyang.github.io/styles/main.min.css" as="style">
+
+<link rel="preload" href="https://fonts.googleapis.com/css?family=Lobster" as="style">
+<link rel="preload" href="/hadyang.github.io/images/avatar.png" as="image">
+<link rel="preload" href="/hadyang.github.io/images/grey-prism.svg" as="image">
+
+
+<style>
+  body {
+    background: rgb(244, 243, 241) url('/hadyang.github.io/images/grey-prism.svg') repeat fixed;
+  }
+</style>
+<link rel="stylesheet" href="/hadyang.github.io/styles/main.min.css">
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lobster">
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/medium-zoom@1.0.2/dist/medium-zoom.min.js"></script>
+
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/video.js@7.3.0/dist/video-js.min.css">
+
+
+
+  
+  
+<!--[if lte IE 8]>
+  <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/videojs-ie8@1.1.2/dist/videojs-ie8.min.js"></script>
+<![endif]-->
+
+<!--[if lte IE 9]>
+  <script src="https://cdn.jsdelivr.net/npm/eligrey-classlist-js-polyfill@1.2.20180112/classList.min.js"></script>
+<![endif]-->
+
+
+</head>
+  <body>
+    
+    <div class="suspension">
+      <a role="button" aria-label="Go to top" title="Go to top" class="to-top is-hide"><span class="icon icon-up" aria-hidden="true"></span></a>
+      
+        
+      
+    </div>
+    
+    
+  <header class="site-header">
+  <img class="avatar" src="/hadyang.github.io/images/avatar.png" alt="Avatar">
+  
+  <h2 class="title">HadYang</h2>
+  
+  <p class="subtitle"></p>
+  <button class="menu-toggle" type="button" aria-label="Main Menu" aria-expanded="false" tab-index="0">
+    <span class="icon icon-menu" aria-hidden="true"></span>
+  </button>
+
+  <nav class="site-menu collapsed">
+    <h2 class="offscreen">Main Menu</h2>
+    <ul class="menu-list">
+      
+      
+      
+      
+    </ul>
+  </nav>
+  <nav class="social-menu collapsed">
+    <h2 class="offscreen">Social Networks</h2>
+    <ul class="social-list"></ul>
+  </nav>
+</header>
+
+  <section class="main post-detail">
+    <header class="post-header">
+      <h1 class="post-title">Volley源码解析</h1>
+      <p class="post-meta">@ · Jul 23, 2016 · 1 min read</p>
+    </header>
+    <article class="post-content"><p>最近复习校招的时候，发现很多公司的面试题都有考Volley，今天我们就来学习学习这个当年在2013年 <code>Google I/O</code> 大会上发布的Android平台网络通信库。</p>
+
+<h3 id="volley">Volley</h3>
+
+<p>Volley是在2013年 <code>Google I/O</code> 大会上发布的一款Android平台网络通信库，具有网络请求的处理、小图片的异步加载和缓存网络请求等功能，能够帮助开发者更方便地执行网络操作，而且更快速高效。</p>
+
+<p>Volley适合高并发、小请求的场景，不适合用来下载大文件，因为Volley会保持在解析过程中所有的响应。Volley的使用比较简单，这里就不详细阐述，具体教程参见<a href="https://www.google.com/url?sa=t&amp;rct=j&amp;q=&amp;esrc=s&amp;source=web&amp;cd=2&amp;cad=rja&amp;uact=8&amp;ved=0ahUKEwjjj9e96InOAhVCzWMKHcpeCo0QFggpMAE&amp;url=https%3A%2F%2Fdeveloper.android.com%2Ftraining%2Fvolley%2Findex.html&amp;usg=AFQjCNFwn_mUDzUwjOceF4Lxu3Q4Zmsd_w&amp;sig2=HVMQyTdQq9GwciCl6XMCQA">Android官方教程</a>。</p>
+
+<h3 id="结构">结构</h3>
+
+<p>Volley类图：</p>
+
+<p><img src="volley-class.jpg" alt="" /></p>
+
+<p>Volley的框架结构相对来说比较简单，主要由以下几个部分组成：
+  - <code>RequestQueue</code>：Volley的主要类，负责请求分发，内部包含两个请求队列，分别是缓存请求队列和网络请求队列。<code>RequestQueue</code>作为<code>生产者-消费者</code>模式中的生产者。</p>
+
+<ul>
+<li><p><code>NetWorkDispatcher</code>：网络请求类，继承自<code>Thread</code>。<code>NetWorkDispatcher</code>自启动就一直在后台不断的获取<code>RequestQueue</code>的网络请求队列中的请求并处理。<code>RequestQueue</code>作为<code>生产者-消费者</code>模式中的消费者。</p></li>
+
+<li><p><code>CacheDispatcher</code>：缓存请求类，继承自<code>Thread</code>。这个类和<code>NetWorkDispatcher</code>在原理上是一致的，但是<code>CacheDispatcher</code>是获取<code>RequestQueue</code>的缓存请求队列中的请求，并且在处理时先从本地查找缓存，如果未命中则将请求添加到网络请求队列中，由<code>NetWorkDispatcher</code>处理。</p></li>
+
+<li><p><code>Request</code>：请求类，该类是抽象的泛型类，Volley提供了几个主要的实现，该类主要包含了对<code>Http</code>请求相关的操作，包括请求参数、编码等等。同时该类也提供了回调函数进行响应解析。</p></li>
+
+<li><p><code>ExecutorDelivery</code>：响应分发类，实现了<code>ResponseDelivery</code>接口，是该接口在<code>Volley</code>中的唯一实现。<code>ExecutorDelivery</code>使用主线程的<code>Handler</code>将响应分发到主线程中，并调用<code>Request</code>的响应回调函数。</p></li>
+
+<li><p><code>Cache</code>：提供了缓存的接口，在一般适用的是Volley提供的<code>DiskBaseCache</code>来进行本地缓存，当然我们也可以通过实现<code>Cache</code>接口自定义缓存方式。</p></li>
+
+<li><p><code>NetWork</code>：提供网络请求的具体方式，<code>NetWorkDispatcher</code>在获取到请求后，会将请求分发到<code>NetWork</code>的实现类中。</p></li>
+
+<li><p><code>HttpStack</code>：Http协议栈，在Volley中提供了两个实现类，其中<code>HurlStack</code>适用于Android 2.3及以上，<code>HttpClientStack</code>适用于Android 2.3以下。这样做的原因是 Android 2.3以下<code>HttpUrlConnection</code> 是不能用的，而Android 2.3以上就是采用<code>HttpUrlConnection</code>进行连接的，以下就是直接用的<code>HttpClient</code>。</p></li>
+</ul>
+
+<h3 id="请求分发">请求分发</h3>
+
+<p>在看过Volley的基本结构后，我们通过源码来进一步认识Volley。</p>
+
+<p>顺序图（图片有点大，可以点开放大看）：</p>
+
+<p><img src="volley-sequence.jpg" alt="" /></p>
+
+<p>从图中可以看出<code>RequestQueue</code>将请求进行分类，由不同的线程去执行。下面我们就从代码对这个过程进行分析。</p>
+
+<pre><code class="language-Java">public &lt;T&gt; Request&lt;T&gt; add(Request&lt;T&gt; request) {
+    ...
+    //判断请求是否可以缓存，如果不可以缓存，则直接加入网络请求队列，由NetWorkDispatcher处理。
+    if (!request.shouldCache()) {
+        mNetworkQueue.add(request);
+        return request;
+    }
+
+    //这里判断是否有相同的请求，并利用缓存来减少请求数量
+    synchronized (mWaitingRequests) {
+
+        //getCacheKey默认返回：请求方式+请求URL
+        String cacheKey = request.getCacheKey();
+
+        //如果等待队列中已存在相同的请求，将后续的相同请求加入一个队列中
+        if (mWaitingRequests.containsKey(cacheKey)) {
+            Queue&lt;Request&lt;?&gt;&gt; stagedRequests = mWaitingRequests.get(cacheKey);
+            if (stagedRequests == null) {
+                stagedRequests = new LinkedList&lt;Request&lt;?&gt;&gt;();
+            }
+            stagedRequests.add(request);
+            mWaitingRequests.put(cacheKey, stagedRequests);
+            ...
+        } else {
+
+            //没有相同请求，向等待队列中放入标记位，并添加到缓存请求队列中
+            mWaitingRequests.put(cacheKey, null);
+            mCacheQueue.add(request);
+        }
+        return request;
+    }
+}
+</code></pre>
+
+<p>Volley在设计中采用了<code>生产者-消费者</code>模式，在上面的代码中<code>mNetworkQueue</code>和<code>mCacheQueue</code>是阻塞队列，<code>NetWorkDispatcher</code>和<code>CacheDispatcher</code>是工作者线程。</p>
+
+<blockquote>
+<p><code>NetWorkDispatcher</code>在Volley中默认是4个线程。</p>
+</blockquote>
+
+<p>对Volley的请求过程Android官方也有一张示意图：</p>
+
+<p><img src="volley-request.png" alt="" /></p></article>
+    <footer class="post-footer">
+      
+      <ul class="post-tags">
+        
+          <li><a href="/tags/%E6%BA%90%E7%A0%81"><span class="tag">源码</span></a></li>
+        
+      </ul>
+      
+      <p class="post-copyright">
+        This post was published <strong>960</strong> days ago, content in the post may be inaccurate, even wrong now, please take risk yourself.
+      </p>
+    </footer>
+    
+      
+    
+  </section>
+  
+<footer class="site-footer">
+  <p>© 2017-2019 HadYang</p>
+  <p>Powered by <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> with theme <a href="https://github.com/laozhu/hugo-nuo" target="_blank" rel="noopener">Nuo</a>.</p>
+  
+</footer>
+
+
+<script src="https://cdn.jsdelivr.net/npm/smooth-scroll@15.0.0/dist/smooth-scroll.min.js"></script>
+
+
+
+<script async src="https://cdn.jsdelivr.net/npm/video.js@7.3.0/dist/video.min.js"></script>
+
+
+
+
+<script async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+      inlineMath: [['$','$'], ['\\(','\\)']],
+      displayMath: [['$$','$$'], ['\\[','\\]']],
+      processEscapes: true,
+      processEnvironments: true,
+      skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+      TeX: { equationNumbers: { autoNumber: "AMS" },
+      extensions: ["AMSmath.js", "AMSsymbols.js"] }
+    },
+  });
+</script>
+<script type="text/x-mathjax-config">
+  // Fix <code> tags after MathJax finishes running. This is a
+  // hack to overcome a shortcoming of Markdown. Discussion at
+  // https://github.com/mojombo/jekyll/issues/199
+  MathJax.Hub.Queue(() => {
+    MathJax.Hub.getAllJax().map(v => v.SourceElement().parentNode.className += ' has-jax');
+  });
+</script>
+
+
+
+<script src="/hadyang.github.io/scripts/index.min.js"></script>
+
+<script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('\/hadyang.github.io\/service-worker.js').then(function() {
+      console.log('[ServiceWorker] Registered');
+    });
+  }
+</script>
+
+
+
+
+
+
+
+
+  </body>
+</html>
