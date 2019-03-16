@@ -6,15 +6,24 @@
     <description>Recent content in Java on HadYang</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>zh-CN</language>
-    <lastBuildDate>Wed, 28 Dec 2016 16:16:46 +0000</lastBuildDate>
+    <lastBuildDate>Sat, 16 Mar 2019 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="hadyang.github.io/categories/java/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
+      <title>手写Socks5通信</title>
+      <link>hadyang.github.io/2019/03/socks-proxy/</link>
+      <pubDate>Sat, 16 Mar 2019 00:00:00 +0000</pubDate>
+      
+      <guid>hadyang.github.io/2019/03/socks-proxy/</guid>
+      <description>&lt;p&gt;Socks 协议本身是基于 TCP 的协议，位于应用层与传输层之间的会话层，将应用层的数据透明的传输到 TCP 层。更详细的介绍参见 &lt;a href=&#34;https://zh.wikipedia.org/wiki/SOCKS&#34;&gt;SOCKS - 维基百科，自由的百科全书&lt;/a&gt;&lt;/p&gt;</description>
+    </item>
+    
+    <item>
       <title>Java Instrumentation</title>
       <link>hadyang.github.io/2016/12/java-instrumentation/</link>
-      <pubDate>Wed, 28 Dec 2016 16:16:46 +0000</pubDate>
+      <pubDate>Wed, 28 Dec 2016 00:00:00 +0000</pubDate>
       
       <guid>hadyang.github.io/2016/12/java-instrumentation/</guid>
       <description>&lt;p&gt;最近在看公司的工具包的时候，发现有个很好用的功能 &amp;ndash; &lt;code&gt;TraceId&lt;/code&gt; 和 LogBack 的 &lt;a href=&#34;http://logback.qos.ch/manual/mdc.html&#34;&gt;MDC&lt;/a&gt; 的功能，可以通过一个 &lt;code&gt;TraceId&lt;/code&gt; 来跟踪一个请求在不同系统中的执行情况，这可以很好的提高对线上业务排查的效率。但是这项功能的实现比较复杂，利用了一个 &lt;code&gt;Instrumentation&lt;/code&gt; 的 JVM 底层代理的功能，&lt;code&gt;Instrumentation&lt;/code&gt;是通过JVMTI与JVM进行交互，&lt;code&gt;JVMIT&lt;/code&gt;是JVM对外提供的用户接口，&lt;code&gt;JVMTI&lt;/code&gt;是基于事件驱动的，JVM每执行到一定的逻辑就会调用一些事件的回调接口，这些接口可以供开发者扩展自己的逻辑。&lt;/p&gt;</description>
@@ -23,7 +32,7 @@
     <item>
       <title>Idea中通过Maven创建 Archetypes</title>
       <link>hadyang.github.io/2016/12/idea-maven-custom-archetypes/</link>
-      <pubDate>Tue, 20 Dec 2016 22:24:49 +0000</pubDate>
+      <pubDate>Tue, 20 Dec 2016 00:00:00 +0000</pubDate>
       
       <guid>hadyang.github.io/2016/12/idea-maven-custom-archetypes/</guid>
       <description>&lt;p&gt;最近在做项目的时候发现Web项目中很多配置都是相对固定的，比如Spring，常用的配置都是那些，每次新建工程的时候很是麻烦，为了减少没必要的复制粘贴（提高效率），这里介绍一种自定义 Archetypes 的方法。Archetypes 是Maven中的一种模板，我们可以通过 Archetypes 将常用的配置放在模板里，每次新建项目的时候选择模板就可以了。&lt;/p&gt;</description>
@@ -32,7 +41,7 @@
     <item>
       <title>Java List 遍历方式比较</title>
       <link>hadyang.github.io/2016/12/java-list-for/</link>
-      <pubDate>Tue, 13 Dec 2016 09:47:18 +0000</pubDate>
+      <pubDate>Tue, 13 Dec 2016 00:00:00 +0000</pubDate>
       
       <guid>hadyang.github.io/2016/12/java-list-for/</guid>
       <description>&lt;p&gt;最近在做项目的时候，有点纠结使用是&lt;code&gt;ArrayList&lt;/code&gt;还是&lt;code&gt;LinkedList&lt;/code&gt;，这两种List实现方式不同，应用于不同场景下，不同的遍历方式对性能和代码的可读性也有很大的影响。&lt;/p&gt;</description>
@@ -41,7 +50,7 @@
     <item>
       <title>Intellij Idea 修改 Maven 项目默认JDK版本</title>
       <link>hadyang.github.io/2016/11/idea-maven-jdk-version/</link>
-      <pubDate>Sat, 19 Nov 2016 19:01:17 +0000</pubDate>
+      <pubDate>Sat, 19 Nov 2016 00:00:00 +0000</pubDate>
       
       <guid>hadyang.github.io/2016/11/idea-maven-jdk-version/</guid>
       <description>&lt;p&gt;在使用IDEA创建Maven项目的时候，默认使用JDK 1.5版本，这样很多新版本的特性就不能使用。为了使用新特性（比如：Lambda表达式），必须在创建项目后进行手动修改，这样很麻烦，下面我就来介绍一个一劳永逸的方法。&lt;/p&gt;</description>
@@ -50,7 +59,7 @@
     <item>
       <title>Java泛型--类型擦除</title>
       <link>hadyang.github.io/2016/11/java-generic-type-type-erasure/</link>
-      <pubDate>Tue, 15 Nov 2016 19:57:44 +0000</pubDate>
+      <pubDate>Tue, 15 Nov 2016 00:00:00 +0000</pubDate>
       
       <guid>hadyang.github.io/2016/11/java-generic-type-type-erasure/</guid>
       <description>&lt;p&gt;从Java1.5开始，Java引入泛型的概念。Java中的泛型和C语言中的模板类有些不同，主要是由于Java在最初版本并没有支持泛型，1.5之后为了实现泛型并且能与旧代码兼容，Java编译器使用了类型擦除机制。&lt;/p&gt;</description>
@@ -59,7 +68,7 @@
     <item>
       <title>Java Enum解析</title>
       <link>hadyang.github.io/2016/08/java-enum/</link>
-      <pubDate>Tue, 30 Aug 2016 13:00:06 +0000</pubDate>
+      <pubDate>Tue, 30 Aug 2016 00:00:00 +0000</pubDate>
       
       <guid>hadyang.github.io/2016/08/java-enum/</guid>
       <description>&lt;p&gt;最近在刷题的时候碰到一个Enum相关的题目，突然发现自己对Enum类的了解知之甚少，于是这篇文章就通过Java字节码来深入了解Enum类。&lt;/p&gt;</description>
@@ -68,7 +77,7 @@
     <item>
       <title>代理模式</title>
       <link>hadyang.github.io/2016/07/pattern-proxy/</link>
-      <pubDate>Fri, 15 Jul 2016 10:56:57 +0000</pubDate>
+      <pubDate>Fri, 15 Jul 2016 00:00:00 +0000</pubDate>
       
       <guid>hadyang.github.io/2016/07/pattern-proxy/</guid>
       <description>&lt;p&gt;在某些情况下，一个客户不想或者不能直接引用一个对象，此时可以通过一个称之为&lt;code&gt;代理&lt;/code&gt;的第三者来实现间接引用。&lt;strong&gt;代理对象可以在客户端和目标对象之间起到中介的作用，并且可以通过代理对象去掉客户不能看到的内容和服务或者添加客户需要的额外服务&lt;/strong&gt;。代理模式是为另一个对象提供一个替身或者占位符以控制对这个对象的访问。使用代理模式创建代理对象，让代理对象控制某对象的访问，被代理对象可以是远程的对象、创建开销大的对象或者是需要安全控制的对象。&lt;/p&gt;</description>
@@ -77,7 +86,7 @@
     <item>
       <title>IDEA通过Gradle打包可执行Jar</title>
       <link>hadyang.github.io/2016/07/idea-build-with-gradle/</link>
-      <pubDate>Mon, 04 Jul 2016 08:39:46 +0000</pubDate>
+      <pubDate>Mon, 04 Jul 2016 00:00:00 +0000</pubDate>
       
       <guid>hadyang.github.io/2016/07/idea-build-with-gradle/</guid>
       <description>&lt;p&gt;前段时间通过IDEA编写Java程序，使用的是Gradle进行依赖管理。在包管理方面Gradle的优势很大，但是在打包可执行Jar包的时候出现不能找到main方法的问题，在这里稍作记录。&lt;/p&gt;</description>
@@ -86,7 +95,7 @@
     <item>
       <title>FlatBuffer初体验</title>
       <link>hadyang.github.io/2016/06/flatbuffer-first/</link>
-      <pubDate>Wed, 29 Jun 2016 22:02:58 +0000</pubDate>
+      <pubDate>Wed, 29 Jun 2016 00:00:00 +0000</pubDate>
       
       <guid>hadyang.github.io/2016/06/flatbuffer-first/</guid>
       <description>&lt;p&gt;&lt;code&gt;FlatBuffer&lt;/code&gt;是一个跨平台的序列化库，可以在C++,C#, C, Go, Java, JavaScript, PHP, Python语言中使用，最初这个库是Google为游戏开发中所使用，其源代码地址在&lt;a href=&#34;http://github.com/google/flatbuffers&#34;&gt;Github&lt;/a&gt;。FlatBuffer提供了详细的使用文档，可以参考&lt;a href=&#34;http://google.github.io/flatbuffers/index.html&#34;&gt;Google.github.io&lt;/a&gt;主页上的教程。&lt;/p&gt;</description>
@@ -95,7 +104,7 @@
     <item>
       <title>LinkedHashMap源码解析</title>
       <link>hadyang.github.io/2016/06/java-linkedhashmap-source/</link>
-      <pubDate>Thu, 23 Jun 2016 13:51:00 +0000</pubDate>
+      <pubDate>Thu, 23 Jun 2016 00:00:00 +0000</pubDate>
       
       <guid>hadyang.github.io/2016/06/java-linkedhashmap-source/</guid>
       <description>&lt;p&gt;&lt;code&gt;LinkedHashMap&lt;/code&gt;是&lt;code&gt;HashMap&lt;/code&gt;的子类，其与HashMap最大的区别就是 &lt;strong&gt;使用了一个双向链表对结点进行存储，通过这个链表可以实现Map中的数据有序&lt;/strong&gt;。在HashMap中遍历数据是根据key的哈希值遍历的，&lt;code&gt;LinkedHashMap&lt;/code&gt;可以根据key插入的顺序或者结点的访问顺序进行遍历。当我们需要记录插入Map结点的顺序时，可以使用&lt;code&gt;LinkedHashMap&lt;/code&gt;。同时&lt;code&gt;LinkedHashMap&lt;/code&gt;是线程不同步的，如果需要进行同步可以使用&lt;code&gt;Collections.synchronizedMap(new LinkedHashMap(...))&lt;/code&gt;。&lt;/p&gt;</description>
@@ -104,7 +113,7 @@
     <item>
       <title>HashMap源码解析</title>
       <link>hadyang.github.io/2016/06/java-hashmap-source/</link>
-      <pubDate>Tue, 07 Jun 2016 22:17:51 +0000</pubDate>
+      <pubDate>Tue, 07 Jun 2016 00:00:00 +0000</pubDate>
       
       <guid>hadyang.github.io/2016/06/java-hashmap-source/</guid>
       <description>&lt;p&gt;HashMap作为Java Map集合下常用类，我们在使用时对其中的原理知道的很少，最近看了HashMap的源码后觉得还是不难理解，在这里对HashMap做一个分析。&lt;/p&gt;</description>
@@ -113,7 +122,7 @@
     <item>
       <title>深入Java虚拟机读书笔记——类装载、连接和初始化</title>
       <link>hadyang.github.io/2016/05/jvm-class-load-init/</link>
-      <pubDate>Tue, 03 May 2016 13:24:59 +0000</pubDate>
+      <pubDate>Tue, 03 May 2016 00:00:00 +0000</pubDate>
       
       <guid>hadyang.github.io/2016/05/jvm-class-load-init/</guid>
       <description>&lt;p&gt;在前面的文章《深入Java虚拟机读书笔记——类加载器》中我们介绍了JVM中类加载器，类加载器是JVM中重要的组成部分，当类第一次被使用时，由它负责类的装载、连接和初始化，进而能让我们使用类来生成对象等等。&lt;/p&gt;</description>
@@ -122,7 +131,7 @@
     <item>
       <title>深入Java虚拟机读书笔记——对象的生命周期</title>
       <link>hadyang.github.io/2016/04/jvm-object-life-cycle/</link>
-      <pubDate>Sat, 30 Apr 2016 13:30:28 +0000</pubDate>
+      <pubDate>Sat, 30 Apr 2016 00:00:00 +0000</pubDate>
       
       <guid>hadyang.github.io/2016/04/jvm-object-life-cycle/</guid>
       <description>&lt;p&gt;一旦一个类被装载、连接和初始化，它就随时可以被使用。程序可以访问它的静态字段，调用它的静态方法，或者创建它的实例。作为Java程序员有必要了解Java对象的生命周期。&lt;/p&gt;</description>
@@ -131,7 +140,7 @@
     <item>
       <title>深入Java虚拟机读书笔记——类加载器</title>
       <link>hadyang.github.io/2016/04/jvm-class-loader/</link>
-      <pubDate>Fri, 29 Apr 2016 22:05:19 +0000</pubDate>
+      <pubDate>Fri, 29 Apr 2016 00:00:00 +0000</pubDate>
       
       <guid>hadyang.github.io/2016/04/jvm-class-loader/</guid>
       <description>&lt;p&gt;在前面一篇的《深入Java虚拟机读书笔记——虚拟机体系结构》中，提到了类加载器，类加载器是JVM重要的组成部分，在类第一次被使用时，类加载器会将类的class文件加载到JVM中，这个class文件包含了类的基本信息：方法、域、继承等等。&lt;/p&gt;</description>
@@ -140,7 +149,7 @@
     <item>
       <title>深入Java虚拟机读书笔记——垃圾回收</title>
       <link>hadyang.github.io/2016/04/jvm-gc/</link>
-      <pubDate>Wed, 27 Apr 2016 18:32:11 +0000</pubDate>
+      <pubDate>Wed, 27 Apr 2016 00:00:00 +0000</pubDate>
       
       <guid>hadyang.github.io/2016/04/jvm-gc/</guid>
       <description>&lt;p&gt;作为自动管理内存的编程语言，Java为我们做了许多的工作。程序员不需要关心内存分配和回收，这大大提高了程序员的工作效率，同时也减少了内存泄漏的风险。正是由于Java语言的这种特性，导致很多程序员对内存分配没有太深刻的概念，产生OOM后不知从何处修改。我们需要对Java内存管理进行了解，更加合理的利用Java自动管理内存的特性。&lt;/p&gt;</description>
@@ -149,7 +158,7 @@
     <item>
       <title>深入Java虚拟机读书笔记——虚拟机体系结构</title>
       <link>hadyang.github.io/2016/04/jvm-architecture/</link>
-      <pubDate>Wed, 27 Apr 2016 16:00:05 +0000</pubDate>
+      <pubDate>Wed, 27 Apr 2016 00:00:00 +0000</pubDate>
       
       <guid>hadyang.github.io/2016/04/jvm-architecture/</guid>
       <description>&lt;p&gt;最近在逛知乎的时候，看到有人推荐这本《深入Java虚拟机》，这几天一直在看这本书，虽然这本书里使用的JVM版本比较低，但是讲的内容还是很有营养的。在看这本书的时候学习到很多东西，在这里写一下，方便以后学习：）&lt;/p&gt;</description>

@@ -6,7 +6,7 @@
     <description>Recent content in 设计模式 on HadYang</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>zh-CN</language>
-    <lastBuildDate>Fri, 15 Jul 2016 10:56:57 +0000</lastBuildDate>
+    <lastBuildDate>Fri, 15 Jul 2016 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="hadyang.github.io/tags/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/index.xml" rel="self" type="application/rss+xml" />
     
@@ -14,7 +14,7 @@
     <item>
       <title>代理模式</title>
       <link>hadyang.github.io/2016/07/pattern-proxy/</link>
-      <pubDate>Fri, 15 Jul 2016 10:56:57 +0000</pubDate>
+      <pubDate>Fri, 15 Jul 2016 00:00:00 +0000</pubDate>
       
       <guid>hadyang.github.io/2016/07/pattern-proxy/</guid>
       <description>&lt;p&gt;在某些情况下，一个客户不想或者不能直接引用一个对象，此时可以通过一个称之为&lt;code&gt;代理&lt;/code&gt;的第三者来实现间接引用。&lt;strong&gt;代理对象可以在客户端和目标对象之间起到中介的作用，并且可以通过代理对象去掉客户不能看到的内容和服务或者添加客户需要的额外服务&lt;/strong&gt;。代理模式是为另一个对象提供一个替身或者占位符以控制对这个对象的访问。使用代理模式创建代理对象，让代理对象控制某对象的访问，被代理对象可以是远程的对象、创建开销大的对象或者是需要安全控制的对象。&lt;/p&gt;</description>

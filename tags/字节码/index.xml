@@ -6,7 +6,7 @@
     <description>Recent content in 字节码 on HadYang</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>zh-CN</language>
-    <lastBuildDate>Wed, 28 Dec 2016 16:16:46 +0000</lastBuildDate>
+    <lastBuildDate>Wed, 28 Dec 2016 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="hadyang.github.io/tags/%E5%AD%97%E8%8A%82%E7%A0%81/index.xml" rel="self" type="application/rss+xml" />
     
@@ -14,7 +14,7 @@
     <item>
       <title>Java Instrumentation</title>
       <link>hadyang.github.io/2016/12/java-instrumentation/</link>
-      <pubDate>Wed, 28 Dec 2016 16:16:46 +0000</pubDate>
+      <pubDate>Wed, 28 Dec 2016 00:00:00 +0000</pubDate>
       
       <guid>hadyang.github.io/2016/12/java-instrumentation/</guid>
       <description>&lt;p&gt;最近在看公司的工具包的时候，发现有个很好用的功能 &amp;ndash; &lt;code&gt;TraceId&lt;/code&gt; 和 LogBack 的 &lt;a href=&#34;http://logback.qos.ch/manual/mdc.html&#34;&gt;MDC&lt;/a&gt; 的功能，可以通过一个 &lt;code&gt;TraceId&lt;/code&gt; 来跟踪一个请求在不同系统中的执行情况，这可以很好的提高对线上业务排查的效率。但是这项功能的实现比较复杂，利用了一个 &lt;code&gt;Instrumentation&lt;/code&gt; 的 JVM 底层代理的功能，&lt;code&gt;Instrumentation&lt;/code&gt;是通过JVMTI与JVM进行交互，&lt;code&gt;JVMIT&lt;/code&gt;是JVM对外提供的用户接口，&lt;code&gt;JVMTI&lt;/code&gt;是基于事件驱动的，JVM每执行到一定的逻辑就会调用一些事件的回调接口，这些接口可以供开发者扩展自己的逻辑。&lt;/p&gt;</description>
@@ -23,7 +23,7 @@
     <item>
       <title>Java Enum解析</title>
       <link>hadyang.github.io/2016/08/java-enum/</link>
-      <pubDate>Tue, 30 Aug 2016 13:00:06 +0000</pubDate>
+      <pubDate>Tue, 30 Aug 2016 00:00:00 +0000</pubDate>
       
       <guid>hadyang.github.io/2016/08/java-enum/</guid>
       <description>&lt;p&gt;最近在刷题的时候碰到一个Enum相关的题目，突然发现自己对Enum类的了解知之甚少，于是这篇文章就通过Java字节码来深入了解Enum类。&lt;/p&gt;</description>

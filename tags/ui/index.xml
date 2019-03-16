@@ -6,7 +6,7 @@
     <description>Recent content in Ui on HadYang</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>zh-CN</language>
-    <lastBuildDate>Wed, 17 Jun 2015 19:36:21 +0000</lastBuildDate>
+    <lastBuildDate>Wed, 17 Jun 2015 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="hadyang.github.io/tags/ui/index.xml" rel="self" type="application/rss+xml" />
     
@@ -14,7 +14,7 @@
     <item>
       <title>仿Google相册的侧滑栏效果--DrawerLayout</title>
       <link>hadyang.github.io/2015/06/android-drawerlayout/</link>
-      <pubDate>Wed, 17 Jun 2015 19:36:21 +0000</pubDate>
+      <pubDate>Wed, 17 Jun 2015 00:00:00 +0000</pubDate>
       
       <guid>hadyang.github.io/2015/06/android-drawerlayout/</guid>
       <description>&lt;p&gt;最近在网上看到谷歌自家的相册应用（Google Photos），它的侧滑栏很吸引我，于是在google了很久之后，终于完成，和大家分享分享。&lt;/p&gt;</description>

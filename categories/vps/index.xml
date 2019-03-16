@@ -6,7 +6,7 @@
     <description>Recent content in Vps on HadYang</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>zh-CN</language>
-    <lastBuildDate>Thu, 23 Jun 2016 19:33:11 +0000</lastBuildDate>
+    <lastBuildDate>Thu, 23 Jun 2016 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="hadyang.github.io/categories/vps/index.xml" rel="self" type="application/rss+xml" />
     
@@ -14,7 +14,7 @@
     <item>
       <title>VPS上搭建Hexo静态博客</title>
       <link>hadyang.github.io/2016/06/vps-hexo-setting/</link>
-      <pubDate>Thu, 23 Jun 2016 19:33:11 +0000</pubDate>
+      <pubDate>Thu, 23 Jun 2016 00:00:00 +0000</pubDate>
       
       <guid>hadyang.github.io/2016/06/vps-hexo-setting/</guid>
       <description>&lt;p&gt;最近在提交百度收录的时候发现github将百度的爬虫给禁掉了，百度收录不了github上的网站。后来试过用CDN但是没有适合，最终还是将博客重新部署在VPS上，这样就解决了百度爬虫的问题。&lt;/p&gt;</description>

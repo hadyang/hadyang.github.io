@@ -6,7 +6,7 @@
     <description>Recent content in Android on HadYang</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>zh-CN</language>
-    <lastBuildDate>Fri, 19 Aug 2016 16:39:50 +0000</lastBuildDate>
+    <lastBuildDate>Fri, 19 Aug 2016 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="hadyang.github.io/categories/android/index.xml" rel="self" type="application/rss+xml" />
     
@@ -14,7 +14,7 @@
     <item>
       <title>AsyncTask源码解析</title>
       <link>hadyang.github.io/2016/08/asynctask-source/</link>
-      <pubDate>Fri, 19 Aug 2016 16:39:50 +0000</pubDate>
+      <pubDate>Fri, 19 Aug 2016 00:00:00 +0000</pubDate>
       
       <guid>hadyang.github.io/2016/08/asynctask-source/</guid>
       <description>&lt;p&gt;&lt;code&gt;AsyncTask&lt;/code&gt;是Android平台提供的一个多线程框架，它可以很简单的用于更新UI线程，你可以在后台执行操作，并将操作的结果Push到UI线程。同时你完全不需要去操作线程和Handler。&lt;code&gt;AsyncTask&lt;/code&gt;与Java中的多线程框架不同，它只适合用于短小的任务（最多几秒钟）。为什么会有这样的要求？这就涉及到内存泄漏，后面我们会说。&lt;/p&gt;</description>
@@ -23,7 +23,7 @@
     <item>
       <title>Volley源码解析</title>
       <link>hadyang.github.io/2016/07/android-volley-source/</link>
-      <pubDate>Sat, 23 Jul 2016 22:00:49 +0000</pubDate>
+      <pubDate>Sat, 23 Jul 2016 00:00:00 +0000</pubDate>
       
       <guid>hadyang.github.io/2016/07/android-volley-source/</guid>
       <description>&lt;p&gt;最近复习校招的时候，发现很多公司的面试题都有考Volley，今天我们就来学习学习这个当年在2013年 &lt;code&gt;Google I/O&lt;/code&gt; 大会上发布的Android平台网络通信库。&lt;/p&gt;</description>
@@ -32,7 +32,7 @@
     <item>
       <title>事件分发过程</title>
       <link>hadyang.github.io/2016/06/andorid-touch-event/</link>
-      <pubDate>Sat, 04 Jun 2016 16:56:59 +0000</pubDate>
+      <pubDate>Sat, 04 Jun 2016 00:00:00 +0000</pubDate>
       
       <guid>hadyang.github.io/2016/06/andorid-touch-event/</guid>
       <description>&lt;p&gt;这篇文章我们继续分析Activity的事件分发过程。&lt;/p&gt;</description>
@@ -41,7 +41,7 @@
     <item>
       <title>View的绘制过程</title>
       <link>hadyang.github.io/2016/06/android-view-draw/</link>
-      <pubDate>Wed, 01 Jun 2016 16:47:02 +0000</pubDate>
+      <pubDate>Wed, 01 Jun 2016 00:00:00 +0000</pubDate>
       
       <guid>hadyang.github.io/2016/06/android-view-draw/</guid>
       <description>&lt;p&gt;上次我们分析了Activity的启动过程，我们已经分析到ActivityThread.main函数，接下来两篇文章我们分析Activity的绘制、时间分发过程。以前，Activity的绘制在我的印象中就measure、lyaout、draw三个过程，对于这三个过程具体的调用过程和细节知之甚少，下面我们就来分析一下Activity的绘制过程。&lt;/p&gt;</description>
@@ -50,7 +50,7 @@
     <item>
       <title>Activity启动过程</title>
       <link>hadyang.github.io/2016/05/activity-startup/</link>
-      <pubDate>Sat, 28 May 2016 14:27:13 +0000</pubDate>
+      <pubDate>Sat, 28 May 2016 00:00:00 +0000</pubDate>
       
       <guid>hadyang.github.io/2016/05/activity-startup/</guid>
       <description>&lt;p&gt;我们进行Android开发的时候，第一个例子就接触过&lt;code&gt;startActivity&lt;/code&gt;这个函数，已经使用了很长时间了。今天我们就来看看Activity的启动到底是怎么回事。&lt;/p&gt;
@@ -61,7 +61,7 @@
     <item>
       <title>启动Launcher</title>
       <link>hadyang.github.io/2016/05/android-launcher-startup/</link>
-      <pubDate>Fri, 27 May 2016 12:14:44 +0000</pubDate>
+      <pubDate>Fri, 27 May 2016 00:00:00 +0000</pubDate>
       
       <guid>hadyang.github.io/2016/05/android-launcher-startup/</guid>
       <description>&lt;p&gt;在上一篇文章《Android系统开机过程分析》中，我们分析了从init进程到系统服务启动的整个过程，虽然写的很简单（很多东西了解的不是很全面，后面会慢慢修改），但是整个启动过程还是很复杂，涉及的东西很多。今天我们来分析一下Android系统中用户第一个看见的App&amp;ndash;Launcher的启动过程。&lt;/p&gt;</description>
@@ -70,7 +70,7 @@
     <item>
       <title>Android系统开机过程分析</title>
       <link>hadyang.github.io/2016/05/android-system-startup/</link>
-      <pubDate>Wed, 25 May 2016 18:43:53 +0000</pubDate>
+      <pubDate>Wed, 25 May 2016 00:00:00 +0000</pubDate>
       
       <guid>hadyang.github.io/2016/05/android-system-startup/</guid>
       <description>&lt;p&gt;当我们开机时，首先是启动Linux内核，在Linux内核中首先启动的是init进程，这个进程会去读取配置文件system\core\rootdir\init.rc配置文件，这个文件中配置了Android系统中第一个进程Zygote进程。Android中其他所有进程都是通过fork Zygote进程得来的。&lt;/p&gt;</description>
@@ -79,7 +79,7 @@
     <item>
       <title>Android Studio NDK 入门教程</title>
       <link>hadyang.github.io/2016/03/android-studio-ndk/</link>
-      <pubDate>Mon, 07 Mar 2016 11:02:53 +0000</pubDate>
+      <pubDate>Mon, 07 Mar 2016 00:00:00 +0000</pubDate>
       
       <guid>hadyang.github.io/2016/03/android-studio-ndk/</guid>
       <description>&lt;p&gt;通常我们使用Java来编写Android App，但是在一些特殊场景，比如图像处理方面，Java的效率太低。这时候我们就可以考虑使用C进行开发。NDK是Google为我们提供的一个在Android上使用C开发的工具集合。&lt;/p&gt;</description>
@@ -88,7 +88,7 @@
     <item>
       <title>仿Google相册的侧滑栏效果--DrawerLayout</title>
       <link>hadyang.github.io/2015/06/android-drawerlayout/</link>
-      <pubDate>Wed, 17 Jun 2015 19:36:21 +0000</pubDate>
+      <pubDate>Wed, 17 Jun 2015 00:00:00 +0000</pubDate>
       
       <guid>hadyang.github.io/2015/06/android-drawerlayout/</guid>
       <description>&lt;p&gt;最近在网上看到谷歌自家的相册应用（Google Photos），它的侧滑栏很吸引我，于是在google了很久之后，终于完成，和大家分享分享。&lt;/p&gt;</description>

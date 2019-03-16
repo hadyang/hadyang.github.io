@@ -6,7 +6,7 @@
     <description>Recent content in 序列化 on HadYang</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>zh-CN</language>
-    <lastBuildDate>Wed, 29 Jun 2016 22:02:58 +0000</lastBuildDate>
+    <lastBuildDate>Wed, 29 Jun 2016 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="hadyang.github.io/tags/%E5%BA%8F%E5%88%97%E5%8C%96/index.xml" rel="self" type="application/rss+xml" />
     
@@ -14,7 +14,7 @@
     <item>
       <title>FlatBuffer初体验</title>
       <link>hadyang.github.io/2016/06/flatbuffer-first/</link>
-      <pubDate>Wed, 29 Jun 2016 22:02:58 +0000</pubDate>
+      <pubDate>Wed, 29 Jun 2016 00:00:00 +0000</pubDate>
       
       <guid>hadyang.github.io/2016/06/flatbuffer-first/</guid>
       <description>&lt;p&gt;&lt;code&gt;FlatBuffer&lt;/code&gt;是一个跨平台的序列化库，可以在C++,C#, C, Go, Java, JavaScript, PHP, Python语言中使用，最初这个库是Google为游戏开发中所使用，其源代码地址在&lt;a href=&#34;http://github.com/google/flatbuffers&#34;&gt;Github&lt;/a&gt;。FlatBuffer提供了详细的使用文档，可以参考&lt;a href=&#34;http://google.github.io/flatbuffers/index.html&#34;&gt;Google.github.io&lt;/a&gt;主页上的教程。&lt;/p&gt;</description>

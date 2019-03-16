@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+
+  <meta charset="utf-8" />
+
+  
+  <title>手写Socks5通信</title>
+
+  
+  
+  <link href="//cdn.jsdelivr.net" rel="dns-prefetch">
+  <link href="//cdnjs.cloudflare.com" rel="dns-prefetch">
+  <link href="//at.alicdn.com" rel="dns-prefetch">
+  <link href="//fonts.googleapis.com" rel="dns-prefetch">
+  <link href="//fonts.gstatic.com" rel="dns-prefetch">
+  
+  
+  
+  
+  
+
+  
+
+  
+  
+  <meta name="description" content="Socks 协议本身是基于 TCP 的协议，位于应用层与传输层之间的会话层，将应用层的数据透明的传输到 TCP 层。更详细的介绍参见 SOCKS - 维基百科，自由的百科全书
+">
+
+  
+  
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:site" content="@gohugoio">
+    <meta name="twitter:title" content="手写Socks5通信">
+    <meta name="twitter:description" content="Socks 协议本身是基于 TCP 的协议，位于应用层与传输层之间的会话层，将应用层的数据透明的传输到 TCP 层。更详细的介绍参见 SOCKS - 维基百科，自由的百科全书
+">
+    <meta name="twitter:image" content="/hadyang.github.io/images/avatar.png">
+  
+
+  
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="手写Socks5通信">
+  <meta property="og:description" content="Socks 协议本身是基于 TCP 的协议，位于应用层与传输层之间的会话层，将应用层的数据透明的传输到 TCP 层。更详细的介绍参见 SOCKS - 维基百科，自由的百科全书
+">
+  <meta property="og:url" content="hadyang.github.io/2019/03/socks-proxy/">
+  <meta property="og:image" content="/hadyang.github.io/images/avatar.png">
+
+
+
+
+<meta name="generator" content="Hugo 0.54.0">
+
+
+<link rel="canonical" href="hadyang.github.io/2019/03/socks-proxy/">
+
+<meta name="renderer" content="webkit">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="format-detection" content="telephone=no,email=no,adress=no">
+<meta http-equiv="Cache-Control" content="no-transform">
+
+
+<meta name="robots" content="index,follow">
+<meta name="referrer" content="origin-when-cross-origin">
+
+
+
+
+
+
+
+<meta name="theme-color" content="#02b875">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="HadYang">
+<meta name="msapplication-tooltip" content="HadYang">
+<meta name='msapplication-navbutton-color' content="#02b875">
+<meta name="msapplication-TileColor" content="#02b875">
+<meta name="msapplication-TileImage" content="/hadyang.github.io/icons/icon-144x144.png">
+<link rel="icon" href="/hadyang.github.io/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="/hadyang.github.io/icons/icon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/hadyang.github.io/icons/icon-32x32.png">
+<link rel="icon" sizes="192x192" href="/hadyang.github.io/icons/icon-192x192.png">
+<link rel="apple-touch-icon" href="/hadyang.github.io/icons/icon-152x152.png">
+<link rel="manifest" href="/hadyang.github.io/manifest.json">
+
+
+<link rel="preload" href="/hadyang.github.io/styles/main.min.css" as="style">
+
+<link rel="preload" href="https://fonts.googleapis.com/css?family=Lobster" as="style">
+<link rel="preload" href="/hadyang.github.io/images/avatar.png" as="image">
+<link rel="preload" href="/hadyang.github.io/images/grey-prism.svg" as="image">
+
+
+<style>
+  body {
+    background: rgb(244, 243, 241) url('/hadyang.github.io/images/grey-prism.svg') repeat fixed;
+  }
+</style>
+<link rel="stylesheet" href="/hadyang.github.io/styles/main.min.css">
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lobster">
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/medium-zoom@1.0.2/dist/medium-zoom.min.js"></script>
+
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/video.js@7.3.0/dist/video-js.min.css">
+
+
+
+  
+  
+<!--[if lte IE 8]>
+  <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/videojs-ie8@1.1.2/dist/videojs-ie8.min.js"></script>
+<![endif]-->
+
+<!--[if lte IE 9]>
+  <script src="https://cdn.jsdelivr.net/npm/eligrey-classlist-js-polyfill@1.2.20180112/classList.min.js"></script>
+<![endif]-->
+
+
+</head>
+  <body>
+    
+    <div class="suspension">
+      <a role="button" aria-label="Go to top" title="Go to top" class="to-top is-hide"><span class="icon icon-up" aria-hidden="true"></span></a>
+      
+        
+      
+    </div>
+    
+    
+  <header class="site-header">
+  <img class="avatar" src="/hadyang.github.io/images/avatar.png" alt="Avatar">
+  
+  <h2 class="title">HadYang</h2>
+  
+  <p class="subtitle"></p>
+  <button class="menu-toggle" type="button" aria-label="Main Menu" aria-expanded="false" tab-index="0">
+    <span class="icon icon-menu" aria-hidden="true"></span>
+  </button>
+
+  <nav class="site-menu collapsed">
+    <h2 class="offscreen">Main Menu</h2>
+    <ul class="menu-list">
+      
+      
+      
+      
+        <li class="menu-item
+          
+          
+           is-active">
+          <a href="hadyang.github.io/">Home</a>
+        </li>
+      
+        <li class="menu-item
+          
+          
+          ">
+          <a href="hadyang.github.io/tags/">Tags</a>
+        </li>
+      
+        <li class="menu-item
+          
+          
+          ">
+          <a href="hadyang.github.io/categories/">Categories</a>
+        </li>
+      
+    </ul>
+  </nav>
+  <nav class="social-menu collapsed">
+    <h2 class="offscreen">Social Networks</h2>
+    <ul class="social-list"><li class="social-item">
+          <a href="mailto:shihaoyang129@gmail.com" title="Email" aria-label="Email">
+            <span class="icon icon-email" aria-hidden="true"></span>
+          </a>
+        </li><li class="social-item">
+          <a href="//github.com/hadyang" title="GitHub" aria-label="GitHub">
+            <span class="icon icon-github" aria-hidden="true"></span>
+          </a>
+        </li></ul>
+  </nav>
+</header>
+
+  <section class="main post-detail">
+    <header class="post-header">
+      <h1 class="post-title">手写Socks5通信</h1>
+      <p class="post-meta">@ · Mar 16, 2019 · 3 min read</p>
+    </header>
+    <article class="post-content"><p>Socks 协议本身是基于 TCP 的协议，位于应用层与传输层之间的会话层，将应用层的数据透明的传输到 TCP 层。更详细的介绍参见 <a href="https://zh.wikipedia.org/wiki/SOCKS">SOCKS - 维基百科，自由的百科全书</a></p>
+
+<h2 id="socks5协议">Socks5协议</h2>
+
+<p>Socks5 协议在进行代理通信时，首先需要进行连接、认证等步骤。</p>
+
+<ul>
+<li>协商：主要是 Client 端请求代理服务对认证方式进行协商</li>
+<li>认证：如果第一步确认需要进行认证，则发送对应密钥进行认证</li>
+<li>连接：通过代理连接目标网站</li>
+<li>通信：进行 Http 等应用层通信，与原始 TCP 通信一致</li>
+</ul>
+
+<p>下面就每一步进行编码。</p>
+
+<h2 id="协商">协商</h2>
+
+<p>在协商阶段请求格式为：</p>
+
+<pre><code>+--------------------------------+
+|   VER    | NMETHODS |  METHODS |
+|----------|----------|----------|
+|    1     |     1    |     1    |
++--------------------------------+
+</code></pre>
+
+<ul>
+<li>MehotdsVER：是SOCKS版本，这里应该是0x05；</li>
+<li>NMETHODS：是METHODS部分的长度；</li>
+<li>METHODS：是客户端支持的认证方式列表，每个方法占1字节。当前的定义是：
+
+<ul>
+<li>0x00 不需要认证</li>
+<li>0x01 GSSAPI</li>
+<li>0x02 用户名、密码认证</li>
+<li>0x03 - 0x7F由IANA分配（保留）</li>
+<li>0x80 - 0xFE为私人方法保留</li>
+<li>0xFF 无可接受的方法</li>
+</ul></li>
+</ul>
+
+<pre><code>buffer.put((byte) 5);
+buffer.put((byte) 1);
+buffer.put((byte) 0);
+</code></pre>
+
+<blockquote>
+<p>我自己的代理本身没有认证，所以最后一个字段为 <code>0</code></p>
+</blockquote>
+
+<p>代理返回的结果：</p>
+
+<pre><code>+---------------------+
+|   VER    | NMETHODS |
+|----------|----------|
+|    1     |     1    |
++---------------------+
+</code></pre>
+
+<ul>
+<li>VER：是SOCKS版本，这里应该是0x05；</li>
+<li>METHOD：是服务端选中的方法。如果返回0xFF表示没有一个认证方法被选中，客户端需要关闭连接。</li>
+</ul>
+
+<h2 id="认证">认证</h2>
+
+<p>请求格式：</p>
+
+<pre><code>+----------+----------+----------+----------+----------+
+|   VER    |   NLEN   |   NAME   |   PLEN   |    PW    |
++------------------------------------------------------+
+|    1     |     1    |   VAR    |     1    |    VAR   |
++----------+----------+----------+----------+----------+
+
+</code></pre>
+
+<p>代理响应结果：</p>
+
+<pre><code>+---------------------+
+|   VER    |  STATES  |
+|----------|----------|
+|    1     |     1    |
++---------------------+
+</code></pre>
+
+<blockquote>
+<p>其中STATES 0x00 表示成功，0x01 表示失败</p>
+</blockquote>
+
+<h2 id="连接">连接</h2>
+
+<p>连接请求格式如下：</p>
+
+<pre><code>+----------+----------+----------+----------+----------+----------+
+|   VER    |   CMD    |    RSV   |   ATYP   | DST.ADDR | DST.PORT |
++-----------------------------------------------------------------+
+|    1     |     1    |   0X00   |     1    |    VAR   |    2   |
++----------+----------+----------+----------+----------+----------+
+</code></pre>
+
+<ul>
+<li>VER：SOCKS版本，这里应该是0x05；</li>
+<li>CMD：SOCK的命令码
+
+<ul>
+<li>0x01：表示CONNECT请求</li>
+<li>0x02：表示BIND请求</li>
+<li>0x03：表示UDP转发</li>
+</ul></li>
+<li>RSV：0x00，保留</li>
+<li>ATYP：DST.ADDR类型
+
+<ul>
+<li>0x01：IPv4地址，DST.ADDR部分4字节长度</li>
+<li>0x03：域名，DST.ADDR部分第一个字节为域名长度，DST.ADDR剩余的内容为域名，没有\0结尾。</li>
+<li>0x04：IPv6地址，16个字节长度。</li>
+</ul></li>
+<li>DST.ADDR：目的地址</li>
+<li>DST.PORT：网络字节序表示的目的端口</li>
+</ul>
+
+<p>代码如下：</p>
+
+<pre><code>buffer.put((byte) 5);
+buffer.put((byte) 1);
+buffer.put((byte) 0);
+buffer.put((byte) 3);
+//BND.ADDR
+buffer.put((byte) toHex(HTTP_HOST.length())); //HTTP 域名
+buffer.put(HTTP_HOST.getBytes());
+//BND.PORT
+buffer.put((byte) 0);
+buffer.put((byte) toHex(80));
+</code></pre>
+
+<p>代理响应结果如下：</p>
+
+<pre><code>+----------+----------+----------+----------+----------+----------+
+|   VER    |   CMD    |    RSV   |   ATYP   | BND.ADDR | BND.PORT |
++-----------------------------------------------------------------+
+|    1     |     1    |   0X00   |     1    |    VAR   |     2    |
++----------+----------+----------+----------+----------+----------+
+</code></pre>
+
+<h2 id="通信">通信</h2>
+
+<p>在通过代理建立远程连接之后，直接可以通过该链路进行通信，这里选用 HTTP 进行简单的 GET 请求。完整代码如下：</p>
+
+<pre><code># Socks 代理 &amp; Http
+
+```java
+public class Main {
+    private static final ByteBuffer buffer = ByteBuffer.allocate(1024);
+
+    private static final AtomicInteger step = new AtomicInteger(0);
+    public static final String HTTP_HOST = &quot;www.baidu.com&quot;;
+
+    public static void main(String[] args) throws Exception {
+        Selector selector = Selector.open();
+
+        SocketChannel channel = SocketChannel.open();
+        channel.socket().connect(new InetSocketAddress(&quot;127.0.0.1&quot;, 1086));
+        System.out.println(&quot;与代理建立连接&quot;);
+
+        channel.configureBlocking(false);
+        channel.register(selector, SelectionKey.OP_READ | SelectionKey.OP_WRITE);
+
+        while (channel.isConnected()) {
+            TimeUnit.MILLISECONDS.sleep(100);
+            if (selector.select() == 0) {
+                continue;
+            }
+
+            Set&lt;SelectionKey&gt; selectionKeys = selector.selectedKeys();
+            for (SelectionKey selectionKey : selectionKeys) {
+                if (selectionKey.isWritable()) {
+                    onWritable(selectionKey);
+                } else if (selectionKey.isReadable()) {
+                    onReadable(selectionKey);
+                }
+            }
+        }
+    }
+
+    private static void onWritable(SelectionKey selectionKey) {
+        SocketChannel channel = (SocketChannel) selectionKey.channel();
+        try {
+            synchronized (buffer) {
+                buffer.clear();
+
+                switch (step.get()) {
+                    case 0:
+                        buffer.put((byte) 5);
+                        buffer.put((byte) 1);
+                        buffer.put((byte) 0);
+                        break;
+                    case 1:
+                        buffer.put((byte) 5);
+                        buffer.put((byte) 1);
+                        buffer.put((byte) 0);
+                        buffer.put((byte) 3);
+                        
+                        buffer.put((byte) toHex(HTTP_HOST.length()));
+                        buffer.put(HTTP_HOST.getBytes());
+                        
+                        buffer.put((byte) 0);
+                        buffer.put((byte) toHex(80));
+                        break;
+                    case 2:
+                        String httpGet = &quot;GET / HTTP/1.1\r\n&quot; +
+                                &quot;host: &quot; + HTTP_HOST + &quot;\r\n&quot; +
+                                &quot;User-Agent: curl/7.54.0\r\n&quot; +
+                                &quot;Accept: */*\r\n&quot; +
+                                &quot;\r\n&quot;;
+
+                        buffer.put(httpGet.getBytes());
+                        break;
+                    case 3:
+                        return;
+                }
+                System.out.println(&quot;step:&quot; + step.get() + &quot;, write:&quot; + Arrays.toString(Arrays.copyOf(buffer.array(), buffer.position())));
+
+                buffer.flip();
+                channel.write(buffer);
+                buffer.compact();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    static int toHex(int source) {
+        String hexString = Integer.toHexString(source);
+
+        return Integer.parseInt(hexString, 16);
+    }
+
+    private static void onReadable(SelectionKey selectionKey) {
+        SocketChannel channel = (SocketChannel) selectionKey.channel();
+        try {
+            synchronized (buffer) {
+                buffer.clear();
+                channel.read(buffer);
+                byte[] res = Arrays.copyOf(buffer.array(), buffer.position());
+                System.out.println(&quot;step:&quot; + step.get() + &quot;, rec:&quot; + Arrays.toString(res));
+
+                switch (step.get()) {
+                    case 0:
+                        if (res[1] == 0) {
+                            step.incrementAndGet();
+                        }
+                        break;
+                    case 1:
+                        if (res[1] == 0) {
+                            step.incrementAndGet();
+                        }
+                        break;
+                    case 2:
+                        System.out.println(&quot;httpResponse:&quot; + new String(res, Charset.forName(&quot;UTF-8&quot;)));
+                        step.incrementAndGet();
+                        break;
+                }
+
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+}
+</code></pre></article>
+    <footer class="post-footer">
+      
+      <ul class="post-tags">
+        
+          <li><a href="/tags/tcp"><span class="tag">Tcp</span></a></li>
+        
+          <li><a href="/tags/socks"><span class="tag">Socks</span></a></li>
+        
+          <li><a href="/tags/proxy"><span class="tag">Proxy</span></a></li>
+        
+      </ul>
+      
+      <p class="post-copyright">
+        
+      </p>
+    </footer>
+    
+      
+    
+  </section>
+  
+<footer class="site-footer">
+  <p>© 2017-2019 HadYang</p>
+  <p>Powered by <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> with theme <a href="https://github.com/laozhu/hugo-nuo" target="_blank" rel="noopener">Nuo</a>.</p>
+  
+</footer>
+
+
+<script src="https://cdn.jsdelivr.net/npm/smooth-scroll@15.0.0/dist/smooth-scroll.min.js"></script>
+
+
+
+<script async src="https://cdn.jsdelivr.net/npm/video.js@7.3.0/dist/video.min.js"></script>
+
+
+
+
+<script async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+      inlineMath: [['$','$'], ['\\(','\\)']],
+      displayMath: [['$$','$$'], ['\\[','\\]']],
+      processEscapes: true,
+      processEnvironments: true,
+      skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+      TeX: { equationNumbers: { autoNumber: "AMS" },
+      extensions: ["AMSmath.js", "AMSsymbols.js"] }
+    },
+  });
+</script>
+<script type="text/x-mathjax-config">
+  // Fix <code> tags after MathJax finishes running. This is a
+  // hack to overcome a shortcoming of Markdown. Discussion at
+  // https://github.com/mojombo/jekyll/issues/199
+  MathJax.Hub.Queue(() => {
+    MathJax.Hub.getAllJax().map(v => v.SourceElement().parentNode.className += ' has-jax');
+  });
+</script>
+
+
+
+<script src="/hadyang.github.io/scripts/index.min.js"></script>
+
+<script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('\/hadyang.github.io\/service-worker.js').then(function() {
+      console.log('[ServiceWorker] Registered');
+    });
+  }
+</script>
+
+
+
+
+
+
+
+
+  </body>
+</html>
