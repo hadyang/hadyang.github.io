@@ -344,126 +344,129 @@ buffer.put((byte) toHex(80));
 
 <pre><code># Socks 代理 &amp; Http
 
-```java
-public class Main {
-    private static final ByteBuffer buffer = ByteBuffer.allocate(1024);
+</code></pre>
 
-    private static final AtomicInteger step = new AtomicInteger(0);
-    public static final String HTTP_HOST = &quot;www.baidu.com&quot;;
+<p>public class Main {
+    private static final ByteBuffer buffer = ByteBuffer.allocate(1024);</p>
 
-    public static void main(String[] args) throws Exception {
-        Selector selector = Selector.open();
+<pre><code>private static final AtomicInteger step = new AtomicInteger(0);
+public static final String HTTP_HOST = &quot;www.baidu.com&quot;;
 
-        SocketChannel channel = SocketChannel.open();
-        channel.socket().connect(new InetSocketAddress(&quot;127.0.0.1&quot;, 1086));
-        System.out.println(&quot;与代理建立连接&quot;);
+public static void main(String[] args) throws Exception {
+    Selector selector = Selector.open();
 
-        channel.configureBlocking(false);
-        channel.register(selector, SelectionKey.OP_READ | SelectionKey.OP_WRITE);
+    SocketChannel channel = SocketChannel.open();
+    channel.socket().connect(new InetSocketAddress(&quot;127.0.0.1&quot;, 1086));
+    System.out.println(&quot;与代理建立连接&quot;);
 
-        while (channel.isConnected()) {
-            TimeUnit.MILLISECONDS.sleep(100);
-            if (selector.select() == 0) {
-                continue;
-            }
+    channel.configureBlocking(false);
+    channel.register(selector, SelectionKey.OP_READ | SelectionKey.OP_WRITE);
 
-            Set&lt;SelectionKey&gt; selectionKeys = selector.selectedKeys();
-            for (SelectionKey selectionKey : selectionKeys) {
-                if (selectionKey.isWritable()) {
-                    onWritable(selectionKey);
-                } else if (selectionKey.isReadable()) {
-                    onReadable(selectionKey);
-                }
-            }
+    while (channel.isConnected()) {
+        TimeUnit.MILLISECONDS.sleep(100);
+        if (selector.select() == 0) {
+            continue;
         }
-    }
 
-    private static void onWritable(SelectionKey selectionKey) {
-        SocketChannel channel = (SocketChannel) selectionKey.channel();
-        try {
-            synchronized (buffer) {
-                buffer.clear();
-
-                switch (step.get()) {
-                    case 0:
-                        buffer.put((byte) 5);
-                        buffer.put((byte) 1);
-                        buffer.put((byte) 0);
-                        break;
-                    case 1:
-                        buffer.put((byte) 5);
-                        buffer.put((byte) 1);
-                        buffer.put((byte) 0);
-                        buffer.put((byte) 3);
-                        
-                        buffer.put((byte) toHex(HTTP_HOST.length()));
-                        buffer.put(HTTP_HOST.getBytes());
-                        
-                        buffer.put((byte) 0);
-                        buffer.put((byte) toHex(80));
-                        break;
-                    case 2:
-                        String httpGet = &quot;GET / HTTP/1.1\r\n&quot; +
-                                &quot;host: &quot; + HTTP_HOST + &quot;\r\n&quot; +
-                                &quot;User-Agent: curl/7.54.0\r\n&quot; +
-                                &quot;Accept: */*\r\n&quot; +
-                                &quot;\r\n&quot;;
-
-                        buffer.put(httpGet.getBytes());
-                        break;
-                    case 3:
-                        return;
-                }
-                System.out.println(&quot;step:&quot; + step.get() + &quot;, write:&quot; + Arrays.toString(Arrays.copyOf(buffer.array(), buffer.position())));
-
-                buffer.flip();
-                channel.write(buffer);
-                buffer.compact();
+        Set&lt;SelectionKey&gt; selectionKeys = selector.selectedKeys();
+        for (SelectionKey selectionKey : selectionKeys) {
+            if (selectionKey.isWritable()) {
+                onWritable(selectionKey);
+            } else if (selectionKey.isReadable()) {
+                onReadable(selectionKey);
             }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    static int toHex(int source) {
-        String hexString = Integer.toHexString(source);
-
-        return Integer.parseInt(hexString, 16);
-    }
-
-    private static void onReadable(SelectionKey selectionKey) {
-        SocketChannel channel = (SocketChannel) selectionKey.channel();
-        try {
-            synchronized (buffer) {
-                buffer.clear();
-                channel.read(buffer);
-                byte[] res = Arrays.copyOf(buffer.array(), buffer.position());
-                System.out.println(&quot;step:&quot; + step.get() + &quot;, rec:&quot; + Arrays.toString(res));
-
-                switch (step.get()) {
-                    case 0:
-                        if (res[1] == 0) {
-                            step.incrementAndGet();
-                        }
-                        break;
-                    case 1:
-                        if (res[1] == 0) {
-                            step.incrementAndGet();
-                        }
-                        break;
-                    case 2:
-                        System.out.println(&quot;httpResponse:&quot; + new String(res, Charset.forName(&quot;UTF-8&quot;)));
-                        step.incrementAndGet();
-                        break;
-                }
-
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
         }
     }
 }
-</code></pre></article>
+
+private static void onWritable(SelectionKey selectionKey) {
+    SocketChannel channel = (SocketChannel) selectionKey.channel();
+    try {
+        synchronized (buffer) {
+            buffer.clear();
+
+            switch (step.get()) {
+                case 0:
+                    buffer.put((byte) 5);
+                    buffer.put((byte) 1);
+                    buffer.put((byte) 0);
+                    break;
+                case 1:
+                    buffer.put((byte) 5);
+                    buffer.put((byte) 1);
+                    buffer.put((byte) 0);
+                    buffer.put((byte) 3);
+
+                    buffer.put((byte) toHex(HTTP_HOST.length()));
+                    buffer.put(HTTP_HOST.getBytes());
+
+                    buffer.put((byte) 0);
+                    buffer.put((byte) toHex(80));
+                    break;
+                case 2:
+                    String httpGet = &quot;GET / HTTP/1.1\r\n&quot; +
+                            &quot;host: &quot; + HTTP_HOST + &quot;\r\n&quot; +
+                            &quot;User-Agent: curl/7.54.0\r\n&quot; +
+                            &quot;Accept: */*\r\n&quot; +
+                            &quot;\r\n&quot;;
+
+                    buffer.put(httpGet.getBytes());
+                    break;
+                case 3:
+                    return;
+            }
+            System.out.println(&quot;step:&quot; + step.get() + &quot;, write:&quot; + Arrays.toString(Arrays.copyOf(buffer.array(), buffer.position())));
+
+            buffer.flip();
+            channel.write(buffer);
+            buffer.compact();
+        }
+    } catch (IOException e) {
+        e.printStackTrace();
+    }
+}
+
+static int toHex(int source) {
+    String hexString = Integer.toHexString(source);
+
+    return Integer.parseInt(hexString, 16);
+}
+
+private static void onReadable(SelectionKey selectionKey) {
+    SocketChannel channel = (SocketChannel) selectionKey.channel();
+    try {
+        synchronized (buffer) {
+            buffer.clear();
+            channel.read(buffer);
+            byte[] res = Arrays.copyOf(buffer.array(), buffer.position());
+            System.out.println(&quot;step:&quot; + step.get() + &quot;, rec:&quot; + Arrays.toString(res));
+
+            switch (step.get()) {
+                case 0:
+                    if (res[1] == 0) {
+                        step.incrementAndGet();
+                    }
+                    break;
+                case 1:
+                    if (res[1] == 0) {
+                        step.incrementAndGet();
+                    }
+                    break;
+                case 2:
+                    System.out.println(&quot;httpResponse:&quot; + new String(res, Charset.forName(&quot;UTF-8&quot;)));
+                    step.incrementAndGet();
+                    break;
+            }
+
+        }
+    } catch (IOException e) {
+        e.printStackTrace();
+    }
+}
+</code></pre>
+
+<p>}
+```</p></article>
     <footer class="post-footer">
       
       <ul class="post-tags">
