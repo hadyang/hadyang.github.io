@@ -1,0 +1,30 @@
+baseURL: hadyang.github.io
+languageCode: zh-CN
+title: HadYang
+theme: hugo-nuo
+publishDir: /Users/hadyang/Documents/Blog
+
+permalinks:
+  posts: /:year/:month/:filename/
+
+menu:
+  main:
+    - 
+     name: Home
+     weight: 10
+     identifier: home
+     url: "/"
+    - 
+     name: Tags
+     weight: 20
+     identifier: tags
+     url: "/tags/"
+    - 
+     name: Categories
+     weight: 40
+     identifier: categories
+     url: "/categories/"
+
+params:
+ email: shihaoyang129@gmail.com
+ github: hadyang
