@@ -1,0 +1,33 @@
+language: go
+go:
+  - 1.x
+
+notifications:
+  email:
+    recipients:
+      - shihaoyang129@gmail.com # 设置通知邮件
+    on_success: change
+    on_failure: always
+
+addons:
+  snaps:
+  - hugo
+
+script:
+  - gitbook build
+
+after_script:
+  - cd _public
+  - git init
+  - git remote add origin https://$REF
+  - git add .
+  - git commit -m "Updated By Travis-CI With Build $TRAVIS_BUILD_NUMBER For Github Pages"
+  - git push --force --quiet "https://$TOKEN@$REF" master:master
+
+branches:
+  only:
+    - master
+
+env:
+  global:
+    - REF=github.com/hadyang/hadyang.github.io.git # 设置 github 地址
