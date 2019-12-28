@@ -9,21 +9,21 @@ permalinks:
 
 menu:
   main:
-    - 
+    -
      name: Home
      weight: 10
      identifier: home
-     url: "/"
-    - 
+     url: "https://hadyang.github.io/"
+    -
      name: Tags
      weight: 20
      identifier: tags
-     url: "/tags/"
-    - 
+     url: "https://hadyang.github.io/tags/"
+    -
      name: Categories
      weight: 40
      identifier: categories
-     url: "/categories/"
+     url: "https://hadyang.github.io/categories/"
 
 params:
  email: shihaoyang129@gmail.com
