@@ -1,59 +1,59 @@
 ---
-title: 【分布式系统】数据复制
-date: 2020-05-27
-draft: true
+title: 什么是复制？
+date: 2020-06-14
+draft: false
 categories: 
     - What is this
 ---
 
-# 数据复制
+复制分为 **计算复制** 和 **数据复制**，不论是计算复制还是数据复制，都是为系统提供更好的可用性、可靠性以及吞吐量。计算复制就是我们常用的集群部署方式，将服务部署在集群中，并通过 Nginx 等中间件提供 *负载均衡*，将计算能力复制到多个节点。
 
-## 目的
+![](assists/calculate_replication.png)
 
-**复制** 在计算机领域，涉及多个冗余节点的数据共享，以提升分布式系统的可靠性、容错性（ fault-tolerance）以及可用性。
-
-用户访问一个复制系统应与访问单一非复制系统有同样的表现，即复制系统保证数据的一致性、持久性。在单个节点访问失败的情况下，复制系统应能进行有效的故障转移（Failover），并且用户无感知。在复制方式上，有两种方式：
-
-- **主动复制**：在复制系统中，将用户写操作在每个节点执行
-- **被动复制**：在复制系统中，选择某个节点执行用户写操作，并将操作结果同步到其他节点
-
-当复制系统中，通过单一节点来执行所有请求，这个系统被称之为 master-slave 架构，这种架构在高可用集群中占主导地位。相对的，如果集群中所有节点均可执行请求，并分发新状态，则称之为 multi-master 架构。在多主架构中，响应的并发控制就少不了
-
-Load balancing differs from task replication, since it distributes a load of different computations across machines, and allows a single computation to be dropped in case of failure. Load balancing, however, sometimes uses data replication (especially multi-master replication) internally, to distribute its data among machines.
-
-负载均衡与任务复制
-
-Backup differs from replication in that the saved copy of data remains unchanged for a long period of time.[3] Replicas, on the other hand, undergo frequent updates and quickly lose any historical state. Replication is one of the oldest and most important topics in the overall area of distributed systems.
+上图中 a 就是一个单点计算系统，所有用户请求均在单个服务器上执行。图 b 将计算能里复制到多个节点，形成服务集群，并通过负载均衡服务器（LB）对请求进行反向代理。在实际的系统中，在 LB 可能不止一层。
 
 
+数据复制就是将数据复制到多个节点，形成冗余数据。典型的单节点数据系统如下图，服务器所有数据均在一个节点。在这种结构中，数据是不安全的，同时服务的可用性也有风险。
 
-Data replication and computation replication both require processes to handle incoming events. Processes for data replication are passive and operate only to maintain the stored data, reply to read requests and apply updates. Computation replication is usually performed to provide fault-tolerance, and take over an operation if one component fails. In both cases, the underlying needs are to ensure that the replicas see the same events in equivalent orders, so that they stay in consistent states and any replica can respond to queries.
+![](assists/data_replication_signle.png)
 
-## 复制模型
-
-### 事务复制
-
-事务复制的原理是先将发布服务器数据库中的初始快照发送到各订阅服务器,然后监控发布服务器数据库中数据发生的变化,捕获个别数据变化的事务并将变化的数据发送到订阅服务器。为了保证变化的数据能准确而及时的发送到订阅服务器上,发布服务器和订阅服务器之间的网络连接必须是可靠且连续的。
-
-基于日志的复制
-
-### 状态机复制
-
-assumes that the replicated process is a deterministic finite automaton and that atomic broadcast of every event is possible. It is based on distributed consensus and has a great deal in common with the transactional replication model. This is sometimes mistakenly used as a synonym of active replication. State machine replication is usually implemented by a replicated log consisting of multiple subsequent rounds of the Paxos algorithm. This was popularized by Google's Chubby system, and is the core behind the open-source Keyspace data store.[4][5]
+数据复制的类型可以从不同方面划分几种，首先从 **可写** 节点的个数，分为 **主从复制** 、**多主复制** 以及 很少见的 **无主复制**。通过节点复制时的通信方式分为 **同步复制**、**异步复制**和 **半同步复制**。
 
 
-复制过程是确定性的有限自动机，并且可以对每个事件进行原子广播（全序广播）。
+## 主从复制
 
-它基于分布式共识，并且与事务复制模型有很多共同点。
+在主从复制结构中，集群只有一个可写节点（Master），其他节点（Slave）从 Master 进行数据复制，下图展示了一种主从复制的结构。Master 可以接受读写请求，Slave 根据需要可以接受读请求，或者不接受请求，完全作为数据备份使用。
 
-有时会误将其用作主动复制的同义词。状态机复制通常由包含多个Paxos算法回合的复制日志来实现。
+![](assists/master-slave-replication.png)
 
-https://en.wikipedia.org/wiki/Atomic_broadcast
+图中，Master 与 Slave1 是 **同步复制**，同步复制即用户在写 Master 时，Master 同步将请求转发到 Slave1，当 Slave1 完成写请求返回，才返回用户本次写请求成功。可以看到，同步复制实际会增加用户写操作的耗时，降低系统吞吐量。但是同步复制的好处就是能保证数据的一致性和安全性，在 Master 节点失效后，Slave1 能被当作新的 Master‘，并且无数据丢失。
 
-https://en.wikipedia.org/wiki/State_machine_replication
+Master 与 Slave2 是 **异步复制** ，异步复制不需要与用户请求同步进行，其优点就是不会增加用户写操作耗时，但缺点就是主从节点会有数据延迟，延迟的时间与系统负载、网络情况都有关。并且，当主节点失效时，若从节点未能即使将主节点数据复制，则会丢失部分数据。
+
+根据不同复制方式的组合，有 **全同步复制**、 **半同步复制** 和 **异步复制**，采用何种复制方式，主要是在可用性和可靠性之间的平衡。上图就是一种半同步复制，在保证数据的安全性的同时，尽量减少对系统吞吐量的影响。
+
+## 多主复制
+
+多主复制即系统中有多个节点可接受写请求，并且主节点之间也要进行数据复制。在多主复制的系统中，最重要的是解决 **数据冲突** 和 **循环复制** 的问题。
+
+![](assists/multi_master_replication.png)
+
+
+当同一项数据在两个主节点均进行写入时，需要对数据冲突进行处理。处理的方式有 **最后写入者胜利（LWW）**、**节点优先级覆盖**、**值拼接** 以及 **用户处理**。当然我们可以通过把对单一数据修改集中到一个节点，来避免冲突。但是当该节点失效后，请求被路由到其他主节点，那么同样需要处理数据冲突。
+
+当主节点之间进行数据复制时，需要考虑循环复制的问题，即 Master2 复制了 Master1 的数据 A，Master1 又将数据 A 从 Master2 复制回来。可以通过在复制信息中添加标记来处理，防止循环复制。
+
+## 复制协议
+
+根据复制协议的不同，可以把数据复制分为 **基于操作的复制** 和 **基于日志的复制**。
+
+一般我们操作数据都是通过命令或者语句，基于操作的复制就是复制这些命令或语句，并在当前节点再次执行。基于操作的复制在很多场景下会导致数据不一致，比如命令中涉及获取当前时间、有自增序列或者带触发器等等。
+
+基于日志的复制又可以 **基于预写日志（WAL）** 或者 **基于行逻辑日志**。WAL 是数据库操作数据的操作日志，每个写操作前都会先写入 WAL，WAL 的数据非常底层：包括哪个磁盘块的哪些字节发生变化。这使得 WAL 与存储引擎紧密耦合，不利于数据库版本兼容或异构的存储引擎。
+
+行逻辑日志将存储细节与数据隔离，逻辑日志通常包含一系列记录来描述表中行的写请求。如果一个事务涉及多行修改，则会有多条日志记录，并最后标记事务完成。MySQL 的 binlog 就是行逻辑日志。
 
 ## 数据复制与分布式一致性
-
 
 复制是指通过网络在多台计算机上保存相同的数据副本。在互联网架构中，大量使用复制是因为大部分的使用场景下，都会对系统的可用性有要求，比如至少有一个服务可用。并且对系统的可靠性（数据的正确性）也有要求，当数据拥有多个副本时，系统就能容忍数据损坏。
 
@@ -61,12 +61,36 @@ https://en.wikipedia.org/wiki/State_machine_replication
 
 复制能给系统带来这么多好处，其包含的问题也是明显的，最重要的就是数据一致性问题。在复制系统中，一致性和可用性是一个平衡的过程。想要拥有强一致性，那么就得牺牲系统性能甚至是可用性。
 
+## 状态机复制
 
-### 文件复制
+状态机复制就是可用性、一致性以及可靠性的平衡。通常的状态机复制算法包括：Paxos、Raft 以及 ZAB。在支持 $F$ 个故障的状态机复制系统中，必须至少包含 $2\times F+1$ 份副本，多余的副本被用作区分正确和故障副本的证据。
 
+状态机，一个状态机从 “初始” 状态开始，每一个输入都被传入转换函数和输出函数，以生成一个新的状态和输出。在新的输入被接收到前，状态保持不变，而输出同时被传输给恰当的接受者。可以用代码来描述这个过程：
 
+```py
+state = init
+log = []
+while true:
+  on receiving cmd from a client:
+    log.append(cmd)
+    state, output = apply(cmd, state)
+    send output to the client
+```
 
-## 单主
+状态机复制的是通过复制，将状态机分布至多个节点。当节点从客户端接收并发请求时，副本首先需要就它们接收的客户端命令的顺序达成一致，这个问题称为 **日志复制**。在约定了顺序之后，各节点逐一的执行命令。在经历相同命令后，所有服务器副本都会到达相同的状态。以这种方式来提供 **可容错** 的机制。
 
+FLP 结论是基于异步系统模型做的证明，其表明如果节点存在失效的风险，则不存在总能达成共识的稳定算法。FLP 结论的模型中，算法都不能使用时钟或者超时机制，在实际的应用中，通常都会使用超时和同步来实现稳定的算法。
 
-## 多主
+## 状态机复制与传统复制
+
+从状态机的概念出发，可以发现传统的复制（主从、多主）也是一种状态机，每个节点从相同的状态开始，执行一系列相同的操作以达到相同状态。这两个概念有如下区别：
+
+- 状态机复制提供 **容错机制**：集群可以实现一定程度的节点失效，不会丢失已产生共识的操作
+- 状态机复制提供 **自动故障恢复**：当主节点失效后，能自动进行选举
+
+状态机复制之所以称为状态机，是在集群中不会出现状态回滚，状态只会向前进行。
+
+## 参考文档
+
+- [Consensus for State Machine Replication](https://decentralizedthoughts.github.io/2019-10-15-consensus-for-state-machine-replication/)
+- [The State Machine Approach:A Tutorial](https://www.cs.cornell.edu/fbs/publications/ibmFault.sm.pdf)
