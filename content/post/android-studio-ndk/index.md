@@ -24,7 +24,7 @@ tags:
 
 2. 配置NDK到Android Studio工程中：打开Module Setting，在NDK Location里选择NDK的位置。
 
-3. 修改Gradle 插件版本，这里使用的是 *experimental*版本，这个版本可以直接在build.gradle对ndk进行操作，不需要使用命令行生成.so。关于这个版本插件的使用，详见  *http://tools.android.com/tech-docs/new-build-system/gradle-experimental*
+3. 修改Gradle 插件版本，这里使用的是 *experimental* 版本，这个版本可以直接在build.gradle对ndk进行操作，不需要使用命令行生成.so。关于这个版本插件的使用，详见  *http://tools.android.com/tech-docs/new-build-system/gradle-experimental*
 
   ```
   classpath 'com.android.tools.build:gradle-experimental:0.6.0-alpha5'
