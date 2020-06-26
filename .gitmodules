@@ -1,4 +1,4 @@
 [submodule "themes/hugo-theme-even"]
 	path = themes/hugo-theme-even
-	url = git@github.com:hadyang/hugo-theme-even.git
+	url = https://github.com/hadyang/hugo-theme-even.git
 	ignore = dirty
