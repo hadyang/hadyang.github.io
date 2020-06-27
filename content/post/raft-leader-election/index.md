@@ -63,17 +63,17 @@ message RequestVoteResponse {
 
 ```protobuf
 message AppendEntriesRequest {
-    uint64 term = 1; // 候选人的任期号
-    uint64 leader_id = 2; //领导人的 id，为了其他服务器能重定向到客户端
+    uint64 term = 1; // Leader 的任期号
+    uint64 leader_id = 2; //Leader 的 id，为了其他服务器能重定向到客户端
     uint64 prev_log_index = 3;//最新日志之前的日志的索引值
-    uint64 prev_log_term = 4;//最新日志之前的日志的领导人任期号
+    uint64 prev_log_term = 4;//最新日志之前的日志的任期号
     repeated string entries = 5;//将要存储的日志条目（表示 heartbeat 时为空，有时会为了效率发送超过一条）
-    uint64 leader_commit = 6;//领导人提交的日志条目索引值
+    uint64 leader_commit = 6;//Leader 提交的日志条目索引值
 }
 
 message AppendEntriesResponse {
-    uint64 term = 1; //当前的任期号，用于领导人更新自己的任期号
-    bool success = 2;//如果其它服务器包含能够匹配上 prevLogIndex 和 prevLogTerm 的日志时为真
+    uint64 term = 1; //当前的任期号，用于 Leader 更新自己的任期号
+    bool success = 2;//如果 Follower 能够匹配上 prevLogIndex 和 prevLogTerm 的日志时为真
 }
 ```
 
