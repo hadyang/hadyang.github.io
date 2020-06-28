@@ -8,13 +8,15 @@ categories:
 
 ## 日志复制
 
-当集群选举完成后，Leader 就会接收并处理客户端的请求。Leader 通过 `AppendEntries` 将客户端的请求打包为 `LogEntry` ，并行的发送给每个节点，请求在每个状态机顺序执行。当 `LogEntry` 被 “安全”（） 地复制，Leader 将 `LogEntry` 的请求在本地状态机执行，并返回结果给客户端。如果 Follower 由于故障或网络延迟等原因，未能返回成功，则 Leader 会持续重试 `AppendEntries` 直到 Follower 返回成功。
+当集群选举完成后，Leader 就会接收并处理客户端的请求。Leader 通过 `AppendEntries` 将客户端的请求打包为 `LogEntry` ，并行的发送给每个节点，请求在每个状态机顺序执行。当 `LogEntry` 被 “安全” 地复制，Leader 将 `LogEntry` 的请求在本地状态机执行，并返回结果给客户端。如果 Follower 由于故障或网络延迟等原因，未能返回成功，则 Leader 会持续重试 `AppendEntries` 直到 Follower 返回成功。
+
+> 安全地复制：`LogEntry` 被复制到大多数节点
 
 日志的组织形式如下图所示，每个 `LogEntry` 都包含一条命令和 Term 信息，Raft 通过Term 信息来区分 `LogEntry` 以及保证安全性。同时，每个 `LogEntry` 都还有一个正整数来标记其在日志中的位置。
 
 ![](assists/log_struct.png)
 
-当 `LogEntry` 被安全的复制后， Leader 会将这个 `LogEntry` 应用到本地状态机，这个 `LogEntry` 则被称为 **已提交**。Raft 保证所有已提交的 `LogEntry` 都是持久的，并且最终会被所有状态机执行。当 Leader 将创建的 `LogEntry` 复制到超过半数的节点时，就可以提交这个 `LogEntry`，比如：上图中的第五个 `LogEntry` $e_5$。当 $e_i$ 被提交时，所有 $e_j$ $j<i$ 的 `LogEntry` 也都会被提交，即使是前一个任期的。
+当 `LogEntry` 被安全的复制后， Leader 会选择一个时间将 `LogEntry` 应用到本地状态机，这个 `LogEntry` 则被称为 **已提交**（在 ETCD 中的 Applied）。Raft 保证所有已提交的 `LogEntry` 都是持久的，并且最终会被所有状态机执行。当 Leader 将创建的 `LogEntry` 复制到超过半数的节点时，就可以提交这个 `LogEntry`，比如：上图中的第五个 `LogEntry` $e_5$。当 $e_i$ 被提交时，所有 $e_j$ $j<i$ 的 `LogEntry` 也都会被提交，即使是 **前一个任期** 的。
 
 Leader 会追踪最新的已提交 `LogEntry`，并将其放在 `AppendEntries` 请求中，这样即使节点故障，当其恢复时也能感知到。一旦 Follower 发现某个 `LogEntry` 已提交，则 Follower 会将其应用到本地状态机。
 
