@@ -1,5 +1,5 @@
 ---
-title: 初识 ETCD 
+title: ETCD 初探
 draft: false
 date: 2020-07-05
 categories: 
