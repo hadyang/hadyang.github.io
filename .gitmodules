@@ -2,7 +2,3 @@
 	path = themes/hugo-theme-even
 	url = https://github.com/hadyang/hugo-theme-even.git
 	ignore = dirty
-[submodule "themes/hugo-developer-portfolio"]
-	path = themes/hugo-developer-portfolio
-	url = git@github.com:hadyang/hugo-developer-portfolio.git
-ignore = dirty
