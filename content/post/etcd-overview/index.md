@@ -8,24 +8,27 @@ categories:
 
 ## ETCD
 
-ETCD 提供强一致性的分布式 K-V 存储，客户端通过 HTTP/HTTPS 协议与其进行交互。同时还可以对 Key 进行 **TTL** 设置、用户级别的 **权限管理** 以及 **事务**。
+ETCD 提供强一致性的分布式 K-V 存储，客户端通过 HTTP/HTTPS 协议与其进行交互。同时还可以对 Key 进行 **TTL** 设置、用户级别的 **权限管理** 以及 **事务**。ETCD 的整体架构如下图所示，在后续的文章中，也会详细介绍各个部分。
 
-在实现上，ETCD 采用有强大的跨平台能力和高性能的 Go 语言编写，底层节点采用 Raft 共识算法进行通信。由于 Raft 算法中，从节点不接受用户请求，所以 ETCD 中主节点的吞吐量是很重要的指标。同时，由于 Raft 算法需要与集群中大部分节点进行通信，集群节点之间的网络延迟会极大的影响 ETCD 的整体性能。
+![](assists/architecture.png)
+
+ETCD 中主要有四个组成部分，raft 负责整个 Raft 协议内容（包括状态机）；transport 是集群中节点的通信模块；lessor 负责整个键空间的过期；backend 负责底层存储。在实现上，ETCD 采用有强大的跨平台能力和高性能的 Go 语言编写，底层节点采用 Raft 共识算法进行通信。由于 Raft 算法的特性，ETCD 中主节点的吞吐量是很重要的指标。同时，由于 Raft 算法需要与集群中大部分节点进行通信，集群节点之间的网络延迟会极大的影响 ETCD 的整体性能。
+
 
 ## 使用场景
 
-ETCD 名称的起源，一种是 Unix 系统上的 `/etc` 文件夹和 `d` 分布式系统。在单机上 `/etc` 文件夹是用来存放配置信息的，而 etcd 是分布式环境下存放配置信息的。
+ETCD 名称的起源，一种是 Unix 系统上的 `/etc` 文件夹和 `d` 分布式系统。在单机上 `/etc` 文件夹是用来存放配置信息的，而 ETCD 是分布式环境下存放配置信息的。
 
-etcd 被设计为大规模分布式系统的通用基础，这些系统永远不会容忍裂脑操作，并且愿意牺牲可用性来实现此目的。etcd 中存储的数据有一致性和可容错保证。etcd 集群旨在提供具有最稳定性，可靠性，可伸缩性和性能的键值存储。
+ETCD 被设计为大规模分布式系统的通用基础，这些系统永远不会容忍裂脑操作，并且愿意牺牲可用性来实现此目的。ETCD 中存储的数据有一致性和可容错保证。ETCD 集群旨在提供具有最稳定性，可靠性，可伸缩性和性能的键值存储。
 
-分布式系统将配置信息存储在 etcd 的一致性 kv 存储中，来实现 **服务发现**、**分布式任务协调**。常见的还会使用 etcd 进行 **选举**、**分布式锁** 以及 **服务健康监控**。
+分布式系统将配置信息存储在 ETCD 的一致性 kv 存储中，来实现 **服务发现**、**分布式任务协调**。常见的还会使用 ETCD 进行 **选举**、**分布式锁** 以及 **服务健康监控**。
 
 
 ## 存储结构
 
 ETCD 是被设计用来存储低频更新的数据，并且提供可靠的查询。ETCD 通过暴露老版本的 KV 数据，来支持 **快照读取** 以及 **监听历史事件**。
 
-ectd 提供了一个持久化、多版本、并发控制的数据模型，当 Key 写入新值时，etcd 会同时保留旧值。 KV 存储是不可变的，更新操作都不会进行替换更新，而是生成新版本的数据。所有老版本的 Key 依然是能可访问和监听的。为了防止数据无限制的增长，ETCD 会压缩老版本的数据。
+ectd 提供了一个持久化、多版本、并发控制的数据模型，当 Key 写入新值时，ETCD 会同时保留旧值。 KV 存储是不可变的，更新操作都不会进行替换更新，而是生成新版本的数据。所有老版本的 Key 依然是能可访问和监听的。为了防止数据无限制的增长，ETCD 会压缩老版本的数据。
 
 
 ### 修订与Key
@@ -63,17 +66,17 @@ KV 接口是 ETCD 中最常用的接口，其分为 原子操作 和 事务操�
 
 PUT 是 ETCD 中修改和创建 KV 的方式，其用法比较简单：
 
-- `etcdctl put foo bar`：创建一个 key=foo，value=bar 的键值对
-- `etcdctl put foo1 bar1 --lease=1234abcd`：创建一个 key=foo，value=bar 的键值对，并将其绑定到 Lease `1234abcd` 上
+- `ETCDctl put foo bar`：创建一个 key=foo，value=bar 的键值对
+- `ETCDctl put foo1 bar1 --lease=1234abcd`：创建一个 key=foo，value=bar 的键值对，并将其绑定到 Lease `1234abcd` 上
 
 
-相比来说 GET 方法就复杂的多，这里只提几种比较有意思的用法，更多用法参考官方文档： [Interacting with etcd](https://etcd.io/docs/v3.4.0/dev-guide/interacting_v3/)
+相比来说 GET 方法就复杂的多，这里只提几种比较有意思的用法，更多用法参考官方文档： [Interacting with ETCD](https://ETCD.io/docs/v3.4.0/dev-guide/interacting_v3/)
 
-- `etcdctl get foo -w=json`： 简单的 KV 查询，并返回 Key 相关的详细信息
-- `etcdctl get foo foo3`： 查询 "foo" 到 "foo3" 范围内的所有 KV
-- `etcdctl get --prefix --order="ASCEND" --limit=2 foo`： 查询前缀为 "foo" 的所有 Key，同时按 Key 顺序排序，取前 2 个 KV（ETCD 的锁就是这样实现的）
-- `etcdctl get --prefix --rev=4 foo`： 查询前缀为 "foo" 并且修订版本为 4 的所有 Key
-- `etcdctl get --from-key b`： 查询 value 小于 key=b 的所有 Key
+- `ETCDctl get foo -w=json`： 简单的 KV 查询，并返回 Key 相关的详细信息
+- `ETCDctl get foo foo3`： 查询 "foo" 到 "foo3" 范围内的所有 KV
+- `ETCDctl get --prefix --order="ASCEND" --limit=2 foo`： 查询前缀为 "foo" 的所有 Key，同时按 Key 顺序排序，取前 2 个 KV（ETCD 的锁就是这样实现的）
+- `ETCDctl get --prefix --rev=4 foo`： 查询前缀为 "foo" 并且修订版本为 4 的所有 Key
+- `ETCDctl get --from-key b`： 查询 value 小于 key=b 的所有 Key
 
 
 #### 事务操作
@@ -117,9 +120,9 @@ Watch 提供 Key 变更的异步事件监听，在 ETCD V3 中会持续对 Key �
 Watch 是一个长请求，通过 gPRC 的流式通道进行数据交换，客户端通过流式通道开启一个监听，并从流式通道中获取监听事件。一个 Watch 流可以同时操作多个 Watch，这种多路复用能有效减少内存占用和连接数。
 
 
-- `etcdctl watch foo1`： 监听单个 Key
-- `etcdctl watch --prefix foo`： 按前缀监听多个 Key
-- `etcdctl watch --rev=2 foo`： 从某个版本的修订开始监听
+- `ETCDctl watch foo1`： 监听单个 Key
+- `ETCDctl watch --prefix foo`： 按前缀监听多个 Key
+- `ETCDctl watch --rev=2 foo`： 从某个版本的修订开始监听
 
 
 Watch 对事件提供以下保证：
@@ -132,10 +135,10 @@ Watch 对事件提供以下保证：
 
 Lease 的相关接口就比较简单。
 
-- `etcdctl lease grant 60`： 生成一个 60s 的新 Lease
-- `etcdctl lease revoke 32695410dcc0ca06`： 释放 Lease
+- `ETCDctl lease grant 60`： 生成一个 60s 的新 Lease
+- `ETCDctl lease revoke 32695410dcc0ca06`： 释放 Lease
 
 
 ## 参考文档
 
-- [etcd doc](https://etcd.io/docs/v3.4.0/)
+- [ETCD doc](https://ETCD.io/docs/v3.4.0/)
