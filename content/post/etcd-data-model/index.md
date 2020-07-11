@@ -59,10 +59,9 @@ type keyIndex struct {
 每个 `keyIndex` 都至少包含一个 `generation`，每个 `generation` 都表示 Key 的一个生命周期。当 Key 被删除时，会将当前的 `generation` 标记为删除，并生成新的空 `generation`。
 
 ```go
-// generation contains multiple revisions of a key.
 type generation struct {
 	ver     int64
-	created revision // when the generation is created (put in first revision).
+	created revision
 	revs    []revision
 }
 ```
