@@ -6,7 +6,7 @@ categories:
     - 深入理解ETCD
 ---
 
-ETCD 服务端提供强一致性的 KV 存储，其整体结构在[《初识ETCD》](https://www.hadyang.xyz/2020/07/etcd-overview/) 中介绍过其组成部分，这里再详细的介绍其底层物理存储结构。ETCD 中底层存储就是 `Backend` 这个接口，其主要提供读写事务的能力。Backend 的组成如下图所示，包含 bblot 和 treeIndex 两个部分。
+ETCD 服务端提供强一致性的 KV 存储，其整体结构在[《初识ETCD》](https://hadyang.github.io/2020/07/etcd-overview/) 中介绍过其组成部分，这里再详细的介绍其底层物理存储结构。ETCD 中底层存储就是 `Backend` 这个接口，其主要提供读写事务的能力。Backend 的组成如下图所示，包含 bblot 和 treeIndex 两个部分。
 
 ![](assists/etcd-data-model.png)
 
@@ -16,7 +16,7 @@ ETCD 服务端提供强一致性的 KV 存储，其整体结构在[《初识ETCD
 
 bblot 可以提供有效的数据一致性和线程安全保证，但是其在处理并发上有些欠缺。 bblot 允许多个读事务并行，但只允许 **同时存在一个写事务**，当同时开启多个写事务时，事务会被阻塞直到上一个写事务完成。
 
-bblot 的数据存放在单独的文件中，一个数据库文件也就对应一个 **DB**。在 DB 内对存储按 **Bucket** 组织，每个 DB 有都有一个 **rootBucket**，其在 DB 创建时就会初始化。然后，每个 rootBucket 下可以拥有多个 **subBucket** 如下图所示，是一个树型结构。Bucket 可以理解为命名空间， Bucket 内部是一颗 [B+ 树](https://www.hadyang.xyz/interview/docs/basic/algo/tree/#b%E6%A0%91-1)。
+bblot 的数据存放在单独的文件中，一个数据库文件也就对应一个 **DB**。在 DB 内对存储按 **Bucket** 组织，每个 DB 有都有一个 **rootBucket**，其在 DB 创建时就会初始化。然后，每个 rootBucket 下可以拥有多个 **subBucket** 如下图所示，是一个树型结构。Bucket 可以理解为命名空间， Bucket 内部是一颗 [B+ 树](https://hadyang.github.io/interview/docs/basic/algo/tree/#b%E6%A0%91-1)。
 
 ![](assists/bblot-buckets.png)
 
@@ -46,7 +46,7 @@ type KeyValue struct {
 
 ## TreeIndex
 
-为了加速用户 Key 的查找，ETCD 还将 KV 数据中的 Key 单独存放。使用一个 `treeIndex` 数据结构存放 Key，其内部是一个 [B 树](https://www.hadyang.xyz/interview/docs/basic/algo/tree/#b%E6%A0%91)。 `treeIndex` 是存储在 **内存** 中的，用于加速 Key 的查找，并且在每次服务启动的时候进行初始化，**加载 DB 中的数据进行构建**。`treeIndex` 中键存储的是 `keyIndex` 结构，包含 Key 以及 `generation` 信息。
+为了加速用户 Key 的查找，ETCD 还将 KV 数据中的 Key 单独存放。使用一个 `treeIndex` 数据结构存放 Key，其内部是一个 [B 树](https://hadyang.github.io/interview/docs/basic/algo/tree/#b%E6%A0%91)。 `treeIndex` 是存储在 **内存** 中的，用于加速 Key 的查找，并且在每次服务启动的时候进行初始化，**加载 DB 中的数据进行构建**。`treeIndex` 中键存储的是 `keyIndex` 结构，包含 Key 以及 `generation` 信息。
 
 ```go
 type keyIndex struct {
