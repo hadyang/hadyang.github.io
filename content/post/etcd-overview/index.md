@@ -66,17 +66,17 @@ KV 接口是 ETCD 中最常用的接口，其分为 原子操作 和 事务操�
 
 PUT 是 ETCD 中修改和创建 KV 的方式，其用法比较简单：
 
-- `ETCDctl put foo bar`：创建一个 key=foo，value=bar 的键值对
-- `ETCDctl put foo1 bar1 --lease=1234abcd`：创建一个 key=foo，value=bar 的键值对，并将其绑定到 Lease `1234abcd` 上
+- `etcdctl put foo bar`：创建一个 key=foo，value=bar 的键值对
+- `etcdctl put foo1 bar1 --lease=1234abcd`：创建一个 key=foo，value=bar 的键值对，并将其绑定到 Lease `1234abcd` 上
 
 
 相比来说 GET 方法就复杂的多，这里只提几种比较有意思的用法，更多用法参考官方文档： [Interacting with ETCD](https://ETCD.io/docs/v3.4.0/dev-guide/interacting_v3/)
 
-- `ETCDctl get foo -w=json`： 简单的 KV 查询，并返回 Key 相关的详细信息
-- `ETCDctl get foo foo3`： 查询 "foo" 到 "foo3" 范围内的所有 KV
-- `ETCDctl get --prefix --order="ASCEND" --limit=2 foo`： 查询前缀为 "foo" 的所有 Key，同时按 Key 顺序排序，取前 2 个 KV（ETCD 的锁就是这样实现的）
-- `ETCDctl get --prefix --rev=4 foo`： 查询前缀为 "foo" 并且修订版本为 4 的所有 Key
-- `ETCDctl get --from-key b`： 查询 value 小于 key=b 的所有 Key
+- `etcdctl get foo -w=json`： 简单的 KV 查询，并返回 Key 相关的详细信息
+- `etcdctl get foo foo3`： 查询 "foo" 到 "foo3" 范围内的所有 KV
+- `etcdctl get --prefix --order="ASCEND" --limit=2 foo`： 查询前缀为 "foo" 的所有 Key，同时按 Key 顺序排序，取前 2 个 KV（ETCD 的锁就是这样实现的）
+- `etcdctl get --prefix --rev=4 foo`： 查询前缀为 "foo" 并且修订版本为 4 的所有 Key
+- `etcdctl get --from-key b`： 查询 value 小于 key=b 的所有 Key
 
 
 #### 事务操作
@@ -120,9 +120,9 @@ Watch 提供 Key 变更的异步事件监听，在 ETCD V3 中会持续对 Key �
 Watch 是一个长请求，通过 gPRC 的流式通道进行数据交换，客户端通过流式通道开启一个监听，并从流式通道中获取监听事件。一个 Watch 流可以同时操作多个 Watch，这种多路复用能有效减少内存占用和连接数。
 
 
-- `ETCDctl watch foo1`： 监听单个 Key
-- `ETCDctl watch --prefix foo`： 按前缀监听多个 Key
-- `ETCDctl watch --rev=2 foo`： 从某个版本的修订开始监听
+- `etcdctl watch foo1`： 监听单个 Key
+- `etcdctl watch --prefix foo`： 按前缀监听多个 Key
+- `etcdctl watch --rev=2 foo`： 从某个版本的修订开始监听
 
 
 Watch 对事件提供以下保证：
@@ -135,8 +135,8 @@ Watch 对事件提供以下保证：
 
 Lease 的相关接口就比较简单。
 
-- `ETCDctl lease grant 60`： 生成一个 60s 的新 Lease
-- `ETCDctl lease revoke 32695410dcc0ca06`： 释放 Lease
+- `etcdctl lease grant 60`： 生成一个 60s 的新 Lease
+- `etcdctl lease revoke 32695410dcc0ca06`： 释放 Lease
 
 
 ## 参考文档
