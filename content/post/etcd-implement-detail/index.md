@@ -1,5 +1,5 @@
 ---
-title: ETCD 实现细节
+title: 【ETCD】实现细节
 date: 2020-07-06
 draft: true
 categories:

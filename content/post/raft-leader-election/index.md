@@ -1,5 +1,5 @@
 ---
-title: Raft 选举过程
+title: 【Raft】选举过程
 date: 2020-06-26
 draft: false
 categories: 

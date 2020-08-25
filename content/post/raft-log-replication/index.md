@@ -1,5 +1,5 @@
 ---
-title: Raft 日志复制
+title: 【Raft】日志复制
 date: 2020-06-27
 draft: false
 categories: 

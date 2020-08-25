@@ -1,5 +1,5 @@
 ---
-title: 缓存算法--LRU && LFU
+title: 【算法】LRU && LFU
 date: 2016-11-30
 categories:
     - 算法
