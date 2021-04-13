@@ -48,19 +48,29 @@ categories:
 	0x005a 00090 (main.go:13)	MOVQ	AX, "".d1+24(SP)
 	0x005f 00095 (main.go:14)	TESTB	AL, (AX)
 	0x0061 00097 (main.go:15)	MOVQ	AX, (SP)
-	0x0065 00101 (main.go:15)	PCDATA	$1, $0
+    ...
 	0x0065 00101 (main.go:15)	CALL	"".(*Dog).Say(SB)
 	...
+    ; 下面是符号链接时的相对位置
 	rel 5+4 t=17 TLS+0
 	rel 70+4 t=16 go.string."煎饼"+0
 	rel 102+4 t=8 "".(*Dog).Say+0
 	rel 117+4 t=8 runtime.morestack_noctxt+0
     ...
+```
+
+在上面的汇编代码中，有几个比较特殊的指令，下面一起来说明下：
+
+1. `XORPS	X0, X0` 异或指令，这里仅仅是将 `X0` 寄存器置 0 （X0是浮点数寄存器）
+2. `TESTB	AL, (AX)` 逻辑与指令，这里是用做 nil check，如果 `AX` 为 0x0 则会发生 panic
+3. `go.string."煎饼"(SB)` 重定向符号，这种带 `(SB)` 的都是用户获取重定向符号的地址
+
+关于重定向，我们这里再看下上面的代码， `go.string."煎饼"(SB)` 在 `main` 函数中作为重定向符号引用，其具体
+
+```
 go.string."煎饼" SRODATA dupok size=6
 	0x0000 e7 85 8e e9 a5 bc                                ......
 ```
-
-
 
 
 ```nasm
