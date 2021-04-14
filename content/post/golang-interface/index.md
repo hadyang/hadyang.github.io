@@ -62,15 +62,22 @@ categories:
 在上面的汇编代码中，有几个比较特殊的指令，下面一起来说明下：
 
 1. `XORPS	X0, X0` 异或指令，这里仅仅是将 `X0` 寄存器置 0 （X0是浮点数寄存器）
-2. `TESTB	AL, (AX)` 逻辑与指令，这里是用做 nil check，如果 `AX` 为 0x0 则会发生 panic
+2. `TESTB	AL, (AX)` 逻辑与指令，这里是用做 nil check，如果加载 `AX` 失败会触发段错误信号 `SIGSEGV`，触发 Go Runtime 抛出 Panic。选择 `TESTB` 仅仅是因为指令短小。
 3. `go.string."煎饼"(SB)` 重定向符号，这种带 `(SB)` 的都是用户获取重定向符号的地址
 
-关于重定向，我们这里再看下上面的代码， `go.string."煎饼"(SB)` 在 `main` 函数中作为重定向符号引用，其具体
+关于重定向，我们这里再看下上面的代码， `go.string."煎饼"(SB)` 在 `main` 函数中作为重定向符号引用，其具体地址会在 Link 阶段确定。
 
 ```
 go.string."煎饼" SRODATA dupok size=6
-	0x0000 e7 85 8e e9 a5 bc                                ......
+	0x0000 e7 85 8e e9 a5 bc                                ...... ; 这里的二进制就是 "煎饼" 的字面值
 ```
+
+上面的汇编代码就是符号的定义，`SRODATA` 表示只读数据， `DUPOK` 表示单个二进制文件中可以有多个定义，但在 Link 阶段该符号会唯一对应一个地址。
+
+
+
+
+## 函数调用
 
 
 ```nasm
@@ -209,3 +216,8 @@ TEXT main.main(SB) /home/shihaoyang/Projects/LeetCode-Go/main.go
     main.go:14    0x49a2cb    e87026fdff        call $runtime.morestack_noctxt
     .:0        0x49a2d0    e92bffffff        jmp $main.main
 ```
+
+
+## 参考文档
+
+[directives](https://golang.org/doc/asm#directives)
