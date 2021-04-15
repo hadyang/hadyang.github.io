@@ -79,7 +79,7 @@ go.string."煎饼" SRODATA dupok size=6
 
 上面的汇编代码就是符号的定义，`SRODATA` 表示只读数据， `DUPOK` 表示单个二进制文件中可以有多个定义，但在 Link 阶段该符号会唯一对应一个地址。
 
-## 函数调用
+## 结构体方法调用
 
 ### 指针接收者
 
@@ -125,6 +125,67 @@ CALL	"".Dog.Sleep(SB)            ;
 
 可以看到即使 `d1` 是指针，Go 在编译时也会转化为值进行调用，并且 Go 会把接收者的数据拷贝一遍，当作参数传递给被调用函数。
 
+## 接口方法调用
+
+接下来，我们再看看接口的方法调用，相比于结构体会更复杂。定义接口 `Animal` 以及以 `Animal` 为入参的 `Night` 函数。
+
+```go
+type Animal interface {
+	Sleep() string
+	Say() string
+}
+func main() {
+	var d1 = &Dog{"WangWang", 43}
+	var t1 Animal = d1
+
+	Night(t1)
+}
+func Night(t Animal) {
+	t.Sleep()
+}
+```
+
+首先，我们来看下接口的定义和赋值，Go 中非空接口的实现是 `runtime.iface`，包含 `itab` 类型的接口信息数据和一个指向结构体的指针。
+
+```go
+type iface struct {
+	tab  *itab
+	data unsafe.Pointer
+}
+```
+
+通过汇编可以发现， `itab` 信息是直接从重定向符号中获取，并且在编译时生成。
+
+```nasm
+LEAQ	go.itab.*"".Dog,"".Animal(SB), CX   ;CX=&(go.itab.*"".Dog,"".Animal(SB))
+MOVQ	CX, "".t1+40(SP)                    ;t1.itab=CX
+MOVQ	AX, "".t1+48(SP)                    ;t1.data=AX
+```
+
+在 `t1` 赋值完成后，就会把 `t1` 拷贝参数并调用 `Night` 方法。并通过 `itab` 定位方法的地址， `itab` 的结构由 `runtime.itab` 表示。
+
+```go
+type itab struct {
+	inter *interfacetype    //
+	_type *_type            //
+	hash  uint32            //offset=16byte
+	_     [4]byte           //内存对齐
+	fun   [1]uintptr        //offset=24byte 方法指针
+}
+```
+
+
+
+```nasm
+MOVQ	"".t+40(SP), AX     ;AX=t1.itab
+TESTB	AL, (AX)            ;nil check
+MOVQ	32(AX), AX          ;AX=t1.itab+32
+MOVQ	"".t+48(SP), CX     ;
+MOVQ	CX, (SP)            ;
+CALL	AX                  ;
+```
+
+
 ## 方法集的奥秘
 
 在 `main.go` 文件中，我们还能看到 `"".(*Dog).Sleep STEXT ...` 的声明，但我们的代码并没有指针接收者的 `Sleep` 方法，这就是 Go 编译器自动生成的代码。通过汇编我们也能知道「`*T` 的方法集：所有声明以 `T` 或 `*T`为接收者的方法集合」这条规则的底层原因。
@@ -149,6 +210,8 @@ CALL	"".Dog.Sleep(SB)
 那这里我们就可以思考下，既然可以通过代码生成来扩充接收者的方法集，那么能自动生成指针接收者的方法吗？
 
 答案是不行。原因也很简单，值接收者是接收拷贝数据的，并不能找到原始数据的具体地址，因此也无法生成指针接受者。
+
+
 
 
 ## 参考文档
