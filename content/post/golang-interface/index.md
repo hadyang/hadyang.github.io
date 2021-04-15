@@ -8,7 +8,7 @@ categories:
 
 在之前的 [《【Golang进阶】函数与栈》]({{< ref "/post/golang-func-stack" >}})文章中，我们通过汇编学习了 Go 的栈结构。今天，我们也通过汇编再来看看结构体和方法调用的实现。
 
-## 初始化
+## 结构体初始化
 
 首先，我们定一个结构体 `Dog` 以及一个指针接收者的方法 `Say`。
 
@@ -125,9 +125,24 @@ CALL	"".Dog.Sleep(SB)            ;
 
 可以看到即使 `d1` 是指针，Go 在编译时也会转化为值进行调用，并且 Go 会把接收者的数据拷贝一遍，当作参数传递给被调用函数。
 
-## 接口方法调用
 
-接下来，我们再看看接口的方法调用，相比于结构体会更复杂。定义接口 `Animal` 以及以 `Animal` 为入参的 `Night` 函数。
+## 接口初始化
+
+接口的初始化有两种情况，分别是空接口 `interface{}` 和非空接口，空接口的实现是 `runtime.eface`，包含一个类型字段和一个指向底层数据的指针；非空接口的实现是 `runtime.iface`，包含 `itab` 类型的接口信息数据和一个指向底层数据的指针。
+
+```go
+type iface struct {
+	tab  *itab
+	data unsafe.Pointer
+}
+
+type eface struct {
+	_type *_type
+	data  unsafe.Pointer
+}
+```
+
+定义接口 `Animal` 以及以 `Animal` 为入参的 `Night` 函数。
 
 ```go
 type Animal interface {
@@ -137,7 +152,9 @@ type Animal interface {
 func main() {
 	var d1 = &Dog{"WangWang", 43}
 	var t1 Animal = d1
+	var t2 interface{} = d1
 
+	_ = t2
 	Night(t1)
 }
 func Night(t Animal) {
@@ -145,22 +162,29 @@ func Night(t Animal) {
 }
 ```
 
-首先，我们来看下接口的定义和赋值，Go 中非空接口的实现是 `runtime.iface`，包含 `itab` 类型的接口信息数据和一个指向结构体的指针。
-
-```go
-type iface struct {
-	tab  *itab
-	data unsafe.Pointer
-}
-```
-
-通过汇编可以发现， `itab` 信息是直接从重定向符号中获取，并且在编译时生成。
+通过汇编可以发现，非空接口中的 `itab` 信息是直接从重定向符号中获取，并且在编译时生成。
 
 ```nasm
-LEAQ	go.itab.*"".Dog,"".Animal(SB), CX   ;CX=&(go.itab.*"".Dog,"".Animal(SB))
-MOVQ	CX, "".t1+40(SP)                    ;t1.itab=CX
-MOVQ	AX, "".t1+48(SP)                    ;t1.data=AX
+LEAQ	go.itab.*"".Dog,"".Animal(SB), CX   ;CX=&(go.itab.*"".Dog,"".Animal)
+MOVQ	CX, "".t1+56(SP)                    ;t1.itab=CX
+MOVQ	AX, "".t1+64(SP)                    ;t1.data=AX
 ```
+
+空接口的 `_type` 同样也是从重定向符号中获取，编译时生成。其他操作与非空接口类型。
+
+```nasm
+LEAQ	type.*"".Dog(SB), CX                ;CX=&(type.*"".Dog)
+MOVQ	CX, "".t2+40(SP)                    ;t1._type=CX
+MOVQ	AX, "".t2+48(SP)                    ;t1.data=AX
+```
+
+
+## 接口方法调用
+
+接下来，我们再看看接口的方法调用，相比于结构体会更复杂。定义接口 `Animal` 以及以 `Animal` 为入参的 `Night` 函数。
+
+
+
 
 在 `t1` 赋值完成后，就会把 `t1` 拷贝参数并调用 `Night` 方法。并通过 `itab` 定位方法的地址， `itab` 的结构由 `runtime.itab` 表示。
 
