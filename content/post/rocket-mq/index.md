@@ -25,6 +25,10 @@ categories:
 
 ## 性能对比
 
+
+bin/benchmark --drivers driver-kafka/kafka.yaml workloads/1-topic-16-partitions-1kb.yaml
+
+
 下面，性能测试对比下 Kafka 和 RocketMQ 在 topic 增加时的表现。测试配置：每个 topic 有 8 个分区，每个 topic 都有一个订阅者，并且 topic 数量逐步增加。
 
 ![](assists/rocketmq_vs_kafka.png)
@@ -33,7 +37,9 @@ categories:
 - 在 topic 从 68 到 256 的增长过程中， Kafka 性能劣化 98%
 - 在 topic 从 68 到 256 的增长过程中， RocketMQ 性能仅劣化 16%
 
-Why the huge difference? The difference is attributable to the fact that every topic and partition of Kafka correspond to one physical file. When the number of topics increases, the policy of deconcentrated storage of messages to disks will lead to disk IO competition to cause performance bottlenecks. In contrast, all the messages in Apache RocketMQ™are stored in the same physical file. The number of topics and partitions is just a logic division for Apache RocketMQ™. So the increasing number of topics won’t generate a huge impact on the Apache RocketMQ™ performance.
+Kafka 劣化的如此明显和其实现方式有关，Kafka 对每个 topic 每个分区都存储一个文件。当 topic 个数增加时，这种将消息分散到多个文件的存储方式会加剧 IO 竞争，导致性能下降。
+
+相反，RocketMQ 在物理上只存在一个文件，topic 和 分区都是逻辑概念，所以 topic 增加不会导致 RocketMQ 性能的急剧下降。
 
 ## 核心原理
 
