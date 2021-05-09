@@ -54,7 +54,7 @@ RocketMQ 的很多关键特性都是其持久化存储机制提供的，下面�
 
 DefaultMQPushConsumer 作为提供给用户的操作接口，提供顺序和并发两种消费模式，内部通过代理 DefaultMQPushConsumerImpl 来实现消息拉取和处理。
 
-DefaultMQPushConsumerImpl 在 Start 后，会加载包括 OffsetStore 在内的各种数据，并初始化消费者服务（ConsumeMessageOrderlyService/MQClientManager），同时通过 NameServer 获取所有 Topic 所在 Brokder 的地址
+DefaultMQPushConsumerImpl 在 Start 后，会加载包括 OffsetStore 在内的各种数据，并初始化消费者服务（ConsumeMessageOrderlyService/MQClientManager），同时通过 NameServer 获取所有 Topic 所在 Brokder 的地址。 Offset 会存储到 Broker 上
 
 DefaultMQPushConsumerImpl 在消息消费完成后执行 ConsumeMessageOrderlyService.processConsumeResult 处理 Commit 等逻辑
 
