@@ -17,10 +17,10 @@ categories:
 - **消息标签**：RocketMQ 支持对消息增加 Tag，并且消费时可以在 RocketMQ 服务端对 Tag 进行过滤
 - **At Least Once**：每个消息至少投递一次，消费者获取到消息，处理成功后才会对消息进行 ACK，如果未 ACK RocketMQ 会进行重试
 - **消息回溯**：将已成功消费的消息再次消费，RocketMQ 支持毫秒级别的回溯
-- **消息重试**：对于顺序消息 RocketMQ 会自动不间断重试，无序消息会根据重试次数增加重试间隔
+- **消息重试**：当消息消费失败时，对于顺序消息 RocketMQ 会自动不间断重试，无序消息会根据重试次数增加重试间隔
 - **死信队列**：当消息重试到达最大次数后，消息会被放入一个特殊的死信队列，不再进行重试
-- **消息重投**：
-- **流量控制**：
+- **消息重投**：当消息发送失败时，
+- **流量控制**：当消息发送过快时，Broker 根据策略拒绝 Send 流量；当消费者消费过慢时，会降低拉取消息的频率
 
 
 ## 性能对比
@@ -40,8 +40,61 @@ Kafka 劣化的如此明显和其实现方式有关，Kafka 对每个 topic 每�
 
 ## 核心原理
 
+一次典型的 RocketMQ 消息由 **生产者**（Producer）同步/异步发送到 **Brocker**，每个消息都必须确定一个 **Topic**。Brocker 将消息持久化存储在本地，消息可以由 **消费者** 从 Broker 拉取，或 Broker 推送到消费者。每个消费者都归属于一个 **消费组**，同一个消息（广播消息除外）在一个消费组里只能被消费一次。消费者在获取到消息后执行本地业务代码，成功后发送 Brocker 确认消息。
 
-### 角色
+RocketMQ 的很多关键特性都是其持久化存储机制提供的，下面我们来看下消息是如何存储和索引的。
+
+
+
+## 消费侧
+
+### 客户端
+
+消费者的 Push 和 Pull 模式，本质上都是 Pull 只不过，Push 自动完成消息拉取操作。
+
+DefaultMQPushConsumer 作为提供给用户的操作接口，提供顺序和并发两种消费模式，内部通过代理 DefaultMQPushConsumerImpl 来实现消息拉取和处理。
+
+DefaultMQPushConsumerImpl 在 Start 后，会加载包括 OffsetStore 在内的各种数据，并初始化消费者服务（ConsumeMessageOrderlyService/MQClientManager），同时通过 NameServer 获取所有 Topic 所在 Brokder 的地址
+
+DefaultMQPushConsumerImpl 在消息消费完成后执行 ConsumeMessageOrderlyService.processConsumeResult 处理 Commit 等逻辑
+
+
+MQClientManager 会创建 MQClientInstance ，
+
+MQClientInstance 由 ip+instanceName 唯一确定，在初始化完成后会启动 RebalanceService。 DefaultMQPushConsumerImpl 会将自己按 consumerGroup 注册到 MQClientInstance 中
+
+RebalanceService 会定时（默认20s）进行一次 Rebalance，调用 DefaultMQPushConsumerImpl.doRebalance ，doRebalance 会对所有 topic 进行 rebalance
+
+ConsumeMessageOrderlyService 启动后，如果当前是集群模式，则会开启线程定时
+
+
+ProcessQueue 作为消息的中转站， DefaultMQPushConsumerImpl 在拉取到消息后放入，并通过 ConsumeMessageOrderlyService 开启线程消费 ProcessQueue 中的消息
+
+MessageQueue 由 Topic、BrokerName、QueueId 唯一确定，由 NameServer 接口 GET_ROUTEINFO_BY_TOPIC 返回的 Router 信息构建， QueueId 由路由在数组中的 Index 决定
+
+
+### 服务端
+
+DefaultMessageStore 负责消息在服务端的存储，其中维护了一个 consumeQueueTable 的 Map 结构，Key 为 Topic，Value 是 QueueId 到 ConsumeQueue 的 Map。在启动时会扫描 ConsumeQueue 文件，获取当前 CommitLog 已分发的最大index 。参考 ConsumeQueue.recover
+
+一个 Topic 对应多个 ConsumeQueue， ConsumeQueue 由 Topic 和 QueueId 唯一标识。一个 ConsumeQueue 对应一个 MappedFileQueue， 
+
+一个 MappedFileQueue 对应多个 MappedFile，MappedFile 每个单元固定长度为 20byte，其中包含 8byte offset，4byte size 以及 8byte tagscode
+
+在从 MappedFile 获取某些参数后，直接从 CommitLog 里获取实际的数据 //TODO
+
+
+Broker 启动时会调用 registerBrokerAll ，并且通过 REGISTER_BROKER 在 NameServer 进行注册
+
+
+## 发送侧
+
+
+### 服务端
+
+
+
+### 数据存储
 
 
 ### 消息发送
