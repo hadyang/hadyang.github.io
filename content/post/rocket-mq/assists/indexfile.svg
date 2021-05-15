@@ -1,0 +1,340 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:xl="http://www.w3.org/1999/xlink" viewBox="11 417 726 549" width="726" height="549">
+  <defs>
+    <font-face font-family="Helvetica Neue" font-size="12" panose-1="2 0 5 3 0 0 0 2 0 4" units-per-em="1000" underline-position="-100" underline-thickness="50" slope="0" x-height="517" cap-height="714" ascent="951.9958" descent="-212.99744" font-weight="400">
+      <font-face-src>
+        <font-face-name name="HelveticaNeue"/>
+      </font-face-src>
+    </font-face>
+    <marker orient="auto" overflow="visible" markerUnits="strokeWidth" id="NegativeControls_Marker" stroke-linejoin="miter" stroke-miterlimit="10" viewBox="-1 -4 2 8" markerWidth="2" markerHeight="8" color="black">
+      <g>
+        <line x1="0" y1="-2.4" x2="0" y2="2.4" fill="none" stroke="currentColor" stroke-width="1"/>
+      </g>
+    </marker>
+    <marker orient="auto" overflow="visible" markerUnits="strokeWidth" id="NegativeControls_Marker_2" stroke-linejoin="miter" stroke-miterlimit="10" viewBox="-1 -4 2 8" markerWidth="2" markerHeight="8" color="black">
+      <g>
+        <line x1="0" y1="2.4" x2="0" y2="-2.4" fill="none" stroke="currentColor" stroke-width="1"/>
+      </g>
+    </marker>
+    <marker orient="auto" overflow="visible" markerUnits="strokeWidth" id="FilledArrow_Marker" stroke-linejoin="miter" stroke-miterlimit="10" viewBox="-1 -4 10 8" markerWidth="10" markerHeight="8" color="black">
+      <g>
+        <path d="M 8 0 L 0 -3 L 0 3 Z" fill="currentColor" stroke="currentColor" stroke-width="1"/>
+      </g>
+    </marker>
+    <font-face font-family="Helvetica Neue" font-size="14" panose-1="2 0 5 3 0 0 0 2 0 4" units-per-em="1000" underline-position="-100" underline-thickness="50" slope="0" x-height="517" cap-height="714" ascent="951.9958" descent="-212.99744" font-weight="400">
+      <font-face-src>
+        <font-face-name name="HelveticaNeue"/>
+      </font-face-src>
+    </font-face>
+  </defs>
+  <metadata> Produced by OmniGraffle 7.18.5\n2021-05-15 16:40:36 +0000</metadata>
+  <g id="Canvas___" fill-opacity="1" fill="none" stroke-opacity="1" stroke="none" stroke-dasharray="none">
+    <title>存储结构</title>
+    <rect fill="white" x="11" y="417" width="726" height="549"/>
+    <g id="Canvas____IndexFile">
+      <title>IndexFile</title>
+      <g id="Group_104">
+        <g id="Graphic_31">
+          <rect x="206" y="675.083" width="80" height="40" fill="#dfd3c3"/>
+          <rect x="206" y="675.083" width="80" height="40" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+          <clipPath id="clip_path">
+            <rect x="0" y="0" width="80" height="40" fill="#dfd3c3"/>
+          </clipPath>
+          <text clip-path="url(#clip_path)" transform="translate(211 687.915)" fill="black">
+            <tspan font-family="Helvetica Neue" font-size="12" font-weight="400" fill="black" x="11.774" y="11">keyHash</tspan>
+          </text>
+        </g>
+        <g id="Graphic_32">
+          <rect x="286" y="675.083" width="160" height="40" fill="#dfd3c3"/>
+          <rect x="286" y="675.083" width="160" height="40" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+          <clipPath id="clip_path_2">
+            <rect x="0" y="0" width="160" height="40" fill="#dfd3c3"/>
+          </clipPath>
+          <text clip-path="url(#clip_path_2)" transform="translate(291 687.915)" fill="black">
+            <tspan font-family="Helvetica Neue" font-size="12" font-weight="400" fill="black" x="59.982" y="11">offset</tspan>
+          </text>
+        </g>
+        <g id="Graphic_33">
+          <rect x="446" y="675.083" width="80" height="40" fill="#dfd3c3"/>
+          <rect x="446" y="675.083" width="80" height="40" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+          <clipPath id="clip_path_3">
+            <rect x="0" y="0" width="80" height="40" fill="#dfd3c3"/>
+          </clipPath>
+          <text clip-path="url(#clip_path_3)" transform="translate(451 687.915)" fill="black">
+            <tspan font-family="Helvetica Neue" font-size="12" font-weight="400" fill="black" x="14.42" y="11">timeDiff</tspan>
+          </text>
+        </g>
+        <g id="Graphic_34">
+          <rect x="526" y="675.083" width="80" height="40" fill="#dfd3c3"/>
+          <rect x="526" y="675.083" width="80" height="40" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+          <clipPath id="clip_path_4">
+            <rect x="0" y="0" width="80" height="40" fill="#dfd3c3"/>
+          </clipPath>
+          <text clip-path="url(#clip_path_4)" transform="translate(531 687.915)" fill="black">
+            <tspan font-family="Helvetica Neue" font-size="12" font-weight="400" fill="black" x="4.616" y="11">preIndex=0</tspan>
+          </text>
+        </g>
+      </g>
+      <g id="Graphic_48">
+        <text transform="translate(77.39 501.666)" fill="black">
+          <tspan font-family="Helvetica Neue" font-size="12" font-weight="400" fill="black" x="8526513e-20" y="11">Header</tspan>
+        </text>
+      </g>
+      <g id="Group_49">
+        <g id="Line_52">
+          <path d="M 146.388 574 L 146.388 574 C 140.86515 574 136.388 578.47715 136.388 584 L 136.388 609.55556" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+        </g>
+        <g id="Line_51">
+          <path d="M 136.388 618.44444 L 136.42028 643.8742 C 136.4273 649.4022 140.86078 653.906 146.388 654 L 146.388 654" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+        </g>
+        <g id="Line_50">
+          <path d="M 136.388 609.55556 L 126.388 614 L 136.388 618.44444" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+        </g>
+      </g>
+      <g id="Graphic_53">
+        <text transform="translate(72.5 606.832)" fill="black">
+          <tspan font-family="Helvetica Neue" font-size="12" font-weight="400" fill="black" x="0" y="11">HashSlot</tspan>
+        </text>
+      </g>
+      <g id="Group_54">
+        <g id="Line_57">
+          <path d="M 146.388 675.083 L 146.388 675.083 C 140.86567 675.083 136.38893 679.5597 136.38893 685.0821 C 136.38893 685.0824 136.38893 685.0827 136.38893 685.083 L 136.39575 758.4439 C 136.39575 758.4541 136.39574 758.4644 136.39573 758.4747 L 136.388 766.7492" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+        </g>
+        <g id="Line_56">
+          <path d="M 136.388 789.6658 L 136.42802 870.931 C 136.43076 876.5043 140.82005 881.0879 146.388 881.332 L 146.388 881.332" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+        </g>
+        <g id="Line_55">
+          <path d="M 136.388 766.7492 L 126.388 778.2075 L 136.388 789.6658" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+        </g>
+      </g>
+      <g id="Group_85">
+        <g id="Graphic_63">
+          <rect x="206" y="758.2075" width="80" height="40" fill="#dfd3c3"/>
+          <rect x="206" y="758.2075" width="80" height="40" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+          <clipPath id="clip_path_5">
+            <rect x="0" y="0" width="80" height="40" fill="#dfd3c3"/>
+          </clipPath>
+          <text clip-path="url(#clip_path_5)" transform="translate(211 771.0395)" fill="black">
+            <tspan font-family="Helvetica Neue" font-size="12" font-weight="400" fill="black" x="11.774" y="11">keyHash</tspan>
+          </text>
+        </g>
+        <g id="Graphic_62">
+          <rect x="286" y="758.2075" width="160" height="40" fill="#dfd3c3"/>
+          <rect x="286" y="758.2075" width="160" height="40" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+          <clipPath id="clip_path_6">
+            <rect x="0" y="0" width="160" height="40" fill="#dfd3c3"/>
+          </clipPath>
+          <text clip-path="url(#clip_path_6)" transform="translate(291 771.0395)" fill="black">
+            <tspan font-family="Helvetica Neue" font-size="12" font-weight="400" fill="black" x="59.982" y="11">offset</tspan>
+          </text>
+        </g>
+        <g id="Graphic_61">
+          <rect x="446" y="758.2075" width="80" height="40" fill="#dfd3c3"/>
+          <rect x="446" y="758.2075" width="80" height="40" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+          <clipPath id="clip_path_7">
+            <rect x="0" y="0" width="80" height="40" fill="#dfd3c3"/>
+          </clipPath>
+          <text clip-path="url(#clip_path_7)" transform="translate(451 771.0395)" fill="black">
+            <tspan font-family="Helvetica Neue" font-size="12" font-weight="400" fill="black" x="14.42" y="11">timeDiff</tspan>
+          </text>
+        </g>
+        <g id="Graphic_60">
+          <rect x="526" y="758.2075" width="80" height="40" fill="#dfd3c3"/>
+          <rect x="526" y="758.2075" width="80" height="40" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+          <clipPath id="clip_path_8">
+            <rect x="0" y="0" width="80" height="40" fill="#dfd3c3"/>
+          </clipPath>
+          <text clip-path="url(#clip_path_8)" transform="translate(531 771.0395)" fill="black">
+            <tspan font-family="Helvetica Neue" font-size="12" font-weight="400" fill="black" x="4.616" y="11">preIndex=0</tspan>
+          </text>
+        </g>
+      </g>
+      <g id="Group_103">
+        <g id="Graphic_68">
+          <rect x="206" y="841.332" width="80" height="40" fill="#dfd3c3"/>
+          <rect x="206" y="841.332" width="80" height="40" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+          <clipPath id="clip_path_9">
+            <rect x="0" y="0" width="80" height="40" fill="#dfd3c3"/>
+          </clipPath>
+          <text clip-path="url(#clip_path_9)" transform="translate(211 854.164)" fill="black">
+            <tspan font-family="Helvetica Neue" font-size="12" font-weight="400" fill="black" x="11.774" y="11">keyHash</tspan>
+          </text>
+        </g>
+        <g id="Graphic_67">
+          <rect x="286" y="841.332" width="160" height="40" fill="#dfd3c3"/>
+          <rect x="286" y="841.332" width="160" height="40" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+          <clipPath id="clip_path_10">
+            <rect x="0" y="0" width="160" height="40" fill="#dfd3c3"/>
+          </clipPath>
+          <text clip-path="url(#clip_path_10)" transform="translate(291 854.164)" fill="black">
+            <tspan font-family="Helvetica Neue" font-size="12" font-weight="400" fill="black" x="59.982" y="11">offset</tspan>
+          </text>
+        </g>
+        <g id="Graphic_66">
+          <rect x="446" y="841.332" width="80" height="40" fill="#dfd3c3"/>
+          <rect x="446" y="841.332" width="80" height="40" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+          <clipPath id="clip_path_11">
+            <rect x="0" y="0" width="80" height="40" fill="#dfd3c3"/>
+          </clipPath>
+          <text clip-path="url(#clip_path_11)" transform="translate(451 854.164)" fill="black">
+            <tspan font-family="Helvetica Neue" font-size="12" font-weight="400" fill="black" x="14.42" y="11">timeDiff</tspan>
+          </text>
+        </g>
+        <g id="Graphic_65">
+          <rect x="526" y="841.332" width="80" height="40" fill="#dfd3c3"/>
+          <rect x="526" y="841.332" width="80" height="40" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+          <clipPath id="clip_path_12">
+            <rect x="0" y="0" width="80" height="40" fill="#dfd3c3"/>
+          </clipPath>
+          <text clip-path="url(#clip_path_12)" transform="translate(531 854.164)" fill="black">
+            <tspan font-family="Helvetica Neue" font-size="12" font-weight="400" fill="black" x="4.616" y="11">preIndex=1</tspan>
+          </text>
+        </g>
+      </g>
+      <g id="Graphic_69">
+        <text transform="translate(66.716 771.0395)" fill="black">
+          <tspan font-family="Helvetica Neue" font-size="12" font-weight="400" fill="black" x="0" y="11">IndexData</tspan>
+        </text>
+      </g>
+      <g id="Group_76">
+        <g id="Graphic_70">
+          <rect x="206" y="468.834" width="160" height="40" fill="#f3ecc2"/>
+          <rect x="206" y="468.834" width="160" height="40" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+          <text transform="translate(211 481.666)" fill="black">
+            <tspan font-family="Helvetica Neue" font-size="12" font-weight="400" fill="black" x="26.982" y="11">begineTimestamp</tspan>
+          </text>
+        </g>
+        <g id="Graphic_71">
+          <rect x="366" y="468.834" width="160" height="40" fill="#f3ecc2"/>
+          <rect x="366" y="468.834" width="160" height="40" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+          <text transform="translate(371 481.666)" fill="black">
+            <tspan font-family="Helvetica Neue" font-size="12" font-weight="400" fill="black" x="34.98" y="11">endTimestamp</tspan>
+          </text>
+        </g>
+        <g id="Graphic_72">
+          <rect x="526" y="468.834" width="160" height="40" fill="#f3ecc2"/>
+          <rect x="526" y="468.834" width="160" height="40" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+          <text transform="translate(531 481.666)" fill="black">
+            <tspan font-family="Helvetica Neue" font-size="12" font-weight="400" fill="black" x="40.752" y="11">begineOffset</tspan>
+          </text>
+        </g>
+        <g id="Graphic_73">
+          <rect x="206" y="508.834" width="160" height="40" fill="#f3ecc2"/>
+          <rect x="206" y="508.834" width="160" height="40" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+          <text transform="translate(211 521.666)" fill="black">
+            <tspan font-family="Helvetica Neue" font-size="12" font-weight="400" fill="black" x="48.75" y="11">endOffset</tspan>
+          </text>
+        </g>
+        <g id="Graphic_74">
+          <rect x="366" y="508.834" width="80" height="40" fill="#f3ecc2"/>
+          <rect x="366" y="508.834" width="80" height="40" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+          <text transform="translate(371 514.498)" fill="black">
+            <tspan font-family="Helvetica Neue" font-size="12" font-weight="400" fill="black" x="11.552" y="11">hashSlot</tspan>
+            <tspan font-family="Helvetica Neue" font-size="12" font-weight="400" fill="black" x="18.662" y="25.336">Count</tspan>
+          </text>
+        </g>
+        <g id="Graphic_75">
+          <rect x="446" y="508.834" width="80" height="40" fill="#f3ecc2"/>
+          <rect x="446" y="508.834" width="80" height="40" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+          <text transform="translate(451 521.666)" fill="black">
+            <tspan font-family="Helvetica Neue" font-size="12" font-weight="400" fill="black" x="4.106" y="11">indexCount </tspan>
+          </text>
+        </g>
+      </g>
+      <g id="Group_102">
+        <g id="Graphic_37">
+          <rect x="206" y="574" width="80" height="40" fill="#f0ece3"/>
+          <rect x="206" y="574" width="80" height="40" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+        </g>
+        <g id="Graphic_38">
+          <rect x="286" y="574" width="80" height="40" fill="#f0ece3"/>
+          <rect x="286" y="574" width="80" height="40" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+        </g>
+        <g id="Graphic_39">
+          <rect x="366" y="574" width="80" height="40" fill="#f0ece3"/>
+          <rect x="366" y="574" width="80" height="40" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+        </g>
+        <g id="Graphic_41">
+          <rect x="446" y="574" width="80" height="40" fill="#f0ece3"/>
+          <rect x="446" y="574" width="80" height="40" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+        </g>
+        <g id="Graphic_42">
+          <rect x="526" y="574" width="80" height="40" fill="#f0ece3"/>
+          <rect x="526" y="574" width="80" height="40" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+        </g>
+        <g id="Graphic_43">
+          <rect x="206" y="614" width="80" height="40" fill="#f0ece3"/>
+          <rect x="206" y="614" width="80" height="40" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+          <text transform="translate(211 626.832)" fill="black">
+            <tspan font-family="Helvetica Neue" font-size="12" font-weight="400" fill="black" x="13.508" y="11">index=3</tspan>
+          </text>
+        </g>
+        <g id="Graphic_44">
+          <rect x="286" y="614" width="80" height="40" fill="#f0ece3"/>
+          <rect x="286" y="614" width="80" height="40" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+        </g>
+        <g id="Graphic_45">
+          <rect x="366" y="614" width="80" height="40" fill="#f0ece3"/>
+          <rect x="366" y="614" width="80" height="40" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+        </g>
+        <g id="Graphic_46">
+          <rect x="446" y="614" width="80" height="40" fill="#f0ece3"/>
+          <rect x="446" y="614" width="80" height="40" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+        </g>
+        <g id="Graphic_47">
+          <rect x="526" y="614" width="80" height="40" fill="#f0ece3"/>
+          <rect x="526" y="614" width="80" height="40" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+        </g>
+        <g id="Graphic_77">
+          <rect x="606" y="574" width="80" height="40" fill="#f0ece3"/>
+          <rect x="606" y="574" width="80" height="40" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+        </g>
+        <g id="Graphic_78">
+          <rect x="606" y="614" width="80" height="40" fill="#f0ece3"/>
+          <rect x="606" y="614" width="80" height="40" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+        </g>
+      </g>
+      <g id="Group_79">
+        <g id="Line_82">
+          <path d="M 146.388 468.834 L 146.388 468.834 C 140.86515 468.834 136.388 473.31115 136.388 478.834 L 136.388 504.38956" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+        </g>
+        <g id="Line_81">
+          <path d="M 136.388 513.27844 L 136.42028 538.7082 C 136.4273 544.2362 140.86078 548.74 146.388 548.834 L 146.388 548.834" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+        </g>
+        <g id="Line_80">
+          <path d="M 136.388 504.38956 L 126.388 508.834 L 136.388 513.27844" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+        </g>
+      </g>
+      <g id="Line_88">
+        <line x1="209.2" y1="903.332" x2="283.8" y2="903.332" marker-end="url(#NegativeControls_Marker)" marker-start="url(#NegativeControls_Marker_2)" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+      </g>
+      <g id="Line_89">
+        <line x1="290.2" y1="903.332" x2="442.8" y2="903.332" marker-end="url(#NegativeControls_Marker)" marker-start="url(#NegativeControls_Marker_2)" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+      </g>
+      <g id="Graphic_90">
+        <rect x="227.39372" y="891.164" width="40.012" height="24.335999" fill="white"/>
+        <text transform="translate(232.39372 896.164)" fill="black">
+          <tspan font-family="Helvetica Neue" font-size="12" font-weight="400" fill="black" x="0" y="11">4byte</tspan>
+        </text>
+      </g>
+      <g id="Graphic_91">
+        <rect x="346.9932" y="891.164" width="40.012" height="24.335999" fill="white"/>
+        <text transform="translate(351.9932 896.164)" fill="black">
+          <tspan font-family="Helvetica Neue" font-size="12" font-weight="400" fill="black" x="0" y="11">8byte</tspan>
+        </text>
+      </g>
+      <g id="Line_98">
+        <path d="M 206 634 L 171.31165 634 L 171.31165 861.332 L 196.1 861.332" marker-end="url(#FilledArrow_Marker)" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="8.0,4.0,1.0,4.0" stroke-width="1"/>
+      </g>
+      <g id="Line_100">
+        <path d="M 606 861.332 L 616 861.332 L 616 822.786 L 191.1 822.786 L 191.1 695.083 L 196.1 695.083" marker-end="url(#FilledArrow_Marker)" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="8.0,4.0,1.0,4.0" stroke-width="1"/>
+      </g>
+      <g id="Graphic_164">
+        <text transform="translate(612.75 894.108)" fill="#596e79">
+          <tspan font-family="Helvetica Neue" font-size="14" font-weight="400" fill="#596e79" x="0" y="13">@HadYang</tspan>
+        </text>
+      </g>
+    </g>
+  </g>
+</svg>
