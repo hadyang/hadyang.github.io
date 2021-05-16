@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
-<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:xl="http://www.w3.org/1999/xlink" viewBox="11 417 726 549" width="726" height="549">
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:dc="http://purl.org/dc/elements/1.1/" version="1.1" xmlns:xl="http://www.w3.org/1999/xlink" viewBox="36 442 676 499" width="676" height="499">
   <defs>
     <font-face font-family="Helvetica Neue" font-size="12" panose-1="2 0 5 3 0 0 0 2 0 4" units-per-em="1000" underline-position="-100" underline-thickness="50" slope="0" x-height="517" cap-height="714" ascent="951.9958" descent="-212.99744" font-weight="400">
       <font-face-src>
@@ -28,48 +28,48 @@
       </font-face-src>
     </font-face>
   </defs>
-  <metadata> Produced by OmniGraffle 7.18.5\n2021-05-15 16:40:36 +0000</metadata>
-  <g id="Canvas___" fill-opacity="1" fill="none" stroke-opacity="1" stroke="none" stroke-dasharray="none">
+  <metadata> Produced by OmniGraffle 7.18.5\n2021-05-16 08:36:54 +0000</metadata>
+  <g id="Canvas___" stroke="none" fill-opacity="1" stroke-opacity="1" stroke-dasharray="none" fill="none">
     <title>存储结构</title>
-    <rect fill="white" x="11" y="417" width="726" height="549"/>
+    <rect fill="white" x="36" y="442" width="676" height="499"/>
     <g id="Canvas____IndexFile">
       <title>IndexFile</title>
       <g id="Group_104">
         <g id="Graphic_31">
-          <rect x="206" y="675.083" width="80" height="40" fill="#dfd3c3"/>
+          <rect x="206" y="675.083" width="80" height="40" fill="#fad56e"/>
           <rect x="206" y="675.083" width="80" height="40" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
           <clipPath id="clip_path">
-            <rect x="0" y="0" width="80" height="40" fill="#dfd3c3"/>
+            <rect x="0" y="0" width="80" height="40" fill="#fad56e"/>
           </clipPath>
           <text clip-path="url(#clip_path)" transform="translate(211 687.915)" fill="black">
             <tspan font-family="Helvetica Neue" font-size="12" font-weight="400" fill="black" x="11.774" y="11">keyHash</tspan>
           </text>
         </g>
         <g id="Graphic_32">
-          <rect x="286" y="675.083" width="160" height="40" fill="#dfd3c3"/>
+          <rect x="286" y="675.083" width="160" height="40" fill="#fad56e"/>
           <rect x="286" y="675.083" width="160" height="40" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
           <clipPath id="clip_path_2">
-            <rect x="0" y="0" width="160" height="40" fill="#dfd3c3"/>
+            <rect x="0" y="0" width="160" height="40" fill="#fad56e"/>
           </clipPath>
           <text clip-path="url(#clip_path_2)" transform="translate(291 687.915)" fill="black">
             <tspan font-family="Helvetica Neue" font-size="12" font-weight="400" fill="black" x="59.982" y="11">offset</tspan>
           </text>
         </g>
         <g id="Graphic_33">
-          <rect x="446" y="675.083" width="80" height="40" fill="#dfd3c3"/>
+          <rect x="446" y="675.083" width="80" height="40" fill="#fad56e"/>
           <rect x="446" y="675.083" width="80" height="40" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
           <clipPath id="clip_path_3">
-            <rect x="0" y="0" width="80" height="40" fill="#dfd3c3"/>
+            <rect x="0" y="0" width="80" height="40" fill="#fad56e"/>
           </clipPath>
           <text clip-path="url(#clip_path_3)" transform="translate(451 687.915)" fill="black">
             <tspan font-family="Helvetica Neue" font-size="12" font-weight="400" fill="black" x="14.42" y="11">timeDiff</tspan>
           </text>
         </g>
         <g id="Graphic_34">
-          <rect x="526" y="675.083" width="80" height="40" fill="#dfd3c3"/>
+          <rect x="526" y="675.083" width="80" height="40" fill="#fad56e"/>
           <rect x="526" y="675.083" width="80" height="40" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
           <clipPath id="clip_path_4">
-            <rect x="0" y="0" width="80" height="40" fill="#dfd3c3"/>
+            <rect x="0" y="0" width="80" height="40" fill="#fad56e"/>
           </clipPath>
           <text clip-path="url(#clip_path_4)" transform="translate(531 687.915)" fill="black">
             <tspan font-family="Helvetica Neue" font-size="12" font-weight="400" fill="black" x="4.616" y="11">preIndex=0</tspan>
@@ -110,40 +110,40 @@
       </g>
       <g id="Group_85">
         <g id="Graphic_63">
-          <rect x="206" y="758.2075" width="80" height="40" fill="#dfd3c3"/>
+          <rect x="206" y="758.2075" width="80" height="40" fill="#fad56e"/>
           <rect x="206" y="758.2075" width="80" height="40" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
           <clipPath id="clip_path_5">
-            <rect x="0" y="0" width="80" height="40" fill="#dfd3c3"/>
+            <rect x="0" y="0" width="80" height="40" fill="#fad56e"/>
           </clipPath>
           <text clip-path="url(#clip_path_5)" transform="translate(211 771.0395)" fill="black">
             <tspan font-family="Helvetica Neue" font-size="12" font-weight="400" fill="black" x="11.774" y="11">keyHash</tspan>
           </text>
         </g>
         <g id="Graphic_62">
-          <rect x="286" y="758.2075" width="160" height="40" fill="#dfd3c3"/>
+          <rect x="286" y="758.2075" width="160" height="40" fill="#fad56e"/>
           <rect x="286" y="758.2075" width="160" height="40" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
           <clipPath id="clip_path_6">
-            <rect x="0" y="0" width="160" height="40" fill="#dfd3c3"/>
+            <rect x="0" y="0" width="160" height="40" fill="#fad56e"/>
           </clipPath>
           <text clip-path="url(#clip_path_6)" transform="translate(291 771.0395)" fill="black">
             <tspan font-family="Helvetica Neue" font-size="12" font-weight="400" fill="black" x="59.982" y="11">offset</tspan>
           </text>
         </g>
         <g id="Graphic_61">
-          <rect x="446" y="758.2075" width="80" height="40" fill="#dfd3c3"/>
+          <rect x="446" y="758.2075" width="80" height="40" fill="#fad56e"/>
           <rect x="446" y="758.2075" width="80" height="40" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
           <clipPath id="clip_path_7">
-            <rect x="0" y="0" width="80" height="40" fill="#dfd3c3"/>
+            <rect x="0" y="0" width="80" height="40" fill="#fad56e"/>
           </clipPath>
           <text clip-path="url(#clip_path_7)" transform="translate(451 771.0395)" fill="black">
             <tspan font-family="Helvetica Neue" font-size="12" font-weight="400" fill="black" x="14.42" y="11">timeDiff</tspan>
           </text>
         </g>
         <g id="Graphic_60">
-          <rect x="526" y="758.2075" width="80" height="40" fill="#dfd3c3"/>
+          <rect x="526" y="758.2075" width="80" height="40" fill="#fad56e"/>
           <rect x="526" y="758.2075" width="80" height="40" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
           <clipPath id="clip_path_8">
-            <rect x="0" y="0" width="80" height="40" fill="#dfd3c3"/>
+            <rect x="0" y="0" width="80" height="40" fill="#fad56e"/>
           </clipPath>
           <text clip-path="url(#clip_path_8)" transform="translate(531 771.0395)" fill="black">
             <tspan font-family="Helvetica Neue" font-size="12" font-weight="400" fill="black" x="4.616" y="11">preIndex=0</tspan>
@@ -152,40 +152,40 @@
       </g>
       <g id="Group_103">
         <g id="Graphic_68">
-          <rect x="206" y="841.332" width="80" height="40" fill="#dfd3c3"/>
+          <rect x="206" y="841.332" width="80" height="40" fill="#fad56e"/>
           <rect x="206" y="841.332" width="80" height="40" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
           <clipPath id="clip_path_9">
-            <rect x="0" y="0" width="80" height="40" fill="#dfd3c3"/>
+            <rect x="0" y="0" width="80" height="40" fill="#fad56e"/>
           </clipPath>
           <text clip-path="url(#clip_path_9)" transform="translate(211 854.164)" fill="black">
             <tspan font-family="Helvetica Neue" font-size="12" font-weight="400" fill="black" x="11.774" y="11">keyHash</tspan>
           </text>
         </g>
         <g id="Graphic_67">
-          <rect x="286" y="841.332" width="160" height="40" fill="#dfd3c3"/>
+          <rect x="286" y="841.332" width="160" height="40" fill="#fad56e"/>
           <rect x="286" y="841.332" width="160" height="40" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
           <clipPath id="clip_path_10">
-            <rect x="0" y="0" width="160" height="40" fill="#dfd3c3"/>
+            <rect x="0" y="0" width="160" height="40" fill="#fad56e"/>
           </clipPath>
           <text clip-path="url(#clip_path_10)" transform="translate(291 854.164)" fill="black">
             <tspan font-family="Helvetica Neue" font-size="12" font-weight="400" fill="black" x="59.982" y="11">offset</tspan>
           </text>
         </g>
         <g id="Graphic_66">
-          <rect x="446" y="841.332" width="80" height="40" fill="#dfd3c3"/>
+          <rect x="446" y="841.332" width="80" height="40" fill="#fad56e"/>
           <rect x="446" y="841.332" width="80" height="40" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
           <clipPath id="clip_path_11">
-            <rect x="0" y="0" width="80" height="40" fill="#dfd3c3"/>
+            <rect x="0" y="0" width="80" height="40" fill="#fad56e"/>
           </clipPath>
           <text clip-path="url(#clip_path_11)" transform="translate(451 854.164)" fill="black">
             <tspan font-family="Helvetica Neue" font-size="12" font-weight="400" fill="black" x="14.42" y="11">timeDiff</tspan>
           </text>
         </g>
         <g id="Graphic_65">
-          <rect x="526" y="841.332" width="80" height="40" fill="#dfd3c3"/>
+          <rect x="526" y="841.332" width="80" height="40" fill="#fad56e"/>
           <rect x="526" y="841.332" width="80" height="40" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
           <clipPath id="clip_path_12">
-            <rect x="0" y="0" width="80" height="40" fill="#dfd3c3"/>
+            <rect x="0" y="0" width="80" height="40" fill="#fad56e"/>
           </clipPath>
           <text clip-path="url(#clip_path_12)" transform="translate(531 854.164)" fill="black">
             <tspan font-family="Helvetica Neue" font-size="12" font-weight="400" fill="black" x="4.616" y="11">preIndex=1</tspan>
@@ -199,35 +199,35 @@
       </g>
       <g id="Group_76">
         <g id="Graphic_70">
-          <rect x="206" y="468.834" width="160" height="40" fill="#f3ecc2"/>
+          <rect x="206" y="468.834" width="160" height="40" fill="#fad56e"/>
           <rect x="206" y="468.834" width="160" height="40" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
           <text transform="translate(211 481.666)" fill="black">
             <tspan font-family="Helvetica Neue" font-size="12" font-weight="400" fill="black" x="26.982" y="11">begineTimestamp</tspan>
           </text>
         </g>
         <g id="Graphic_71">
-          <rect x="366" y="468.834" width="160" height="40" fill="#f3ecc2"/>
+          <rect x="366" y="468.834" width="160" height="40" fill="#fad56e"/>
           <rect x="366" y="468.834" width="160" height="40" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
           <text transform="translate(371 481.666)" fill="black">
             <tspan font-family="Helvetica Neue" font-size="12" font-weight="400" fill="black" x="34.98" y="11">endTimestamp</tspan>
           </text>
         </g>
         <g id="Graphic_72">
-          <rect x="526" y="468.834" width="160" height="40" fill="#f3ecc2"/>
+          <rect x="526" y="468.834" width="160" height="40" fill="#fad56e"/>
           <rect x="526" y="468.834" width="160" height="40" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
           <text transform="translate(531 481.666)" fill="black">
             <tspan font-family="Helvetica Neue" font-size="12" font-weight="400" fill="black" x="40.752" y="11">begineOffset</tspan>
           </text>
         </g>
         <g id="Graphic_73">
-          <rect x="206" y="508.834" width="160" height="40" fill="#f3ecc2"/>
+          <rect x="206" y="508.834" width="160" height="40" fill="#fad56e"/>
           <rect x="206" y="508.834" width="160" height="40" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
           <text transform="translate(211 521.666)" fill="black">
             <tspan font-family="Helvetica Neue" font-size="12" font-weight="400" fill="black" x="48.75" y="11">endOffset</tspan>
           </text>
         </g>
         <g id="Graphic_74">
-          <rect x="366" y="508.834" width="80" height="40" fill="#f3ecc2"/>
+          <rect x="366" y="508.834" width="80" height="40" fill="#fad56e"/>
           <rect x="366" y="508.834" width="80" height="40" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
           <text transform="translate(371 514.498)" fill="black">
             <tspan font-family="Helvetica Neue" font-size="12" font-weight="400" fill="black" x="11.552" y="11">hashSlot</tspan>
@@ -235,7 +235,7 @@
           </text>
         </g>
         <g id="Graphic_75">
-          <rect x="446" y="508.834" width="80" height="40" fill="#f3ecc2"/>
+          <rect x="446" y="508.834" width="80" height="40" fill="#fad56e"/>
           <rect x="446" y="508.834" width="80" height="40" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
           <text transform="translate(451 521.666)" fill="black">
             <tspan font-family="Helvetica Neue" font-size="12" font-weight="400" fill="black" x="4.106" y="11">indexCount </tspan>
@@ -244,54 +244,54 @@
       </g>
       <g id="Group_102">
         <g id="Graphic_37">
-          <rect x="206" y="574" width="80" height="40" fill="#f0ece3"/>
+          <rect x="206" y="574" width="80" height="40" fill="#f3ecc2"/>
           <rect x="206" y="574" width="80" height="40" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
         </g>
         <g id="Graphic_38">
-          <rect x="286" y="574" width="80" height="40" fill="#f0ece3"/>
+          <rect x="286" y="574" width="80" height="40" fill="#f3ecc2"/>
           <rect x="286" y="574" width="80" height="40" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
         </g>
         <g id="Graphic_39">
-          <rect x="366" y="574" width="80" height="40" fill="#f0ece3"/>
+          <rect x="366" y="574" width="80" height="40" fill="#f3ecc2"/>
           <rect x="366" y="574" width="80" height="40" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
         </g>
         <g id="Graphic_41">
-          <rect x="446" y="574" width="80" height="40" fill="#f0ece3"/>
+          <rect x="446" y="574" width="80" height="40" fill="#f3ecc2"/>
           <rect x="446" y="574" width="80" height="40" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
         </g>
         <g id="Graphic_42">
-          <rect x="526" y="574" width="80" height="40" fill="#f0ece3"/>
+          <rect x="526" y="574" width="80" height="40" fill="#f3ecc2"/>
           <rect x="526" y="574" width="80" height="40" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
         </g>
         <g id="Graphic_43">
-          <rect x="206" y="614" width="80" height="40" fill="#f0ece3"/>
+          <rect x="206" y="614" width="80" height="40" fill="#f3ecc2"/>
           <rect x="206" y="614" width="80" height="40" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
           <text transform="translate(211 626.832)" fill="black">
             <tspan font-family="Helvetica Neue" font-size="12" font-weight="400" fill="black" x="13.508" y="11">index=3</tspan>
           </text>
         </g>
         <g id="Graphic_44">
-          <rect x="286" y="614" width="80" height="40" fill="#f0ece3"/>
+          <rect x="286" y="614" width="80" height="40" fill="#f3ecc2"/>
           <rect x="286" y="614" width="80" height="40" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
         </g>
         <g id="Graphic_45">
-          <rect x="366" y="614" width="80" height="40" fill="#f0ece3"/>
+          <rect x="366" y="614" width="80" height="40" fill="#f3ecc2"/>
           <rect x="366" y="614" width="80" height="40" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
         </g>
         <g id="Graphic_46">
-          <rect x="446" y="614" width="80" height="40" fill="#f0ece3"/>
+          <rect x="446" y="614" width="80" height="40" fill="#f3ecc2"/>
           <rect x="446" y="614" width="80" height="40" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
         </g>
         <g id="Graphic_47">
-          <rect x="526" y="614" width="80" height="40" fill="#f0ece3"/>
+          <rect x="526" y="614" width="80" height="40" fill="#f3ecc2"/>
           <rect x="526" y="614" width="80" height="40" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
         </g>
         <g id="Graphic_77">
-          <rect x="606" y="574" width="80" height="40" fill="#f0ece3"/>
+          <rect x="606" y="574" width="80" height="40" fill="#f3ecc2"/>
           <rect x="606" y="574" width="80" height="40" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
         </g>
         <g id="Graphic_78">
-          <rect x="606" y="614" width="80" height="40" fill="#f0ece3"/>
+          <rect x="606" y="614" width="80" height="40" fill="#f3ecc2"/>
           <rect x="606" y="614" width="80" height="40" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
         </g>
       </g>
