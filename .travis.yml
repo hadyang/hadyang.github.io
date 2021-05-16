@@ -26,7 +26,7 @@ deploy:
   skip-cleanup: true
   github-token: $TOKEN  # Set in travis-ci.org dashboard, marked secure
   verbose: true
-  keep-history: true
+  keep-history: false
   local-dir: public
   target_branch: master  # branch contains blog content
   on:
