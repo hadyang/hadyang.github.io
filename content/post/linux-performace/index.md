@@ -129,6 +129,10 @@ buff/cache
 - DirectMap1G:            
 ```
 
+
+正是如上的一系列动作，使得Page Cache与Buffer Cache(buffer_head)相互绑定。对上，在文件读写时，以page为单位进行处理。而对下，在数据向device进行刷新时，则可以以buffer_head(block)为单位进行处理。
+https://lday.me/2019/09/09/0023_linux_page_cache_and_buffer_cache/
+
 ## IO设备
 
 
