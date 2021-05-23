@@ -6,7 +6,9 @@ categories:
     - 
 ---
 
-Golang 的原生类型十分丰富，除了常见的数值、字符串类型，还包含函数、channel 以及 map 容器。类型之间如何进行比较？哪些类型比较会导致 Panic？我们先从类型匹配讲起。
+golang 的原生类型十分丰富，除了常见的数值、字符串类型，还包含函数、channel 以及 map 容器。 map 在业务场景下很常见，go 中也可以作为 set 的实现。
+
+那大家是否有想过，什么类型能作为 map 的 key 呢？function、channel、slice 这些类型能作为 key 吗？为解答这个问题，我们先从类型匹配讲起。
 
 ## 类型匹配
 
@@ -87,6 +89,8 @@ func(x int, y float64) *[]string, func(int, float64) (result *[]string), and A5
 - 两个结构体的对应非空白标志（由 `_` 标示）相等，则它们相等
 - 两个数组中各个对应的元素相等，那么它们相等
 
+## 不可比较导致 panic
+
 `slice`、`map` 和 `function` 是不可比较的，但都可以与预定义的 `nil` 进行比较。当两个接口值的动态类型是 **不可比较** 的，在代码中进行了比较时，会导致 **panic**。这种行为不只是接口值，还包含接口数组或包含接口的结构体。
 
 ```go
@@ -99,5 +103,19 @@ func main() {
 	i1, i2 = f1, f2
 
 	println(i1 == i2) //panic
+}
+```
+
+对于 map 来说，其 key 必须是 **可比较** 的，因此 `slice`、`map` 和 `function` 均不能作为 map 的key，如果使用则会导致 panic 发生。其他包括 channel、数组在内的类型都能作为 key。
+
+```go
+func A() {
+}
+
+func main() {
+	m := make(map[interface{}]struct{})
+	m[A] = struct{}{} //panic
+
+	fmt.Println(m) 
 }
 ```
