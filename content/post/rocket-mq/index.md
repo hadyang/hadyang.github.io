@@ -1,5 +1,5 @@
 ---
-title: RocketMQ 原理解析
+title: RocketMQ 关键特性解析
 draft: false
 date: 2021-04-21
 categories: 
