@@ -36,6 +36,69 @@ Kafka 劣化的如此明显和其实现方式有关，Kafka 对每个 topic 每�
 
 相反，RocketMQ 在物理上只存在一个文件，topic 和 分区都是逻辑概念，所以 topic 增加不会导致 RocketMQ 性能的急剧下降。因此，**Kafka 适合少量 topic 的场景**， **RocketMQ 适合多 topic 场景**。
 
+## 系统架构
+
+Topic 是一组相似消息的集合，每个消息都属于某个 Topic，RocketMQ 中的 Topic 属于逻辑结构。在一次消息的发送中，RocketMQ 多种不同组件分工合作，包含管理 Topic 路由的 NameServer、存储消息的 Broker、以及发送消息的 Producer和处理消息的 Consumer。
+
+- **NameServer** 保存集群的元信息，最主要的就是 Topic 路由，路由数据通过 Broker 上报，存储在本地内存中。一个集群中可以配置多个 NameServer 以提供容错保障，NameServer 之间独立无感知。
+- **Broker** 存储消息数据的模块，一个集群中可以部署多个 Broker 主节点，一个 Broker 主节点可以部署多个从节点，提供高可用方案。 Broker 在启动时会初始化系统默认的 Topic，以完成某些功能。一个 Topic 可以存储在多个 Broker 主节点中，当 Broker 启动时，会对集群中所有 NameServer 进行注册，将自己的 Topic 信息上报。
+- **Producer** 消息发送方，通过 NameServer 获取消息路由，将消息投递到 Broker 上。对于事务消息还需要实现事务查询接口。
+- **Consumer** 消息消费方，有集群和广播两种消费方式。通过 NameServer 获取消息路由，并定时从 Broker 拉取消息。在客户端的实现上，有 Push 和 Pull 两种方式，本质上都是拉取的方式， Push 只是 SDK 自动完成拉取工作。
+- [**Admin**](https://rocketmq-1.gitbook.io/rocketmq-connector/kai-fa-zhe-zhong-xin/mqadmin-cao-zuo-zhi-nan) 集群管理平台，可以对集群进行监控，修改路由信息等。
+
+![](assists/architecure.svg)
+
+## 路由机制
+
+消息系统中最重要的就是路由，消息从何处来、存放到何处、被谁消费，这都是通过路由机制来决定的，RocketMQ 中的 NameServer 承担起了管理路由的职责。在 Producer/Consumer 启动时，从 NameServer 获取 Topic 的路由，其中包括 Borker/Queue 的相关信息。
+
+```java
+public class TopicRouteData extends RemotingSerializable {
+    private String orderTopicConf;
+    private List<QueueData> queueDatas;
+    private List<BrokerData> brokerDatas;
+    private HashMap<String/* brokerAddr */, List<String>/* Filter Server */> filterServerTable;
+}
+
+public class QueueData implements Comparable<QueueData> {
+    private String brokerName;
+    private int readQueueNums; //当前Broker上读队列个数
+    private int writeQueueNums; //当前Broker上写队列个数
+    private int perm; //Topic的读写权限 6=可读可写
+    private int topicSynFlag;
+}
+
+public class BrokerData implements Comparable<BrokerData> {
+    private String cluster;
+    private String brokerName;
+    private HashMap<Long/* brokerId */, String/* broker address */> brokerAddrs;
+}
+```
+
+可以看到，`QueueData` 中 `readQueueNums` `writeQueueNums` 控制 Borker 上队列的个数。在 Producer/Consumer 获取到路由信息后，会根据这两个参数的配置来构建 `MessageQueue`。在客户端的视角来看， MessageQueue 和 Broker 上的 ConsumerQueue 是对应的。
+
+```java
+public static TopicPublishInfo topicRouteData2TopicPublishInfo(final String topic, final TopicRouteData route) {
+    ...
+    for (int i = 0; i < qd.getWriteQueueNums(); i++) {
+        MessageQueue mq = new MessageQueue(topic, qd.getBrokerName(), i);
+        info.getMessageQueueList().add(mq);
+    }
+    ...
+}
+
+public static Set<MessageQueue> topicRouteData2TopicSubscribeInfo(final String topic, final TopicRouteData route) {
+    ...
+    for (int i = 0; i < qd.getReadQueueNums(); i++) {
+        MessageQueue mq = new MessageQueue(topic, qd.getBrokerName(), i);
+        mqList.add(mq);
+    }
+    ...
+}
+```
+
+Producer/Consumer 会根据 MessageQueue 进行发送/拉取消息。注意，**当写队列个数大于读队列个数时，多出来的队列无法被消费**。
+
 ## 消息存储
 
 一次典型的 RocketMQ 消息由 **生产者**（Producer）同步/异步发送到 **Brocker**，每个消息都必须确定一个 **Topic**。Brocker 将消息持久化存储在本地，消息可以由 **消费者** 从 Broker 拉取，或 Broker 推送到消费者。每个消费者都归属于一个 **消费组**，同一个消息（广播消息除外）在一个消费组里只能被消费一次。消费者在获取到消息后执行本地业务代码，成功后发送 Brocker 确认消息。
@@ -72,10 +135,9 @@ HashSlot 默认有 5,000,000 个，将消息的 `key` 进行哈希取模选择�
 
 RocketMQ 可以手动创建 Topic，也可以在 Producer 发送消息时自动创建。自动创建逻辑在实现时比较有意思，当 Producer/Consumer 启动时会开启一系列定时任务，包括定时从 NameServer 获取路由信息。当 Producer 发送消息时，若未发现 Topic 路由信息，则获取 Topic `TBW102` 的路由信息，并以此发送消息。 `TBW102` 属于一种系统 Topic，在 Broker 启动时就会创建。
 
-
 ## 负载均衡
 
-Produder 的负载均衡相对来说比较简单，默认策略下是随机选取一个 MessageQueue（客户端概念，对应Broker的ConsumeQueue）。当开启 `LatencyFaultTolerance` 策略后，在默认策略的基础上，对之前失败的 MessageQueue 按一定的时间做退避。例如，如果上次请求的 `latency` 超过 550ms，就退避 3000ms；超过 1000ms，就退避 60000ms；
+Producer 的负载均衡相对来说比较简单，默认策略下是随机选取一个 MessageQueue（客户端概念，对应Broker的ConsumeQueue）。当开启 `LatencyFaultTolerance` 策略后，在默认策略的基础上，对之前失败的 MessageQueue 按一定的时间做退避。例如，如果上次请求的 `latency` 超过 550ms，就退避 3000ms；超过 1000ms，就退避 60000ms；
 
 
 RocketMQ 中的 Consumer 支持集群消费和广播消费，集群消费的负载均衡会复杂一些，需要处理 ConsumerGroup 重复消费的问题。在实现上 RocketMQ 并没有通过集中化的方式来处理重复消费，而是通过算法策略（默认为平均分配），可以看下面的示例图。
@@ -104,6 +166,22 @@ RocketMQ 采用了 2PC 的思想来实现了提交事务消息，同时增加一
 
 同时，RocketMQ 有一个定时任务 `TransactionalMessageCheckService` 扫描 Half 消息，对于没有提交或回滚的事务消息进行补偿。
 
+## 顺序消息
+
+从上面负载均衡的小节中能发现，一个 ConsumerQueue 最多只能被一个 Consumer 消费。因此，顺序消息在实现上就更简单了，通过将消息分配到一个 ConsumerQueue 中实现消息的顺序消费。一个典型的顺序消息实现如下：
+
+```java
+SendResult sendResult = producer.send(msg, new MessageQueueSelector() {
+    @Override
+    public MessageQueue select(List<MessageQueue> mqs, Message msg, Object arg) {
+        Integer id = (Integer) arg;
+        int index = id % mqs.size();
+        return mqs.get(index);
+    }
+}, orderId);
+```
+
+而全局顺序就是更简单了，将所有的 Msg 都在一个 ConsumerQueue 里，就能实现全局顺序消费😂
 
 ## 参考文档
 

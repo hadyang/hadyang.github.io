@@ -19,7 +19,7 @@ before_install:
   - sudo dpkg -i hugo_extended.deb
 
 script:
-  - hugo
+  - hugo --config config-github.toml
 
 deploy:
   provider: pages
