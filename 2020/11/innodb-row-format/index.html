@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>【Inoodb】行格式 - HadYang</title>
+  <meta name="renderer" content="webkit" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<meta name="theme-color" content="#f8f5ec" />
+<meta name="msapplication-navbutton-color" content="#f8f5ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
+
+
+<meta name="author" content="HadYang" /><meta name="description" content="文件格式 随着 Innodb 的演进，老版本的数据文件格式已经不能支撑新特性的诉求。为方便管理降级和升级以及不同版本 MySQL 的运行，Innodb 采用命名文件格式，" /><meta name="keywords" content="Java" />
+
+
+
+
+
+
+<meta name="generator" content="Hugo 0.73.0 with theme even" />
+
+
+<link rel="canonical" href="https://hadyang.github.io/2020/11/innodb-row-format/" />
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="manifest" href="/manifest.json">
+<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
+
+
+
+<link href="/sass/main.min.75c01efdcbc2767fdfe1f22f5a6fccc8c390d3cda325742f698bd0c6344144be.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.css" integrity="sha256-7TyXnr2YU040zfSP+rEcz29ggW4j56/ujTPwjMzyqFY=" crossorigin="anonymous">
+
+
+<meta property="og:title" content="【Inoodb】行格式" />
+<meta property="og:description" content="文件格式 随着 Innodb 的演进，老版本的数据文件格式已经不能支撑新特性的诉求。为方便管理降级和升级以及不同版本 MySQL 的运行，Innodb 采用命名文件格式，" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://hadyang.github.io/2020/11/innodb-row-format/" />
+<meta property="article:published_time" content="2020-11-29T00:00:00+00:00" />
+<meta property="article:modified_time" content="2020-11-29T00:00:00+00:00" />
+<meta itemprop="name" content="【Inoodb】行格式">
+<meta itemprop="description" content="文件格式 随着 Innodb 的演进，老版本的数据文件格式已经不能支撑新特性的诉求。为方便管理降级和升级以及不同版本 MySQL 的运行，Innodb 采用命名文件格式，">
+<meta itemprop="datePublished" content="2020-11-29T00:00:00&#43;00:00" />
+<meta itemprop="dateModified" content="2020-11-29T00:00:00&#43;00:00" />
+<meta itemprop="wordCount" content="2921">
+
+
+
+<meta itemprop="keywords" content="" /><meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="【Inoodb】行格式"/>
+<meta name="twitter:description" content="文件格式 随着 Innodb 的演进，老版本的数据文件格式已经不能支撑新特性的诉求。为方便管理降级和升级以及不同版本 MySQL 的运行，Innodb 采用命名文件格式，"/>
+
+<!--[if lte IE 9]>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js"></script>
+<![endif]-->
+
+<!--[if lt IE 9]>
+  <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+<![endif]-->
+
+</head>
+<body>
+  <div id="mobile-navbar" class="mobile-navbar">
+  <div class="mobile-header-logo">
+    <a href="/" class="logo">HadYang</a>
+  </div>
+  <div class="mobile-navbar-icon">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
+<nav id="mobile-menu" class="mobile-menu slideout-menu">
+  <ul class="mobile-menu-list">
+    <a href="https://hadyang.github.io/interview/">
+        <li class="mobile-menu-item">Interview</li>
+      </a><a href="/categories/">
+        <li class="mobile-menu-item">分类</li>
+      </a>
+  </ul>
+
+  
+
+
+</nav>
+
+  <div class="container" id="mobile-panel">
+    <header id="header" class="header">
+        <div class="logo-wrapper">
+  <a href="/" class="logo">HadYang</a>
+</div>
+
+
+
+
+
+<nav class="site-navbar">
+  <ul id="menu" class="menu">
+    <li class="menu-item">
+        <a class="menu-item-link" href="https://hadyang.github.io/interview/">Interview</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/categories/">分类</a>
+      </li>
+  </ul>
+</nav>
+
+    </header>
+
+    <main id="main" class="main">
+      <div class="content-wrapper">
+        <div id="content" class="content">
+          <article class="post">
+    
+    <header class="post-header">
+      <h1 class="post-title">【Inoodb】行格式</h1>
+
+      <div class="post-meta">
+        <span class="post-time"> 2020-11-29 </span>
+        <div class="post-category">
+            <a href="/categories/database/"> Database </a>
+            </div>
+          <span class="more-meta"> 约 2921 字 </span>
+          <span class="more-meta"> 预计阅读 6 分钟 </span>
+        
+      </div>
+    </header>
+
+    <div class="post-toc" id="post-toc">
+  <h2 class="post-toc-title">文章目录</h2>
+  <div class="post-toc-content always-active">
+    <nav id="TableOfContents">
+  <ul>
+    <li><a href="#文件格式">文件格式</a></li>
+    <li><a href="#行格式">行格式</a>
+      <ul>
+        <li><a href="#redundant">REDUNDANT</a></li>
+        <li><a href="#compact">COMPACT</a></li>
+        <li><a href="#dynamic-行格式">DYNAMIC 行格式</a></li>
+        <li><a href="#compressed-行格式">COMPRESSED 行格式</a></li>
+        <li><a href="#溢出判定">溢出判定</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+  </div>
+</div>
+    <div class="post-content">
+      <h2 id="文件格式">文件格式</h2>
+<p>随着 Innodb 的演进，老版本的数据文件格式已经不能支撑新特性的诉求。为方便管理降级和升级以及不同版本 MySQL 的运行，Innodb 采用命名文件格式，Innodb 目前支持两种文件格式： <code>Antelope</code> 和 <code>Barracuda</code></p>
+<ul>
+<li><strong>Antelope</strong> 是最原始的 Innodb 文件格式，在之前都没有名称。它支持 <strong>COMPACT</strong> 和 <strong>REDUNDANT</strong> 两种行格式</li>
+<li><strong>Barracuda</strong> 是新的文件格式。它支持所有的行格式，包括新的 <strong>COMPRESSED</strong> 和 <strong>DYNAMIC</strong> 行格式</li>
+</ul>
+<p>可以通过元数据表 <code>INFORMATION_SCHEMA.INNODB_SYS_TABLES</code> 查看表对应的文件格式和行格式</p>
+<div class="highlight"><pre class="chroma"><code class="language-sql" data-lang="sql"><span class="n">mysql</span><span class="o">&gt;</span> <span class="k">SELECT</span> <span class="o">*</span> <span class="k">FROM</span> <span class="n">INFORMATION_SCHEMA</span><span class="p">.</span><span class="n">INNODB_SYS_TABLES</span> <span class="k">WHERE</span> <span class="n">NAME</span><span class="o">=</span><span class="s1">&#39;test/t1&#39;</span><span class="err">\</span><span class="k">G</span>
+<span class="o">***************************</span> <span class="mi">1</span><span class="p">.</span> <span class="k">row</span> <span class="o">***************************</span>
+     <span class="n">TABLE_ID</span><span class="p">:</span> <span class="mi">44</span>
+         <span class="n">NAME</span><span class="p">:</span> <span class="n">test</span><span class="o">/</span><span class="n">t1</span>
+         <span class="n">FLAG</span><span class="p">:</span> <span class="mi">1</span>
+       <span class="n">N_COLS</span><span class="p">:</span> <span class="mi">6</span>
+        <span class="k">SPACE</span><span class="p">:</span> <span class="mi">30</span>
+  <span class="n">FILE_FORMAT</span><span class="p">:</span> <span class="n">Antelope</span>
+   <span class="n">ROW_FORMAT</span><span class="p">:</span> <span class="n">Compact</span>
+<span class="n">ZIP_PAGE_SIZE</span><span class="p">:</span> <span class="mi">0</span>
+</code></pre></div><h2 id="行格式">行格式</h2>
+<p>行格式决定表如何对行进行物理存储，这会影响到查询和 DML 语句的性能。当单个磁盘页能容纳越多的行，则其查询和索引性能就越好，在 Buffer Pool 中占用越少的内存，以及更新数据时越少的IO操作</p>
+<p>每个表中的数据都是存储在各个 Page 中的，Page 组成的表排列在一个被称为B树索引的结构中。表数据和二级索引都使用 B树这种数据结构。当B树索引代表整个表时，称之为聚集索引，聚集索引按主键排列。聚集索引的节点包含整行记录数据。二级索引的节点包含 <strong>索引列</strong> 和 <strong>主键列</strong>。</p>
+<p>一般情况下，列的数据都存储在B树节点中，但变长列是个例外。当变长列过大，导致B树的 Page 无法容纳时，会在磁盘上单独开辟 <strong>溢出页</strong> 进行存储。这些列被称为页外列（off-page columns）。页外列的值存储在溢出页的单链表，每个列都有其自己的链表，包含一个或多个溢出页。根据列的不同长度，变长列可以将全部或前缀数据存放在B树中，以免浪费存储空间和读取更多的页。</p>
+<p>在 MySQL 中字段的大小不仅与表定义的列长度有关，还与表使用的字符集有关联。比如对于 <code>CHAR(10)</code> 列，在 <code>latin1</code> 字符集下最多只占用 10byte，而在 <code>utf8</code> 字符集下其占用的存储空间在 10byte ~ 40byte 范围中。</p>
+<p>Innodb 中有四种行格式，分别为 <code>REDUNDANT</code>、<code>COMPACT</code>、<code>DYNAMIC</code>和<code>COMPRESSED</code>。</p>
+<h3 id="redundant">REDUNDANT</h3>
+<ol>
+<li>每条索引记录都包含 6byte 的 header，header 的作用在于链接连续的记录以及行级锁</li>
+<li>记录在聚集索引上包含所有用户定义的列。额外还包含 6byte 的事务ID 以及 7byte 的回滚指针</li>
+<li>如果没有定义主键，则聚集索引还会包含一个 6byte 的行ID</li>
+<li>每个二级索引记录除索引列本身外，还包含主键列</li>
+<li>每个记录中中包含一个指针指向每个字段。如果这些字段的总长度不超过 128byte，则指针只有 1byte，否则为 2byte。这些指针组成的数组被称为记录目录（Record Directory），指针指向的区域是记录的数据区</li>
+<li>默认情况下，固定长度的列比如 CHAR(10) 以固定长度存储。 VARCHAR 的后缀空格不会被截断（那就是说 CHAR 类型会截断）</li>
+<li>固定长度的列大于或等于 768byte 时，被当作变长列处理，<strong>可以</strong> 存储在溢出页上。</li>
+<li>Null 值在记录目（Record Directory）里会消耗 1～2byte。Null在变长列的数据区占用0byte，在固定长度列消耗“固定长度” 的空间。这样有助于 固定长度列从 空 → 非空的值更新，从而避免页分裂导致的碎片化</li>
+</ol>
+<p><img src="assists/redundant-format.png" alt=""></p>
+<h3 id="compact">COMPACT</h3>
+<ol>
+<li>每条索引记录都包含 5byte 的 header 以及 变长部分，header 的作用在于链接连续的记录以及行级锁</li>
+<li>记录头的变长部分包含一个 bit 向量，用于标记 NULL 列。bit 向量的大小由行中允许为 NULL 的列的个数决定，比如，由6～19列可以为 NULL，则这个 bit 向量使用 2byte。空列除 bit 向量外，不占用其他存储空间。变长部分还包含变长列的长度，根据列最大长度的不同，每个列长度占用 1～2 byte。如果所有的列都是 Not-NULL 并且都是固定长度，那么记录头不包含任何变长部分。</li>
+<li>对于非NULL 变长列，记录头占用1～2byte来记录列长度。2byte 在列存储在溢出页、最大长度超过255byte、实际长度超过127byte情况下使用。对于溢出页的列 2byte 用于标记页内存储+20byte溢出页指针的长度。页内存储长度为 768 byte，所以长度为 768+20。这 20byte指针存储真正的列长度</li>
+<li>记录头后紧跟着 <strong>非空列</strong> 的数据</li>
+<li>记录在聚集索引上包含所有用户定义的列。额外还包含 6byte 的事务ID 以及 7byte 的回滚指针</li>
+<li>如果没有定义主键，则聚集索引还会包含一个 6byte 的行ID</li>
+<li>每个二级索引记录除索引列本身外，还包含主键列。如果主键列是变长的，每个二级索引的记录头都会有一个变长的部分来记录其长度，即使二级索引是定长的</li>
+<li>对非变长的字符集，定长的字符列是按定长格式存储， VARCHAR 的后缀空白字符不会被截断</li>
+<li>对于变长字符集（utf8mb4），Innodb 截断 CHAR(n) 的后缀空白字符，并尝试存储在 n 个字节中。如果 CHAR(n) 的值超过 n 个字节，截断后缀空白的值就是该列的最小长度。最大长度就是字符集的最大长度*n
+<ol>
+<li>为 CHAR(n) 至少保留 n 个字节，在大多数情况下都可以原地更新，减少页碎片。相比来说，REDUNDANT 则会占用列的最大可能长度。</li>
+<li>当定长列超过或等于 768byte 时，会被当作变长字段，<strong>可以</strong>被存储在溢出页中。char(255) 在 utf8mb4 的编码下，最大长度就可能超过 768</li>
+</ol>
+</li>
+</ol>
+<p><img src="assists/compact-format.png" alt=""></p>
+<h3 id="dynamic-行格式">DYNAMIC 行格式</h3>
+<p>在存储特性上 DYNAMIC 与 COMPACT 相同，但增强了对超长变长列的存储能力，以支持更大索引前缀。对于溢出页的存储 DYNAMIC 基于一个想法：将长数据的一部分存储在页外，等效于将整个数据放到页外。 DYNAMIC 格式会尽量将短的列存储在行内，减少溢出页的个数</p>
+<ol>
+<li>超长的变长列（ <code>VARCHAR VARBINARY BLOB TEXT</code> ）完全存储到页外（off-page），在聚集索引中只包含 20byte 的溢出页指针。</li>
+<li>当定长列超过或等于 768byte 时，会被当作变长字段，可以被存储在溢出页中。</li>
+<li><strong>列是否存储到页外还依赖页大小和行的总长</strong>。当行非常长的时候，最长的列会被存储到页外，直到聚集索引的记录能在B树节点中至少存放两行。</li>
+<li>TEXT BLOB 长度小于等于 40byte 时，会存储在行内。</li>
+<li>当行长度合适时，DYNAMIC 也会将整个行放入索引记录中，但是 DYNAMIC 会避免将超长的列放入索引中。</li>
+<li>DYNAMIC 支持索引长度为 3072byte</li>
+</ol>
+<h3 id="compressed-行格式">COMPRESSED 行格式</h3>
+<ol>
+<li>COMPRESSED 行格式拥有与 DYNAMIC 相同的存储特性和能力，但支持表和索引数据的 <strong>压缩</strong>。</li>
+<li>COMPRESSED 行格式使用页外存储的方式与 DYNAMIC 类似，额外增加了压缩表和索引数据的存储和性能的考量，并且使用更少的空间。</li>
+<li>COMPRESSED 行格式通过 <code>KEY_BLOCK_SIZE</code> 选项控制聚集索引存储的数据大小，以及溢出页存储的数据大</li>
+<li>COMPRESSED 支持索引长度为 3072byte</li>
+</ol>
+<p>下面通过表格对比四种不同行格式的特点</p>
+<table>
+<thead>
+<tr>
+<th align="left">行格式</th>
+<th align="left">长字段存储</th>
+<th align="left">空间分配</th>
+<th align="left">后缀空格</th>
+<th align="left">NULL字段</th>
+<th align="left">索引长度</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left">REDUNDANT</td>
+<td align="left">1. 定长字段的值长度超过 768byte 就会被当作变长字段，超出数据 <strong>可以</strong> 存储到溢出页<br/>2. BLOB 和 TEXT 看实际长度，来决定是否适用溢出页</td>
+<td align="left">1. 定长字段以可能的最大长度存储，无数据字节用 0x20 填充<br>2. 变长字段不会预分配最大可能的存储空间</td>
+<td align="left">1. 定长字段的后缀空白会被截断<br>2. 变长字段的后缀空白会保留</td>
+<td align="left">1. 定长字段的NULL占用可能的最大空间<br>2. 变长字段的NULL不占用空间</td>
+<td align="left">768byte</td>
+</tr>
+<tr>
+<td align="left">COMPACT</td>
+<td align="left">1. 定长字段的值长度超过 768byte 就会被当作变长字段，超出数据 <strong>可以</strong> 存储到溢出页<br>2. BLOB和TEXT看实际长度，来决定是否适用溢出页</td>
+<td align="left">1. 定长字段&amp;变长字符-&gt;至少分配n个字<br>2. 定长字段&amp;定长字符集-&gt;分配最大长度，无数据字节用0x20填充<br>3. 变长字段-&gt;不预分配最大可能的存储空间</td>
+<td align="left">1. 定长字段的后缀空白会被截断<br>2. 变长字段的后缀空白会保留</td>
+<td align="left">1. 变长和定长字段均不占用空间</td>
+<td align="left">768byte</td>
+</tr>
+<tr>
+<td align="left">DYNAMIC</td>
+<td align="left">1. 对溢出数据，行内只存储指针，无前缀数据<br>2. BLOB 和 TEXT 小于 40byte 存储页内</td>
+<td align="left">同上</td>
+<td align="left">同上</td>
+<td align="left">同上</td>
+<td align="left">3072byte</td>
+</tr>
+<tr>
+<td align="left">COMPRESSED</td>
+<td align="left">同上</td>
+<td align="left">同上</td>
+<td align="left">同上</td>
+<td align="left">同上</td>
+<td align="left">3072byte</td>
+</tr>
+</tbody>
+</table>
+<h3 id="溢出判定">溢出判定</h3>
+<p>如果一个 Page 中可以放入两行数据（对于 16KB 的页来说，就是每行 8KB），那么 <code>VARCHAR VARBINARY BLOB TEXT</code> 类型的数据就不会放入溢出页中。两行数据不代表每行数据就占用 8192byte ，Innodb 内部还会有部分存储空间的占用。因此，对于 VARCHAR 来说最多是 8098byte，对 BLOB 和 TEXT 来说最多是 8000byte</p>
+<!-- 
+## 参考文档
+
+2. https://blog.jcole.us/2013/01/10/the-physical-structure-of-records-in-innodb/ 
+
+--><blockquote>
+</blockquote>
+
+    </div>
+
+    
+<footer class="post-footer">
+      
+      <nav class="post-nav">
+        <a class="prev" href="/2020/12/innodb-redolog/">
+            <i class="iconfont icon-left"></i>
+            <span class="prev-text nav-default">【Innodb】Redo Log</span>
+            <span class="prev-text nav-mobile">上一篇</span>
+          </a>
+        <a class="next" href="/2020/07/etcd-data-model/">
+            <span class="next-text nav-default">【ETCD】存储模型</span>
+            <span class="next-text nav-mobile">下一篇</span>
+            <i class="iconfont icon-right"></i>
+          </a>
+      </nav>
+    </footer>
+  </article>
+        </div>
+        <div id="gitalk-container"></div>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js" crossorigin="anonymous"></script>
+    <script type="text/javascript">
+      var gitalk = new Gitalk({
+        id: '\/2020\/11\/innodb-row-format\/',
+        title: '【Inoodb】行格式',
+        clientID: '64b9f11ba0a3291ee49e',
+        clientSecret: '8632b99db733cc33fd8f6fe85680f63f0db9d872',
+        repo: 'hadyang.github.io',
+        owner: 'hadyang',
+        admin: ['hadyang'],
+        body: decodeURI(location.href)
+      });
+      gitalk.render('gitalk-container');
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://github.com/gitalk/gitalk">comments powered by gitalk.</a></noscript>
+
+  
+
+  
+
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="social-links">
+  <a href="" type="application/rss+xml" class="iconfont icon-rss" title="rss"></a>
+</div>
+
+<div class="copyright">
+  <span class="power-by">
+    由 <a class="hexo-link" href="https://gohugo.io">Hugo</a> 强力驱动
+  </span>
+  <span class="division">|</span>
+  <span class="theme-info">
+    主题 -
+    <a class="theme-link" href="https://github.com/olOwOlo/hugo-theme-even">Even</a>
+  </span>
+
+  
+
+  <span class="copyright-year">
+    &copy; 
+    2017 - 
+    2021<span class="heart"><i class="iconfont icon-heart"></i></span><span>HadYang</span>
+  </span>
+</div>
+
+    </footer>
+
+    <div class="back-to-top" id="back-to-top">
+      <i class="iconfont icon-up"></i>
+    </div>
+  </div>
+  
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/slideout@1.0.1/dist/slideout.min.js" integrity="sha256-t+zJ/g8/KXIJMjSVQdnibt4dlaDxc9zXr/9oNPeWqdg=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.js" integrity="sha256-XVLffZaxoWfGUEbdzuLi7pwaUJv1cecsQJQqGLe7axY=" crossorigin="anonymous"></script>
+
+
+
+<script type="text/javascript" src="/js/main.min.c12618f9a600c40bd024996677e951e64d3487006775aeb22e200c990006c5c7.js"></script>
+  <script type="text/javascript">
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$','$'], ['\\(','\\)']],
+        }
+    };
+  </script>
+  <script async src="https://cdn.jsdelivr.net/npm/mathjax@3.0.5/es5/tex-mml-chtml.js" integrity="sha256-HGLuEfFcsUJGhvB8cQ8nr0gai9EucOOaIxFw7qxmd+w=" crossorigin="anonymous"></script>
+
+
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+	ga('create', 'UA-157595781-2', 'auto');
+	ga('set', 'anonymizeIp', true);
+	ga('send', 'pageview');
+}
+</script>
+<script async src='https://www.google-analytics.com/analytics.js'></script>
+
+
+
+
+
+
+
+</body>
+</html>

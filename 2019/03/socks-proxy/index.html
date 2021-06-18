@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>手写Socks5通信 - HadYang</title>
+  <meta name="renderer" content="webkit" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<meta name="theme-color" content="#f8f5ec" />
+<meta name="msapplication-navbutton-color" content="#f8f5ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
+
+
+<meta name="author" content="HadYang" /><meta name="description" content="Socks 协议本身是基于 TCP 的协议，位于应用层与传输层之间的会话层，将应用层的数据透明的传输到 TCP 层。更详细的介绍参见 SOCKS - 维基百科，自由的百科全书
+" /><meta name="keywords" content="Java" />
+
+
+
+
+
+
+<meta name="generator" content="Hugo 0.73.0 with theme even" />
+
+
+<link rel="canonical" href="https://hadyang.github.io/2019/03/socks-proxy/" />
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="manifest" href="/manifest.json">
+<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
+
+
+
+<link href="/sass/main.min.75c01efdcbc2767fdfe1f22f5a6fccc8c390d3cda325742f698bd0c6344144be.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.css" integrity="sha256-7TyXnr2YU040zfSP+rEcz29ggW4j56/ujTPwjMzyqFY=" crossorigin="anonymous">
+
+
+<meta property="og:title" content="手写Socks5通信" />
+<meta property="og:description" content="Socks 协议本身是基于 TCP 的协议，位于应用层与传输层之间的会话层，将应用层的数据透明的传输到 TCP 层。更详细的介绍参见 SOCKS - 维基百科，自由的百科全书" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://hadyang.github.io/2019/03/socks-proxy/" />
+<meta property="article:published_time" content="2019-03-16T00:00:00+00:00" />
+<meta property="article:modified_time" content="2019-03-16T00:00:00+00:00" />
+<meta itemprop="name" content="手写Socks5通信">
+<meta itemprop="description" content="Socks 协议本身是基于 TCP 的协议，位于应用层与传输层之间的会话层，将应用层的数据透明的传输到 TCP 层。更详细的介绍参见 SOCKS - 维基百科，自由的百科全书">
+<meta itemprop="datePublished" content="2019-03-16T00:00:00&#43;00:00" />
+<meta itemprop="dateModified" content="2019-03-16T00:00:00&#43;00:00" />
+<meta itemprop="wordCount" content="1271">
+
+
+
+<meta itemprop="keywords" content="tcp,socks,proxy," /><meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="手写Socks5通信"/>
+<meta name="twitter:description" content="Socks 协议本身是基于 TCP 的协议，位于应用层与传输层之间的会话层，将应用层的数据透明的传输到 TCP 层。更详细的介绍参见 SOCKS - 维基百科，自由的百科全书"/>
+
+<!--[if lte IE 9]>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js"></script>
+<![endif]-->
+
+<!--[if lt IE 9]>
+  <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+<![endif]-->
+
+</head>
+<body>
+  <div id="mobile-navbar" class="mobile-navbar">
+  <div class="mobile-header-logo">
+    <a href="/" class="logo">HadYang</a>
+  </div>
+  <div class="mobile-navbar-icon">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
+<nav id="mobile-menu" class="mobile-menu slideout-menu">
+  <ul class="mobile-menu-list">
+    <a href="https://hadyang.github.io/interview/">
+        <li class="mobile-menu-item">Interview</li>
+      </a><a href="/categories/">
+        <li class="mobile-menu-item">分类</li>
+      </a>
+  </ul>
+
+  
+
+
+</nav>
+
+  <div class="container" id="mobile-panel">
+    <header id="header" class="header">
+        <div class="logo-wrapper">
+  <a href="/" class="logo">HadYang</a>
+</div>
+
+
+
+
+
+<nav class="site-navbar">
+  <ul id="menu" class="menu">
+    <li class="menu-item">
+        <a class="menu-item-link" href="https://hadyang.github.io/interview/">Interview</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/categories/">分类</a>
+      </li>
+  </ul>
+</nav>
+
+    </header>
+
+    <main id="main" class="main">
+      <div class="content-wrapper">
+        <div id="content" class="content">
+          <article class="post">
+    
+    <header class="post-header">
+      <h1 class="post-title">手写Socks5通信</h1>
+
+      <div class="post-meta">
+        <span class="post-time"> 2019-03-16 </span>
+        <div class="post-category">
+            <a href="/categories/java/"> Java </a>
+            </div>
+          <span class="more-meta"> 约 1271 字 </span>
+          <span class="more-meta"> 预计阅读 3 分钟 </span>
+        
+      </div>
+    </header>
+
+    <div class="post-toc" id="post-toc">
+  <h2 class="post-toc-title">文章目录</h2>
+  <div class="post-toc-content always-active">
+    <nav id="TableOfContents">
+  <ul>
+    <li><a href="#socks5协议">Socks5协议</a></li>
+    <li><a href="#协商">协商</a></li>
+    <li><a href="#认证">认证</a></li>
+    <li><a href="#连接">连接</a></li>
+    <li><a href="#通信">通信</a></li>
+    <li><a href="#socks-代理--http">Socks 代理 &amp; Http</a></li>
+  </ul>
+</nav>
+  </div>
+</div>
+    <div class="post-content">
+      <p>Socks 协议本身是基于 TCP 的协议，位于应用层与传输层之间的会话层，将应用层的数据透明的传输到 TCP 层。更详细的介绍参见 <a href="https://zh.wikipedia.org/wiki/SOCKS">SOCKS - 维基百科，自由的百科全书</a></p>
+<h2 id="socks5协议">Socks5协议</h2>
+<p>Socks5 协议在进行代理通信时，首先需要进行连接、认证等步骤。</p>
+<ul>
+<li>协商：主要是 Client 端请求代理服务对认证方式进行协商</li>
+<li>认证：如果第一步确认需要进行认证，则发送对应密钥进行认证</li>
+<li>连接：通过代理连接目标网站</li>
+<li>通信：进行 Http 等应用层通信，与原始 TCP 通信一致</li>
+</ul>
+<p>下面就每一步进行编码。</p>
+<h2 id="协商">协商</h2>
+<p>在协商阶段请求格式为：</p>
+<div class="highlight"><pre class="chroma"><code class="language-fallback" data-lang="fallback">+--------------------------------+
+|   VER    | NMETHODS |  METHODS |
+|----------|----------|----------|
+|    1     |     1    |     1    |
++--------------------------------+
+</code></pre></div><ul>
+<li>MehotdsVER：是SOCKS版本，这里应该是0x05；</li>
+<li>NMETHODS：是METHODS部分的长度；</li>
+<li>METHODS：是客户端支持的认证方式列表，每个方法占1字节。当前的定义是：
+<ul>
+<li>0x00 不需要认证</li>
+<li>0x01 GSSAPI</li>
+<li>0x02 用户名、密码认证</li>
+<li>0x03 - 0x7F由IANA分配（保留）</li>
+<li>0x80 - 0xFE为私人方法保留</li>
+<li>0xFF 无可接受的方法</li>
+</ul>
+</li>
+</ul>
+<div class="highlight"><pre class="chroma"><code class="language-fallback" data-lang="fallback">buffer.put((byte) 5);
+buffer.put((byte) 1);
+buffer.put((byte) 0);
+</code></pre></div><blockquote>
+<p>我自己的代理本身没有认证，所以最后一个字段为 <code>0</code></p>
+</blockquote>
+<p>代理返回的结果：</p>
+<div class="highlight"><pre class="chroma"><code class="language-fallback" data-lang="fallback">+---------------------+
+|   VER    | NMETHODS |
+|----------|----------|
+|    1     |     1    |
++---------------------+
+</code></pre></div><ul>
+<li>VER：是SOCKS版本，这里应该是0x05；</li>
+<li>METHOD：是服务端选中的方法。如果返回0xFF表示没有一个认证方法被选中，客户端需要关闭连接。</li>
+</ul>
+<h2 id="认证">认证</h2>
+<p>请求格式：</p>
+<div class="highlight"><pre class="chroma"><code class="language-fallback" data-lang="fallback">+----------+----------+----------+----------+----------+
+|   VER    |   NLEN   |   NAME   |   PLEN   |    PW    |
++------------------------------------------------------+
+|    1     |     1    |   VAR    |     1    |    VAR   |
++----------+----------+----------+----------+----------+
+
+</code></pre></div><p>代理响应结果：</p>
+<div class="highlight"><pre class="chroma"><code class="language-fallback" data-lang="fallback">+---------------------+
+|   VER    |  STATES  |
+|----------|----------|
+|    1     |     1    |
++---------------------+
+</code></pre></div><blockquote>
+<p>其中STATES 0x00 表示成功，0x01 表示失败</p>
+</blockquote>
+<h2 id="连接">连接</h2>
+<p>连接请求格式如下：</p>
+<div class="highlight"><pre class="chroma"><code class="language-fallback" data-lang="fallback">+----------+----------+----------+----------+----------+----------+
+|   VER    |   CMD    |    RSV   |   ATYP   | DST.ADDR | DST.PORT |
++-----------------------------------------------------------------+
+|    1     |     1    |   0X00   |     1    |    VAR   |    2   |
++----------+----------+----------+----------+----------+----------+
+</code></pre></div><ul>
+<li>VER：SOCKS版本，这里应该是0x05；</li>
+<li>CMD：SOCK的命令码
+<ul>
+<li>0x01：表示CONNECT请求</li>
+<li>0x02：表示BIND请求</li>
+<li>0x03：表示UDP转发</li>
+</ul>
+</li>
+<li>RSV：0x00，保留</li>
+<li>ATYP：DST.ADDR类型
+<ul>
+<li>0x01：IPv4地址，DST.ADDR部分4字节长度</li>
+<li>0x03：域名，DST.ADDR部分第一个字节为域名长度，DST.ADDR剩余的内容为域名，没有\0结尾。</li>
+<li>0x04：IPv6地址，16个字节长度。</li>
+</ul>
+</li>
+<li>DST.ADDR：目的地址</li>
+<li>DST.PORT：网络字节序表示的目的端口</li>
+</ul>
+<p>代码如下：</p>
+<div class="highlight"><pre class="chroma"><code class="language-fallback" data-lang="fallback">buffer.put((byte) 5);
+buffer.put((byte) 1);
+buffer.put((byte) 0);
+buffer.put((byte) 3);
+//BND.ADDR
+buffer.put((byte) toHex(HTTP_HOST.length())); //HTTP 域名
+buffer.put(HTTP_HOST.getBytes());
+//BND.PORT
+buffer.put((byte) 0);
+buffer.put((byte) toHex(80));
+</code></pre></div><p>代理响应结果如下：</p>
+<div class="highlight"><pre class="chroma"><code class="language-fallback" data-lang="fallback">+----------+----------+----------+----------+----------+----------+
+|   VER    |   CMD    |    RSV   |   ATYP   | BND.ADDR | BND.PORT |
++-----------------------------------------------------------------+
+|    1     |     1    |   0X00   |     1    |    VAR   |     2    |
++----------+----------+----------+----------+----------+----------+
+</code></pre></div><h2 id="通信">通信</h2>
+<p>在通过代理建立远程连接之后，直接可以通过该链路进行通信，这里选用 HTTP 进行简单的 GET 请求。完整代码如下：</p>
+<h2 id="socks-代理--http">Socks 代理 &amp; Http</h2>
+<div class="highlight"><pre class="chroma"><code class="language-java" data-lang="java"><span class="kd">public</span> <span class="kd">class</span> <span class="nc">Main</span> <span class="o">{</span>
+    <span class="kd">private</span> <span class="kd">static</span> <span class="kd">final</span> <span class="n">ByteBuffer</span> <span class="n">buffer</span> <span class="o">=</span> <span class="n">ByteBuffer</span><span class="o">.</span><span class="na">allocate</span><span class="o">(</span><span class="n">1024</span><span class="o">);</span>
+
+    <span class="kd">private</span> <span class="kd">static</span> <span class="kd">final</span> <span class="n">AtomicInteger</span> <span class="n">step</span> <span class="o">=</span> <span class="k">new</span> <span class="n">AtomicInteger</span><span class="o">(</span><span class="n">0</span><span class="o">);</span>
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kd">final</span> <span class="n">String</span> <span class="n">HTTP_HOST</span> <span class="o">=</span> <span class="s">&#34;www.baidu.com&#34;</span><span class="o">;</span>
+
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="n">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="kd">throws</span> <span class="n">Exception</span> <span class="o">{</span>
+        <span class="n">Selector</span> <span class="n">selector</span> <span class="o">=</span> <span class="n">Selector</span><span class="o">.</span><span class="na">open</span><span class="o">();</span>
+
+        <span class="n">SocketChannel</span> <span class="n">channel</span> <span class="o">=</span> <span class="n">SocketChannel</span><span class="o">.</span><span class="na">open</span><span class="o">();</span>
+        <span class="n">channel</span><span class="o">.</span><span class="na">socket</span><span class="o">().</span><span class="na">connect</span><span class="o">(</span><span class="k">new</span> <span class="n">InetSocketAddress</span><span class="o">(</span><span class="s">&#34;127.0.0.1&#34;</span><span class="o">,</span> <span class="n">1086</span><span class="o">));</span>
+        <span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">&#34;与代理建立连接&#34;</span><span class="o">);</span>
+
+        <span class="n">channel</span><span class="o">.</span><span class="na">configureBlocking</span><span class="o">(</span><span class="kc">false</span><span class="o">);</span>
+        <span class="n">channel</span><span class="o">.</span><span class="na">register</span><span class="o">(</span><span class="n">selector</span><span class="o">,</span> <span class="n">SelectionKey</span><span class="o">.</span><span class="na">OP_READ</span> <span class="o">|</span> <span class="n">SelectionKey</span><span class="o">.</span><span class="na">OP_WRITE</span><span class="o">);</span>
+
+        <span class="k">while</span> <span class="o">(</span><span class="n">channel</span><span class="o">.</span><span class="na">isConnected</span><span class="o">())</span> <span class="o">{</span>
+            <span class="n">TimeUnit</span><span class="o">.</span><span class="na">MILLISECONDS</span><span class="o">.</span><span class="na">sleep</span><span class="o">(</span><span class="n">100</span><span class="o">);</span>
+            <span class="k">if</span> <span class="o">(</span><span class="n">selector</span><span class="o">.</span><span class="na">select</span><span class="o">()</span> <span class="o">==</span> <span class="n">0</span><span class="o">)</span> <span class="o">{</span>
+                <span class="k">continue</span><span class="o">;</span>
+            <span class="o">}</span>
+
+            <span class="n">Set</span><span class="o">&lt;</span><span class="n">SelectionKey</span><span class="o">&gt;</span> <span class="n">selectionKeys</span> <span class="o">=</span> <span class="n">selector</span><span class="o">.</span><span class="na">selectedKeys</span><span class="o">();</span>
+            <span class="k">for</span> <span class="o">(</span><span class="n">SelectionKey</span> <span class="n">selectionKey</span> <span class="o">:</span> <span class="n">selectionKeys</span><span class="o">)</span> <span class="o">{</span>
+                <span class="k">if</span> <span class="o">(</span><span class="n">selectionKey</span><span class="o">.</span><span class="na">isWritable</span><span class="o">())</span> <span class="o">{</span>
+                    <span class="n">onWritable</span><span class="o">(</span><span class="n">selectionKey</span><span class="o">);</span>
+                <span class="o">}</span> <span class="k">else</span> <span class="k">if</span> <span class="o">(</span><span class="n">selectionKey</span><span class="o">.</span><span class="na">isReadable</span><span class="o">())</span> <span class="o">{</span>
+                    <span class="n">onReadable</span><span class="o">(</span><span class="n">selectionKey</span><span class="o">);</span>
+                <span class="o">}</span>
+            <span class="o">}</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+
+    <span class="kd">private</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">onWritable</span><span class="o">(</span><span class="n">SelectionKey</span> <span class="n">selectionKey</span><span class="o">)</span> <span class="o">{</span>
+        <span class="n">SocketChannel</span> <span class="n">channel</span> <span class="o">=</span> <span class="o">(</span><span class="n">SocketChannel</span><span class="o">)</span> <span class="n">selectionKey</span><span class="o">.</span><span class="na">channel</span><span class="o">();</span>
+        <span class="k">try</span> <span class="o">{</span>
+            <span class="kd">synchronized</span> <span class="o">(</span><span class="n">buffer</span><span class="o">)</span> <span class="o">{</span>
+                <span class="n">buffer</span><span class="o">.</span><span class="na">clear</span><span class="o">();</span>
+
+                <span class="k">switch</span> <span class="o">(</span><span class="n">step</span><span class="o">.</span><span class="na">get</span><span class="o">())</span> <span class="o">{</span>
+                    <span class="k">case</span> <span class="n">0</span><span class="o">:</span>
+                        <span class="n">buffer</span><span class="o">.</span><span class="na">put</span><span class="o">((</span><span class="kt">byte</span><span class="o">)</span> <span class="n">5</span><span class="o">);</span>
+                        <span class="n">buffer</span><span class="o">.</span><span class="na">put</span><span class="o">((</span><span class="kt">byte</span><span class="o">)</span> <span class="n">1</span><span class="o">);</span>
+                        <span class="n">buffer</span><span class="o">.</span><span class="na">put</span><span class="o">((</span><span class="kt">byte</span><span class="o">)</span> <span class="n">0</span><span class="o">);</span>
+                        <span class="k">break</span><span class="o">;</span>
+                    <span class="k">case</span> <span class="n">1</span><span class="o">:</span>
+                        <span class="n">buffer</span><span class="o">.</span><span class="na">put</span><span class="o">((</span><span class="kt">byte</span><span class="o">)</span> <span class="n">5</span><span class="o">);</span>
+                        <span class="n">buffer</span><span class="o">.</span><span class="na">put</span><span class="o">((</span><span class="kt">byte</span><span class="o">)</span> <span class="n">1</span><span class="o">);</span>
+                        <span class="n">buffer</span><span class="o">.</span><span class="na">put</span><span class="o">((</span><span class="kt">byte</span><span class="o">)</span> <span class="n">0</span><span class="o">);</span>
+                        <span class="n">buffer</span><span class="o">.</span><span class="na">put</span><span class="o">((</span><span class="kt">byte</span><span class="o">)</span> <span class="n">3</span><span class="o">);</span>
+                        
+                        <span class="n">buffer</span><span class="o">.</span><span class="na">put</span><span class="o">((</span><span class="kt">byte</span><span class="o">)</span> <span class="n">toHex</span><span class="o">(</span><span class="n">HTTP_HOST</span><span class="o">.</span><span class="na">length</span><span class="o">()));</span>
+                        <span class="n">buffer</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="n">HTTP_HOST</span><span class="o">.</span><span class="na">getBytes</span><span class="o">());</span>
+                        
+                        <span class="n">buffer</span><span class="o">.</span><span class="na">put</span><span class="o">((</span><span class="kt">byte</span><span class="o">)</span> <span class="n">0</span><span class="o">);</span>
+                        <span class="n">buffer</span><span class="o">.</span><span class="na">put</span><span class="o">((</span><span class="kt">byte</span><span class="o">)</span> <span class="n">toHex</span><span class="o">(</span><span class="n">80</span><span class="o">));</span>
+                        <span class="k">break</span><span class="o">;</span>
+                    <span class="k">case</span> <span class="n">2</span><span class="o">:</span>
+                        <span class="n">String</span> <span class="n">httpGet</span> <span class="o">=</span> <span class="s">&#34;GET / HTTP/1.1\r\n&#34;</span> <span class="o">+</span>
+                                <span class="s">&#34;host: &#34;</span> <span class="o">+</span> <span class="n">HTTP_HOST</span> <span class="o">+</span> <span class="s">&#34;\r\n&#34;</span> <span class="o">+</span>
+                                <span class="s">&#34;User-Agent: curl/7.54.0\r\n&#34;</span> <span class="o">+</span>
+                                <span class="s">&#34;Accept: */*\r\n&#34;</span> <span class="o">+</span>
+                                <span class="s">&#34;\r\n&#34;</span><span class="o">;</span>
+
+                        <span class="n">buffer</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="n">httpGet</span><span class="o">.</span><span class="na">getBytes</span><span class="o">());</span>
+                        <span class="k">break</span><span class="o">;</span>
+                    <span class="k">case</span> <span class="n">3</span><span class="o">:</span>
+                        <span class="k">return</span><span class="o">;</span>
+                <span class="o">}</span>
+                <span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">&#34;step:&#34;</span> <span class="o">+</span> <span class="n">step</span><span class="o">.</span><span class="na">get</span><span class="o">()</span> <span class="o">+</span> <span class="s">&#34;, write:&#34;</span> <span class="o">+</span> <span class="n">Arrays</span><span class="o">.</span><span class="na">toString</span><span class="o">(</span><span class="n">Arrays</span><span class="o">.</span><span class="na">copyOf</span><span class="o">(</span><span class="n">buffer</span><span class="o">.</span><span class="na">array</span><span class="o">(),</span> <span class="n">buffer</span><span class="o">.</span><span class="na">position</span><span class="o">())));</span>
+
+                <span class="n">buffer</span><span class="o">.</span><span class="na">flip</span><span class="o">();</span>
+                <span class="n">channel</span><span class="o">.</span><span class="na">write</span><span class="o">(</span><span class="n">buffer</span><span class="o">);</span>
+                <span class="n">buffer</span><span class="o">.</span><span class="na">compact</span><span class="o">();</span>
+            <span class="o">}</span>
+        <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="n">IOException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+            <span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+
+    <span class="kd">static</span> <span class="kt">int</span> <span class="nf">toHex</span><span class="o">(</span><span class="kt">int</span> <span class="n">source</span><span class="o">)</span> <span class="o">{</span>
+        <span class="n">String</span> <span class="n">hexString</span> <span class="o">=</span> <span class="n">Integer</span><span class="o">.</span><span class="na">toHexString</span><span class="o">(</span><span class="n">source</span><span class="o">);</span>
+
+        <span class="k">return</span> <span class="n">Integer</span><span class="o">.</span><span class="na">parseInt</span><span class="o">(</span><span class="n">hexString</span><span class="o">,</span> <span class="n">16</span><span class="o">);</span>
+    <span class="o">}</span>
+
+    <span class="kd">private</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">onReadable</span><span class="o">(</span><span class="n">SelectionKey</span> <span class="n">selectionKey</span><span class="o">)</span> <span class="o">{</span>
+        <span class="n">SocketChannel</span> <span class="n">channel</span> <span class="o">=</span> <span class="o">(</span><span class="n">SocketChannel</span><span class="o">)</span> <span class="n">selectionKey</span><span class="o">.</span><span class="na">channel</span><span class="o">();</span>
+        <span class="k">try</span> <span class="o">{</span>
+            <span class="kd">synchronized</span> <span class="o">(</span><span class="n">buffer</span><span class="o">)</span> <span class="o">{</span>
+                <span class="n">buffer</span><span class="o">.</span><span class="na">clear</span><span class="o">();</span>
+                <span class="n">channel</span><span class="o">.</span><span class="na">read</span><span class="o">(</span><span class="n">buffer</span><span class="o">);</span>
+                <span class="kt">byte</span><span class="o">[]</span> <span class="n">res</span> <span class="o">=</span> <span class="n">Arrays</span><span class="o">.</span><span class="na">copyOf</span><span class="o">(</span><span class="n">buffer</span><span class="o">.</span><span class="na">array</span><span class="o">(),</span> <span class="n">buffer</span><span class="o">.</span><span class="na">position</span><span class="o">());</span>
+                <span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">&#34;step:&#34;</span> <span class="o">+</span> <span class="n">step</span><span class="o">.</span><span class="na">get</span><span class="o">()</span> <span class="o">+</span> <span class="s">&#34;, rec:&#34;</span> <span class="o">+</span> <span class="n">Arrays</span><span class="o">.</span><span class="na">toString</span><span class="o">(</span><span class="n">res</span><span class="o">));</span>
+
+                <span class="k">switch</span> <span class="o">(</span><span class="n">step</span><span class="o">.</span><span class="na">get</span><span class="o">())</span> <span class="o">{</span>
+                    <span class="k">case</span> <span class="n">0</span><span class="o">:</span>
+                        <span class="k">if</span> <span class="o">(</span><span class="n">res</span><span class="o">[</span><span class="n">1</span><span class="o">]</span> <span class="o">==</span> <span class="n">0</span><span class="o">)</span> <span class="o">{</span>
+                            <span class="n">step</span><span class="o">.</span><span class="na">incrementAndGet</span><span class="o">();</span>
+                        <span class="o">}</span>
+                        <span class="k">break</span><span class="o">;</span>
+                    <span class="k">case</span> <span class="n">1</span><span class="o">:</span>
+                        <span class="k">if</span> <span class="o">(</span><span class="n">res</span><span class="o">[</span><span class="n">1</span><span class="o">]</span> <span class="o">==</span> <span class="n">0</span><span class="o">)</span> <span class="o">{</span>
+                            <span class="n">step</span><span class="o">.</span><span class="na">incrementAndGet</span><span class="o">();</span>
+                        <span class="o">}</span>
+                        <span class="k">break</span><span class="o">;</span>
+                    <span class="k">case</span> <span class="n">2</span><span class="o">:</span>
+                        <span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">&#34;httpResponse:&#34;</span> <span class="o">+</span> <span class="k">new</span> <span class="n">String</span><span class="o">(</span><span class="n">res</span><span class="o">,</span> <span class="n">Charset</span><span class="o">.</span><span class="na">forName</span><span class="o">(</span><span class="s">&#34;UTF-8&#34;</span><span class="o">)));</span>
+                        <span class="n">step</span><span class="o">.</span><span class="na">incrementAndGet</span><span class="o">();</span>
+                        <span class="k">break</span><span class="o">;</span>
+                <span class="o">}</span>
+
+            <span class="o">}</span>
+        <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="n">IOException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+            <span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div>
+    </div>
+
+    
+<footer class="post-footer">
+      <div class="post-tags">
+          <a href="/tags/tcp/">tcp</a>
+          <a href="/tags/socks/">socks</a>
+          <a href="/tags/proxy/">proxy</a>
+          </div>
+      <nav class="post-nav">
+        <a class="prev" href="/2019/12/mysql-delete-insert-deadlock/">
+            <i class="iconfont icon-left"></i>
+            <span class="prev-text nav-default">MySQL 删除&amp;插入死锁分析</span>
+            <span class="prev-text nav-mobile">上一篇</span>
+          </a>
+        <a class="next" href="/2017/03/pattern-filter/">
+            <span class="next-text nav-default">拦截器模式</span>
+            <span class="next-text nav-mobile">下一篇</span>
+            <i class="iconfont icon-right"></i>
+          </a>
+      </nav>
+    </footer>
+  </article>
+        </div>
+        <div id="gitalk-container"></div>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js" crossorigin="anonymous"></script>
+    <script type="text/javascript">
+      var gitalk = new Gitalk({
+        id: '\/2019\/03\/socks-proxy\/',
+        title: '手写Socks5通信',
+        clientID: '64b9f11ba0a3291ee49e',
+        clientSecret: '8632b99db733cc33fd8f6fe85680f63f0db9d872',
+        repo: 'hadyang.github.io',
+        owner: 'hadyang',
+        admin: ['hadyang'],
+        body: decodeURI(location.href)
+      });
+      gitalk.render('gitalk-container');
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://github.com/gitalk/gitalk">comments powered by gitalk.</a></noscript>
+
+  
+
+  
+
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="social-links">
+  <a href="" type="application/rss+xml" class="iconfont icon-rss" title="rss"></a>
+</div>
+
+<div class="copyright">
+  <span class="power-by">
+    由 <a class="hexo-link" href="https://gohugo.io">Hugo</a> 强力驱动
+  </span>
+  <span class="division">|</span>
+  <span class="theme-info">
+    主题 -
+    <a class="theme-link" href="https://github.com/olOwOlo/hugo-theme-even">Even</a>
+  </span>
+
+  
+
+  <span class="copyright-year">
+    &copy; 
+    2017 - 
+    2021<span class="heart"><i class="iconfont icon-heart"></i></span><span>HadYang</span>
+  </span>
+</div>
+
+    </footer>
+
+    <div class="back-to-top" id="back-to-top">
+      <i class="iconfont icon-up"></i>
+    </div>
+  </div>
+  
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/slideout@1.0.1/dist/slideout.min.js" integrity="sha256-t+zJ/g8/KXIJMjSVQdnibt4dlaDxc9zXr/9oNPeWqdg=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.js" integrity="sha256-XVLffZaxoWfGUEbdzuLi7pwaUJv1cecsQJQqGLe7axY=" crossorigin="anonymous"></script>
+
+
+
+<script type="text/javascript" src="/js/main.min.c12618f9a600c40bd024996677e951e64d3487006775aeb22e200c990006c5c7.js"></script>
+  <script type="text/javascript">
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$','$'], ['\\(','\\)']],
+        }
+    };
+  </script>
+  <script async src="https://cdn.jsdelivr.net/npm/mathjax@3.0.5/es5/tex-mml-chtml.js" integrity="sha256-HGLuEfFcsUJGhvB8cQ8nr0gai9EucOOaIxFw7qxmd+w=" crossorigin="anonymous"></script>
+
+
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+	ga('create', 'UA-157595781-2', 'auto');
+	ga('set', 'anonymizeIp', true);
+	ga('send', 'pageview');
+}
+</script>
+<script async src='https://www.google-analytics.com/analytics.js'></script>
+
+
+
+
+
+
+
+</body>
+</html>

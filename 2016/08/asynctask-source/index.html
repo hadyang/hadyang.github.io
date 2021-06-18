@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>AsyncTask源码解析 - HadYang</title>
+  <meta name="renderer" content="webkit" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<meta name="theme-color" content="#f8f5ec" />
+<meta name="msapplication-navbutton-color" content="#f8f5ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
+
+
+<meta name="author" content="HadYang" /><meta name="description" content="AsyncTask是Android平台提供的一个多线程框架，它可以很简单的用于更新UI线程，你可以在后台执行操作，并将操作的结果Push到UI线程。同时你完全不需要去操作线程和Handler。AsyncTask与Java中的多线程框架不同，它只适合用于短小的任务（最多几秒钟）。为什么会有这样的要求？这就涉及到内存泄漏，后面我们会说。
+" /><meta name="keywords" content="Java" />
+
+
+
+
+
+
+<meta name="generator" content="Hugo 0.73.0 with theme even" />
+
+
+<link rel="canonical" href="https://hadyang.github.io/2016/08/asynctask-source/" />
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="manifest" href="/manifest.json">
+<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
+
+
+
+<link href="/sass/main.min.75c01efdcbc2767fdfe1f22f5a6fccc8c390d3cda325742f698bd0c6344144be.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.css" integrity="sha256-7TyXnr2YU040zfSP+rEcz29ggW4j56/ujTPwjMzyqFY=" crossorigin="anonymous">
+
+
+<meta property="og:title" content="AsyncTask源码解析" />
+<meta property="og:description" content="AsyncTask是Android平台提供的一个多线程框架，它可以很简单的用于更新UI线程，你可以在后台执行操作，并将操作的结果Push到UI线程。同时你完全不需要去操作线程和Handler。AsyncTask与Java中的多线程框架不同，它只适合用于短小的任务（最多几秒钟）。为什么会有这样的要求？这就涉及到内存泄漏，后面我们会说。" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://hadyang.github.io/2016/08/asynctask-source/" />
+<meta property="article:published_time" content="2016-08-19T00:00:00+00:00" />
+<meta property="article:modified_time" content="2016-08-19T00:00:00+00:00" />
+<meta itemprop="name" content="AsyncTask源码解析">
+<meta itemprop="description" content="AsyncTask是Android平台提供的一个多线程框架，它可以很简单的用于更新UI线程，你可以在后台执行操作，并将操作的结果Push到UI线程。同时你完全不需要去操作线程和Handler。AsyncTask与Java中的多线程框架不同，它只适合用于短小的任务（最多几秒钟）。为什么会有这样的要求？这就涉及到内存泄漏，后面我们会说。">
+<meta itemprop="datePublished" content="2016-08-19T00:00:00&#43;00:00" />
+<meta itemprop="dateModified" content="2016-08-19T00:00:00&#43;00:00" />
+<meta itemprop="wordCount" content="1958">
+
+
+
+<meta itemprop="keywords" content="源码," /><meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="AsyncTask源码解析"/>
+<meta name="twitter:description" content="AsyncTask是Android平台提供的一个多线程框架，它可以很简单的用于更新UI线程，你可以在后台执行操作，并将操作的结果Push到UI线程。同时你完全不需要去操作线程和Handler。AsyncTask与Java中的多线程框架不同，它只适合用于短小的任务（最多几秒钟）。为什么会有这样的要求？这就涉及到内存泄漏，后面我们会说。"/>
+
+<!--[if lte IE 9]>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js"></script>
+<![endif]-->
+
+<!--[if lt IE 9]>
+  <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+<![endif]-->
+
+</head>
+<body>
+  <div id="mobile-navbar" class="mobile-navbar">
+  <div class="mobile-header-logo">
+    <a href="/" class="logo">HadYang</a>
+  </div>
+  <div class="mobile-navbar-icon">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
+<nav id="mobile-menu" class="mobile-menu slideout-menu">
+  <ul class="mobile-menu-list">
+    <a href="https://hadyang.github.io/interview/">
+        <li class="mobile-menu-item">Interview</li>
+      </a><a href="/categories/">
+        <li class="mobile-menu-item">分类</li>
+      </a>
+  </ul>
+
+  
+
+
+</nav>
+
+  <div class="container" id="mobile-panel">
+    <header id="header" class="header">
+        <div class="logo-wrapper">
+  <a href="/" class="logo">HadYang</a>
+</div>
+
+
+
+
+
+<nav class="site-navbar">
+  <ul id="menu" class="menu">
+    <li class="menu-item">
+        <a class="menu-item-link" href="https://hadyang.github.io/interview/">Interview</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/categories/">分类</a>
+      </li>
+  </ul>
+</nav>
+
+    </header>
+
+    <main id="main" class="main">
+      <div class="content-wrapper">
+        <div id="content" class="content">
+          <article class="post">
+    
+    <header class="post-header">
+      <h1 class="post-title">AsyncTask源码解析</h1>
+
+      <div class="post-meta">
+        <span class="post-time"> 2016-08-19 </span>
+        <div class="post-category">
+            <a href="/categories/android/"> Android </a>
+            </div>
+          <span class="more-meta"> 约 1958 字 </span>
+          <span class="more-meta"> 预计阅读 4 分钟 </span>
+        
+      </div>
+    </header>
+
+    <div class="post-toc" id="post-toc">
+  <h2 class="post-toc-title">文章目录</h2>
+  <div class="post-toc-content always-active">
+    <nav id="TableOfContents">
+  <ul>
+    <li>
+      <ul>
+        <li><a href="#初始化">初始化</a></li>
+        <li><a href="#task执行">Task执行</a></li>
+        <li><a href="#主线程调用">主线程调用</a></li>
+        <li><a href="#内存泄漏">内存泄漏</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+  </div>
+</div>
+    <div class="post-content">
+      <p><code>AsyncTask</code>是Android平台提供的一个多线程框架，它可以很简单的用于更新UI线程，你可以在后台执行操作，并将操作的结果Push到UI线程。同时你完全不需要去操作线程和Handler。<code>AsyncTask</code>与Java中的多线程框架不同，它只适合用于短小的任务（最多几秒钟）。为什么会有这样的要求？这就涉及到内存泄漏，后面我们会说。</p>
+<p>在使用<code>AsyncTask</code>前，我们需要实现<code>AsyncTask</code>，并定义三种类型，分别是<code>请求参数</code>、<code>进度参数</code>、<code>返回结果</code>，其中进度参数通常用来更新进度。在<code>AsyncTask</code>中执行异步任务的时候，<code>AsyncTask</code>会依次调用<code>onPreExecute</code>、<code>doInBackground</code>、 <code>onProgressUpdate</code>、<code>onPostExecute</code>这四个回调方法，我们可以在这些回调方法中执行相关操作。</p>
+<p>我们首先说说<code>AsyncTask</code>的变迁历史，在<code>Android 1.6</code> 开始，<code>AsyncTask</code>是使用线程池同时执行多个任务，但是为了避免多线程给应用程序带来的错误，从<code>Android 3.0</code>开始，<code>AsyncTask</code>默认后台只开启一个线程，这里的改变就是将默认的<code>Executor</code>换做了<code>SerialExecutor</code>。</p>
+<h3 id="初始化">初始化</h3>
+<p>AsyncTask中含有几个重要的静态成员变量，会在类加载的时候进行初始化：</p>
+<ul>
+<li><strong>THREAD_POOL_EXECUTOR</strong>：<code>ThreadExecutor</code>实例，用于执行Task。</li>
+<li><strong>sPoolWorkQueue</strong>：<code>LinkedBlockingQueue&lt;Runnable&gt;</code>实例，用于存放<code>THREAD_POOL_EXECUTOR</code>需要执行的Runable。</li>
+<li><strong>sDefaultExecutor</strong>：<code>SerialExecutor</code>实例，将Task <strong>线性</strong> 提交给<code>ThreadExecutor</code>执行。</li>
+<li><strong>sHandler</strong>：主线程的Handler，用于在主线程回调结果、界面刷新。</li>
+</ul>
+<p>同时还有两个成员变量：</p>
+<div class="highlight"><pre class="chroma"><code class="language-Java" data-lang="Java"><span class="kd">public</span> <span class="nf">AsyncTask</span><span class="o">()</span> <span class="o">{</span>
+    <span class="n">mWorker</span> <span class="o">=</span> <span class="k">new</span> <span class="n">WorkerRunnable</span><span class="o">&lt;</span><span class="n">Params</span><span class="o">,</span> <span class="n">Result</span><span class="o">&gt;()</span> <span class="o">{</span>
+        <span class="kd">public</span> <span class="n">Result</span> <span class="nf">call</span><span class="o">()</span> <span class="kd">throws</span> <span class="n">Exception</span> <span class="o">{</span>
+            <span class="o">...</span>
+            <span class="n">Result</span> <span class="n">result</span> <span class="o">=</span> <span class="n">doInBackground</span><span class="o">(</span><span class="n">mParams</span><span class="o">);</span>
+            <span class="o">...</span>
+            <span class="k">return</span> <span class="n">postResult</span><span class="o">(</span><span class="n">result</span><span class="o">);</span>
+        <span class="o">}</span>
+    <span class="o">};</span>
+
+    <span class="n">mFuture</span> <span class="o">=</span> <span class="k">new</span> <span class="n">FutureTask</span><span class="o">&lt;</span><span class="n">Result</span><span class="o">&gt;(</span><span class="n">mWorker</span><span class="o">)</span> <span class="o">{</span>
+        <span class="nd">@Override</span>
+        <span class="kd">protected</span> <span class="kt">void</span> <span class="nf">done</span><span class="o">()</span> <span class="o">{</span>
+            <span class="k">try</span> <span class="o">{</span>
+                <span class="n">postResultIfNotInvoked</span><span class="o">(</span><span class="n">get</span><span class="o">());</span>
+                <span class="o">...</span>
+            <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="n">CancellationException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+                <span class="n">postResultIfNotInvoked</span><span class="o">(</span><span class="kc">null</span><span class="o">);</span>
+            <span class="o">}</span>
+        <span class="o">}</span>
+    <span class="o">};</span>
+<span class="o">}</span>
+</code></pre></div><ul>
+<li><strong>mWorker</strong>：<code>Callable</code>接口的实现，作为Task的执行过程，在这里主要是调用<code>doInBackground</code>，并获取<code>result</code>。</li>
+<li><strong>mFuture</strong>：<code>FutureTask</code>的子类，<code>FutureTask</code>是<code>RunnableFuture</code>的子类，它接受一个<code>Callable</code>。其实<code>FutureTask</code>就是包装了<code>Callable</code>，并且可以对<code>Callable</code>进行取消操作。</li>
+</ul>
+<h3 id="task执行">Task执行</h3>
+<div class="highlight"><pre class="chroma"><code class="language-Java" data-lang="Java"><span class="nd">@MainThread</span>
+<span class="kd">public</span> <span class="kd">final</span> <span class="n">AsyncTask</span><span class="o">&lt;</span><span class="n">Params</span><span class="o">,</span> <span class="n">Progress</span><span class="o">,</span> <span class="n">Result</span><span class="o">&gt;</span> <span class="nf">execute</span><span class="o">(</span><span class="n">Params</span><span class="o">...</span> <span class="n">params</span><span class="o">)</span> <span class="o">{</span>
+    <span class="k">return</span> <span class="n">executeOnExecutor</span><span class="o">(</span><span class="n">sDefaultExecutor</span><span class="o">,</span> <span class="n">params</span><span class="o">);</span>
+<span class="o">}</span>
+
+<span class="nd">@MainThread</span>
+<span class="kd">public</span> <span class="kd">final</span> <span class="n">AsyncTask</span><span class="o">&lt;</span><span class="n">Params</span><span class="o">,</span> <span class="n">Progress</span><span class="o">,</span> <span class="n">Result</span><span class="o">&gt;</span> <span class="nf">executeOnExecutor</span><span class="o">(</span><span class="n">Executor</span> <span class="n">exec</span><span class="o">,</span>
+        <span class="n">Params</span><span class="o">...</span> <span class="n">params</span><span class="o">)</span> <span class="o">{</span>
+    <span class="o">...</span>
+    <span class="n">mStatus</span> <span class="o">=</span> <span class="n">Status</span><span class="o">.</span><span class="na">RUNNING</span><span class="o">;</span>
+
+    <span class="n">onPreExecute</span><span class="o">();</span>
+
+    <span class="n">mWorker</span><span class="o">.</span><span class="na">mParams</span> <span class="o">=</span> <span class="n">params</span><span class="o">;</span>
+    <span class="n">exec</span><span class="o">.</span><span class="na">execute</span><span class="o">(</span><span class="n">mFuture</span><span class="o">);</span>
+
+    <span class="k">return</span> <span class="k">this</span><span class="o">;</span>
+<span class="o">}</span>
+</code></pre></div><p>在上面的代码中我们可以看到<code>execute</code>方法默认使用<code>SerialExecutor</code>，当然我们也可以调用<code>executeOnExecutor</code>来使用自己的<code>Executor</code>。在执行Task之前会回调<code>onPreExecute</code>方法，然后通过<code>Executor</code>执行Task。</p>
+<div class="highlight"><pre class="chroma"><code class="language-Java" data-lang="Java"><span class="kd">private</span> <span class="kd">static</span> <span class="kd">class</span> <span class="nc">SerialExecutor</span> <span class="kd">implements</span> <span class="n">Executor</span> <span class="o">{</span>
+    <span class="kd">final</span> <span class="n">ArrayDeque</span><span class="o">&lt;</span><span class="n">Runnable</span><span class="o">&gt;</span> <span class="n">mTasks</span> <span class="o">=</span> <span class="k">new</span> <span class="n">ArrayDeque</span><span class="o">&lt;</span><span class="n">Runnable</span><span class="o">&gt;();</span>
+    <span class="n">Runnable</span> <span class="n">mActive</span><span class="o">;</span>
+
+    <span class="kd">public</span> <span class="kd">synchronized</span> <span class="kt">void</span> <span class="nf">execute</span><span class="o">(</span><span class="kd">final</span> <span class="n">Runnable</span> <span class="n">r</span><span class="o">)</span> <span class="o">{</span>
+        <span class="n">mTasks</span><span class="o">.</span><span class="na">offer</span><span class="o">(</span><span class="k">new</span> <span class="n">Runnable</span><span class="o">()</span> <span class="o">{</span>
+            <span class="kd">public</span> <span class="kt">void</span> <span class="nf">run</span><span class="o">()</span> <span class="o">{</span>
+                <span class="k">try</span> <span class="o">{</span>
+                    <span class="n">r</span><span class="o">.</span><span class="na">run</span><span class="o">();</span>
+                <span class="o">}</span> <span class="k">finally</span> <span class="o">{</span>
+                    <span class="n">scheduleNext</span><span class="o">();</span>
+                <span class="o">}</span>
+            <span class="o">}</span>
+        <span class="o">});</span>
+        <span class="k">if</span> <span class="o">(</span><span class="n">mActive</span> <span class="o">==</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+            <span class="n">scheduleNext</span><span class="o">();</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+
+    <span class="kd">protected</span> <span class="kd">synchronized</span> <span class="kt">void</span> <span class="nf">scheduleNext</span><span class="o">()</span> <span class="o">{</span>
+        <span class="k">if</span> <span class="o">((</span><span class="n">mActive</span> <span class="o">=</span> <span class="n">mTasks</span><span class="o">.</span><span class="na">poll</span><span class="o">())</span> <span class="o">!=</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+            <span class="n">THREAD_POOL_EXECUTOR</span><span class="o">.</span><span class="na">execute</span><span class="o">(</span><span class="n">mActive</span><span class="o">);</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div><p>从上面的代码可以看出，<code>SerialExecutor</code>先将Task加入到一个队列中，然后通过<code>ThreadExecutor</code>来执行<code>mFuture</code>。在前面<code>mFuture</code>的初始化代码中，<code>mFuture</code>会回调<code>doInBackground</code>方法，然后调用<code>postResult</code>将运行结果发送到主线程。</p>
+<blockquote>
+<p>由于中间通过<code>SerialExecutor</code>执行Task，<code>ThreadExecutor</code>只会创建一个线程。</p>
+</blockquote>
+<div class="highlight"><pre class="chroma"><code class="language-Java" data-lang="Java"><span class="kd">private</span> <span class="n">Result</span> <span class="nf">postResult</span><span class="o">(</span><span class="n">Result</span> <span class="n">result</span><span class="o">)</span> <span class="o">{</span>
+    <span class="nd">@SuppressWarnings</span><span class="o">(</span><span class="s">&#34;unchecked&#34;</span><span class="o">)</span>
+    <span class="n">Message</span> <span class="n">message</span> <span class="o">=</span> <span class="n">getHandler</span><span class="o">().</span><span class="na">obtainMessage</span><span class="o">(</span><span class="n">MESSAGE_POST_RESULT</span><span class="o">,</span>
+            <span class="k">new</span> <span class="n">AsyncTaskResult</span><span class="o">&lt;</span><span class="n">Result</span><span class="o">&gt;(</span><span class="k">this</span><span class="o">,</span> <span class="n">result</span><span class="o">));</span>
+    <span class="n">message</span><span class="o">.</span><span class="na">sendToTarget</span><span class="o">();</span>
+    <span class="k">return</span> <span class="n">result</span><span class="o">;</span>
+<span class="o">}</span>
+</code></pre></div><h3 id="主线程调用">主线程调用</h3>
+<p>在AsyncTask的说明中我们可以看到：</p>
+<div class="highlight"><pre class="chroma"><code class="language-fallback" data-lang="fallback">There are a few threading rules that must be followed for this class to work properly:
+
+  1. The AsyncTask class must be loaded on the UI thread. This is done automatically as of JELLY_BEAN.
+  2. The task instance must be created on the UI thread.
+  3. execute(Params...) must be invoked on the UI thread.
+  4. Do not call onPreExecute(), onPostExecute(Result), doInBackground(Params...), onProgressUpdate(Progress...) manually.
+  5. The task can be executed only once (an exception will be thrown if a second execution is attempted.)
+</code></pre></div><p>对于第一点，在<code>JELLY_BEAN</code>版本前，<code>AsyncTask</code>的加载必须在主线程执行，在<code>JELLY_BEAN</code>时，在<code>ActivityThread</code>中进行<code>AsyncTask</code>的类加载。</p>
+<div class="highlight"><pre class="chroma"><code class="language-Java" data-lang="Java"><span class="c1">//以下是 Android JELLY_BEAN 的代码
+</span><span class="c1"></span>
+<span class="c1">//ActivityThread.java
+</span><span class="c1"></span><span class="kd">public</span> <span class="kd">static</span> <span class="n">ActivityThread</span> <span class="nf">systemMain</span><span class="o">()</span> <span class="o">{</span>
+    <span class="n">HardwareRenderer</span><span class="o">.</span><span class="na">disable</span><span class="o">(</span><span class="kc">true</span><span class="o">);</span>
+    <span class="n">ActivityThread</span> <span class="n">thread</span> <span class="o">=</span> <span class="k">new</span> <span class="n">ActivityThread</span><span class="o">();</span>
+    <span class="n">thread</span><span class="o">.</span><span class="na">attach</span><span class="o">(</span><span class="kc">true</span><span class="o">);</span>
+
+    <span class="n">ActivityThread</span> <span class="n">thread</span> <span class="o">=</span> <span class="k">new</span> <span class="n">ActivityThread</span><span class="o">();</span>
+    <span class="n">thread</span><span class="o">.</span><span class="na">attach</span><span class="o">(</span><span class="kc">false</span><span class="o">);</span>
+
+    <span class="n">AsyncTask</span><span class="o">.</span><span class="na">init</span><span class="o">();</span>
+
+    <span class="o">...</span>
+ <span class="o">}</span>
+
+<span class="c1">//AsyncTask.java
+</span><span class="c1"></span><span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">init</span><span class="o">()</span> <span class="o">{</span>
+    <span class="c1">//当前在ActivityThread中，即主线程中
+</span><span class="c1"></span>    <span class="n">sHandler</span><span class="o">.</span><span class="na">getLooper</span><span class="o">();</span>
+<span class="o">}</span>
+</code></pre></div><p>对于第二点和第三点，与UI更新有关，我们可以在源码中看到，<code>onPreExecute</code>，<code>onProgressUpdate</code>等方法都注释有<code>@MainThread</code>。<strong>如果我们不需要更新UI，可以在其他线程中创建AsyncTask的实例</strong>。</p>
+<h3 id="内存泄漏">内存泄漏</h3>
+<p>在本文开始的时候，我们就提到<code>AsyncTask</code>只适合 “短小” 的任务。如果<code>AsyncTask</code>是<code>Activity</code>的内部类，就会持有<code>Activity</code>的引用，<code>AsyncTask</code>中任务时间过长，可能导致<code>Activity</code>不能及时回收，从而导致内存泄漏。</p>
+    </div>
+
+    
+<footer class="post-footer">
+      <div class="post-tags">
+          <a href="/tags/%E6%BA%90%E7%A0%81/">源码</a>
+          </div>
+      <nav class="post-nav">
+        <a class="prev" href="/2016/08/java-enum/">
+            <i class="iconfont icon-left"></i>
+            <span class="prev-text nav-default">Java Enum解析</span>
+            <span class="prev-text nav-mobile">上一篇</span>
+          </a>
+        <a class="next" href="/2016/07/android-volley-source/">
+            <span class="next-text nav-default">Volley源码解析</span>
+            <span class="next-text nav-mobile">下一篇</span>
+            <i class="iconfont icon-right"></i>
+          </a>
+      </nav>
+    </footer>
+  </article>
+        </div>
+        <div id="gitalk-container"></div>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js" crossorigin="anonymous"></script>
+    <script type="text/javascript">
+      var gitalk = new Gitalk({
+        id: '\/2016\/08\/asynctask-source\/',
+        title: 'AsyncTask源码解析',
+        clientID: '64b9f11ba0a3291ee49e',
+        clientSecret: '8632b99db733cc33fd8f6fe85680f63f0db9d872',
+        repo: 'hadyang.github.io',
+        owner: 'hadyang',
+        admin: ['hadyang'],
+        body: decodeURI(location.href)
+      });
+      gitalk.render('gitalk-container');
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://github.com/gitalk/gitalk">comments powered by gitalk.</a></noscript>
+
+  
+
+  
+
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="social-links">
+  <a href="" type="application/rss+xml" class="iconfont icon-rss" title="rss"></a>
+</div>
+
+<div class="copyright">
+  <span class="power-by">
+    由 <a class="hexo-link" href="https://gohugo.io">Hugo</a> 强力驱动
+  </span>
+  <span class="division">|</span>
+  <span class="theme-info">
+    主题 -
+    <a class="theme-link" href="https://github.com/olOwOlo/hugo-theme-even">Even</a>
+  </span>
+
+  
+
+  <span class="copyright-year">
+    &copy; 
+    2017 - 
+    2021<span class="heart"><i class="iconfont icon-heart"></i></span><span>HadYang</span>
+  </span>
+</div>
+
+    </footer>
+
+    <div class="back-to-top" id="back-to-top">
+      <i class="iconfont icon-up"></i>
+    </div>
+  </div>
+  
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/slideout@1.0.1/dist/slideout.min.js" integrity="sha256-t+zJ/g8/KXIJMjSVQdnibt4dlaDxc9zXr/9oNPeWqdg=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.js" integrity="sha256-XVLffZaxoWfGUEbdzuLi7pwaUJv1cecsQJQqGLe7axY=" crossorigin="anonymous"></script>
+
+
+
+<script type="text/javascript" src="/js/main.min.c12618f9a600c40bd024996677e951e64d3487006775aeb22e200c990006c5c7.js"></script>
+  <script type="text/javascript">
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$','$'], ['\\(','\\)']],
+        }
+    };
+  </script>
+  <script async src="https://cdn.jsdelivr.net/npm/mathjax@3.0.5/es5/tex-mml-chtml.js" integrity="sha256-HGLuEfFcsUJGhvB8cQ8nr0gai9EucOOaIxFw7qxmd+w=" crossorigin="anonymous"></script>
+
+
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+	ga('create', 'UA-157595781-2', 'auto');
+	ga('set', 'anonymizeIp', true);
+	ga('send', 'pageview');
+}
+</script>
+<script async src='https://www.google-analytics.com/analytics.js'></script>
+
+
+
+
+
+
+
+</body>
+</html>

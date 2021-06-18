@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>【What is this】什么是共识算法？ - HadYang</title>
+  <meta name="renderer" content="webkit" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<meta name="theme-color" content="#f8f5ec" />
+<meta name="msapplication-navbutton-color" content="#f8f5ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
+
+
+<meta name="author" content="HadYang" /><meta name="description" content="共识通俗地讲就是多个节点（个人）对某项提议达成一致。有很多场景都需要集群节点达成一致，例如： 主节点选举，对于主从复制的数据库来说，所有节点需" /><meta name="keywords" content="Java" />
+
+
+
+
+
+
+<meta name="generator" content="Hugo 0.73.0 with theme even" />
+
+
+<link rel="canonical" href="https://hadyang.github.io/2020/05/consensus/" />
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="manifest" href="/manifest.json">
+<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
+
+
+
+<link href="/sass/main.min.75c01efdcbc2767fdfe1f22f5a6fccc8c390d3cda325742f698bd0c6344144be.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.css" integrity="sha256-7TyXnr2YU040zfSP+rEcz29ggW4j56/ujTPwjMzyqFY=" crossorigin="anonymous">
+
+
+<meta property="og:title" content="【What is this】什么是共识算法？" />
+<meta property="og:description" content="共识通俗地讲就是多个节点（个人）对某项提议达成一致。有很多场景都需要集群节点达成一致，例如： 主节点选举，对于主从复制的数据库来说，所有节点需" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://hadyang.github.io/2020/05/consensus/" />
+<meta property="article:published_time" content="2020-05-29T00:00:00+00:00" />
+<meta property="article:modified_time" content="2020-05-29T00:00:00+00:00" />
+<meta itemprop="name" content="【What is this】什么是共识算法？">
+<meta itemprop="description" content="共识通俗地讲就是多个节点（个人）对某项提议达成一致。有很多场景都需要集群节点达成一致，例如： 主节点选举，对于主从复制的数据库来说，所有节点需">
+<meta itemprop="datePublished" content="2020-05-29T00:00:00&#43;00:00" />
+<meta itemprop="dateModified" content="2020-05-29T00:00:00&#43;00:00" />
+<meta itemprop="wordCount" content="2512">
+
+
+
+<meta itemprop="keywords" content="" /><meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="【What is this】什么是共识算法？"/>
+<meta name="twitter:description" content="共识通俗地讲就是多个节点（个人）对某项提议达成一致。有很多场景都需要集群节点达成一致，例如： 主节点选举，对于主从复制的数据库来说，所有节点需"/>
+
+<!--[if lte IE 9]>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js"></script>
+<![endif]-->
+
+<!--[if lt IE 9]>
+  <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+<![endif]-->
+
+</head>
+<body>
+  <div id="mobile-navbar" class="mobile-navbar">
+  <div class="mobile-header-logo">
+    <a href="/" class="logo">HadYang</a>
+  </div>
+  <div class="mobile-navbar-icon">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
+<nav id="mobile-menu" class="mobile-menu slideout-menu">
+  <ul class="mobile-menu-list">
+    <a href="https://hadyang.github.io/interview/">
+        <li class="mobile-menu-item">Interview</li>
+      </a><a href="/categories/">
+        <li class="mobile-menu-item">分类</li>
+      </a>
+  </ul>
+
+  
+
+
+</nav>
+
+  <div class="container" id="mobile-panel">
+    <header id="header" class="header">
+        <div class="logo-wrapper">
+  <a href="/" class="logo">HadYang</a>
+</div>
+
+
+
+
+
+<nav class="site-navbar">
+  <ul id="menu" class="menu">
+    <li class="menu-item">
+        <a class="menu-item-link" href="https://hadyang.github.io/interview/">Interview</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/categories/">分类</a>
+      </li>
+  </ul>
+</nav>
+
+    </header>
+
+    <main id="main" class="main">
+      <div class="content-wrapper">
+        <div id="content" class="content">
+          <article class="post">
+    
+    <header class="post-header">
+      <h1 class="post-title">【What is this】什么是共识算法？</h1>
+
+      <div class="post-meta">
+        <span class="post-time"> 2020-05-29 </span>
+        <div class="post-category">
+            <a href="/categories/what-it-is/"> What it is </a>
+            </div>
+          <span class="more-meta"> 约 2512 字 </span>
+          <span class="more-meta"> 预计阅读 6 分钟 </span>
+        
+      </div>
+    </header>
+
+    <div class="post-toc" id="post-toc">
+  <h2 class="post-toc-title">文章目录</h2>
+  <div class="post-toc-content always-active">
+    <nav id="TableOfContents">
+  <ul>
+    <li><a href="#全序广播">全序广播</a></li>
+    <li><a href="#共识与全序广播">共识与全序广播</a></li>
+    <li><a href="#拜占庭将军问题">拜占庭将军问题</a></li>
+    <li><a href="#共识与一致性">共识与一致性</a></li>
+    <li><a href="#共识算法的局限">共识算法的局限</a></li>
+    <li><a href="#参考文档">参考文档</a></li>
+  </ul>
+</nav>
+  </div>
+</div>
+    <div class="post-content">
+      <p>共识通俗地讲就是多个节点（个人）对某项提议达成一致。有很多场景都需要集群节点达成一致，例如：</p>
+<p>主节点选举，对于主从复制的数据库来说，所有节点需要就谁来充当主节点达成一致。由于网络问题，节点之间可能无法通信，会对主节点产生争议。此时，共识对于避免错误切换非常重要，比如，集群中有两个节点接受写请求，那么就会导致数据不一致，甚至丢失数据。</p>
+<p>还有一种场景就是跨节点或跨分区事务的数据库，某个事务可能在部分节点执行成功，但其他节点最终失败。为了维护事务的 “原子性”，所有节点必须对事务的结果达成一致：要么全部提交，要么全部回滚。这个共识问题被称为 <strong>原子提交问题</strong>。</p>
+<p>共识问题形式化描述如下：一个或多个节点可以提议某些值，由共识算法来决定最终值。<strong>共识算法</strong>（Consensus Algorithm）就是为分布式系统，在不可靠的网络环境、不可靠的节点下，提供达成共识的方法。共识算法必须满足以下性质：</p>
+<ul>
+<li><strong>协商一致性</strong>：所有节点都接收相同的提议</li>
+<li><strong>诚实性</strong>：所有节点不能反悔，即对一项提议进行多次投票</li>
+<li><strong>合法性</strong>：如果决定了一个值，其一定是系统中某个节点提议的</li>
+</ul>
+<p>类似于 2PC 或者 TCC 这类分布式事务算法也属于共识算法。但是 2PC 这种采取等待节点恢复的算法，会导致算法不可终止，系统长时间不可用。于是，<strong>可容错的共识算法</strong> 在共识算法的基础上，增加 <strong>可终止性</strong>：节点如果不崩溃则最终一定能达成协议。它强调一个共识算法不能原地空转，换句话说，它必须取得实质性进展。即使节点出现故障，其他节点也必须作出决定。常见的可容错共识算法有 ZAB 、Raft 和 Paxos算法。</p>
+<p>这里的可终止性也是有条件的，即 <strong>一定数量</strong> 的节点崩溃。如果所有节点都崩溃，那没有一种算法能最终作出决定。在实现过程中，任何的共识算法，都需要至少大部分节点正常运行，才能保证可终止性。而这个大多数就是 <strong>quorum</strong>，即集群中节点数量过半。</p>
+<blockquote>
+<p>当集群中正常运行节点少于 quorum 时，集群处于无响应状态</p>
+</blockquote>
+<h2 id="全序广播">全序广播</h2>
+<p>首先介绍下全序关系和偏序关系，这两个均为集合论中的概念。全序关系是在集合 $X$ 上的满足反对性、传递性和完全性的二元关系。对于 $X$ 中任意两个元素 $a$, $b$ 和 $c$：</p>
+<ul>
+<li>反对称性：若 $a \leq b$ 且 $b \leq a$ 则 $a = b$</li>
+<li>传递性：若 $a \leq b$ 且 $b \leq c$ 则 $a \leq c$</li>
+<li>完全性：$a \leq b$ 且 $b \leq a$</li>
+</ul>
+<p>全序关系中的完全性可以做如下描述：集合中的任何一对元素都是 <strong>可相互比较</strong> 的。偏序关系的概念比较复杂，可以简单理解为：不满足 <strong>完全性</strong> 的全序关系，即部分有序。</p>
+<p>在单机系统上，CPU 本身保证操作的全序关系，但是在分布式系统中，如何让所有节点就全序关系达成一致就面临很大的挑战。这里的挑战也是本身分布式系统所面临的，包括：网络延迟、网络丢包、不统一的时钟、不稳定的节点。</p>
+<p><strong>全序广播</strong> 通常指的是节点之间交换消息的某种协议，其满足以下两个属性：</p>
+<ul>
+<li><strong>可靠发送</strong>：没有消息丢失，如果消息发送到某个节点，则它一定要到达所有节点</li>
+<li><strong>严格有序</strong>：消息总是以相同顺序发送给每个节点</li>
+</ul>
+<p>全序广播需要保证上述的两个条件，即使在网络故障的情况下，算法必须进行重试，直到网络最终恢复。全序广播又被称为 <strong>原子广播</strong>，但这里的 “原子” 和我们常说的 ACID 中的 “原子性” 没有关系，而是和 线性化存储 有关。</p>
+<p>如果有了解过 MySQL 的主从复制，就比较能理解全序广播的概念。MySQL 的主从复制，就是一种全序广播的实现。类似的还有 ZAB 协议、Raft 协议，都是全序广播的一种实现，只不过 ZAB 和 Raft 是属于 <strong>可容错的全序广播</strong>。</p>
+<h2 id="共识与全序广播">共识与全序广播</h2>
+<p>常见的共识算法还有 Paxos、ZAB 以及 Raft，其中，ZAB 和 Raft 协议类似，他们是 <strong>决定一些值，然后采用全序广播算法</strong> 。全序广播的要点是，消息按相同的顺序发送到所有节点，有且只有一次。在某种程度上，全序广播属于持续多轮的共识：在每一轮，节点提出接下来想发送的消息，然后决定下一个消息的全局顺序。而 Paxos 协议则是对所有数据进行共识，在一定程度上导致 Paxos 算法的复杂性。</p>
+<p>在上面提到的全序广播中，都有一个共性即 “一主多从” ，由单个主节点接收写请求，并将请求复制到其他节点。但是如果主节点失效，对于全序广播来说，这时整个系统都不可用，只能由人工介入，手动再指定一个主节点。如果算法能在节点失效时，自动选举和故障切换，这样就构成 <strong>可容错的全序广播</strong>。</p>
+<h2 id="拜占庭将军问题">拜占庭将军问题</h2>
+<p>在共识算法中，经常会提到一个 <strong>拜占庭将军问题</strong>。在拜占庭将军问题中，分布式系统中的节点会发出错误的消息，即存在 <strong>欺骗</strong>，这种欺骗可能是由于程序Bug、数据损坏等等。拜占庭将军问题中，节点是不可信的。</p>
+<p>上面提到的 Paxos 、 ZAB 、Raft 均不是拜占庭容错算法。之前热度很高的区块链技术，通过 <strong>工作量证明算法</strong>（PoW）来实现了拜占庭容错（解决拜占庭将军问题）。</p>
+<h2 id="共识与一致性">共识与一致性</h2>
+<p>分布式一致性关注分布式环境下，由于网络延迟和故障的影响，同一数据副本在多个节点的状态是否一致。而共识算法则是关注同一数据在多个节点是否能达成共识，达成共识并不一定表示当前本节点该数据状态与其他节点的状态一致。</p>
+<p>举个例子来解释，对于 ZK 来说，当你请求数据写入并返回时，它已就某个值达成共识，但在 Follwer 节点你还是可能读取到旧值。这也是 ZK 写入原子一致性、读取顺序一致性的表现。</p>
+<blockquote>
+<p>ZooKeeper does not guarantee that at every instance in time, two different clients will have identical views of ZooKeeper data. Due to factors like network delays, one client may perform an update before another client gets notified of the change. Consider the scenario of two clients, A and B. <strong>If client A sets the value of a znode /a from 0 to 1, then tells client B to read /a, client B may read the old value of 0, depending on which server it is connected to</strong>. If it is important that Client A and Client B read the same value, Client B should should call the sync() method from the ZooKeeper API method before it performs its read.</p>
+</blockquote>
+<blockquote>
+<p>So, ZooKeeper by itself doesn&rsquo;t guarantee that changes occur synchronously across all servers, but ZooKeeper primitives can be used to construct higher level functions that provide useful client synchronization. (For more information, see the ZooKeeper Recipes. [tbd:..]).</p>
+</blockquote>
+<p>虽然我极力避免在本文提到一致性相关内容，因为这又是一个复杂的问题。但是这里还是要强调以下共识算法与分布式一致性 <strong>没有</strong> 必然的联系。</p>
+<h2 id="共识算法的局限">共识算法的局限</h2>
+<p>共识算法为不确定的分布式系统带来了明确的安全属性（写入一致性、完整性和有效性），同时它还支持一定程度的容错。当然，共识算法也不是银弹，不能解决所有问题，并且其也存在局限性。</p>
+<ol>
+<li><strong>共识算法需要大多数节点存活才能正常运行</strong>，这意味着至少三个节点才能容忍一个节点的失效</li>
+<li><strong>多数共识算法假定一组固定参与投票的节点集合</strong>，这意味着不能动态增加或删除节点</li>
+<li>共识算法通常采用 <strong>超时机制</strong> 来检测节点是否可用，在网络延迟不确定的环境下，会导致节点错误的认为主节点失效，频繁的进行选举会导致系统不可用时间变成。</li>
+</ol>
+<h2 id="参考文档">参考文档</h2>
+<ul>
+<li><a href="https://zookeeper.apache.org/doc/r3.1.2/zookeeperProgrammers.html#ch_zkGuarantees">ZooKeeper Programmer&rsquo;s Guide</a></li>
+</ul>
+
+    </div>
+
+    
+<footer class="post-footer">
+      
+      <nav class="post-nav">
+        <a class="prev" href="/2020/06/consistency/">
+            <i class="iconfont icon-left"></i>
+            <span class="prev-text nav-default">【What is this】什么是一致性？</span>
+            <span class="prev-text nav-mobile">上一篇</span>
+          </a>
+        <a class="next" href="/2019/12/mysql-delete-insert-deadlock/">
+            <span class="next-text nav-default">MySQL 删除&amp;插入死锁分析</span>
+            <span class="next-text nav-mobile">下一篇</span>
+            <i class="iconfont icon-right"></i>
+          </a>
+      </nav>
+    </footer>
+  </article>
+        </div>
+        <div id="gitalk-container"></div>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js" crossorigin="anonymous"></script>
+    <script type="text/javascript">
+      var gitalk = new Gitalk({
+        id: '\/2020\/05\/consensus\/',
+        title: '【What is this】什么是共识算法？',
+        clientID: '64b9f11ba0a3291ee49e',
+        clientSecret: '8632b99db733cc33fd8f6fe85680f63f0db9d872',
+        repo: 'hadyang.github.io',
+        owner: 'hadyang',
+        admin: ['hadyang'],
+        body: decodeURI(location.href)
+      });
+      gitalk.render('gitalk-container');
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://github.com/gitalk/gitalk">comments powered by gitalk.</a></noscript>
+
+  
+
+  
+
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="social-links">
+  <a href="" type="application/rss+xml" class="iconfont icon-rss" title="rss"></a>
+</div>
+
+<div class="copyright">
+  <span class="power-by">
+    由 <a class="hexo-link" href="https://gohugo.io">Hugo</a> 强力驱动
+  </span>
+  <span class="division">|</span>
+  <span class="theme-info">
+    主题 -
+    <a class="theme-link" href="https://github.com/olOwOlo/hugo-theme-even">Even</a>
+  </span>
+
+  
+
+  <span class="copyright-year">
+    &copy; 
+    2017 - 
+    2021<span class="heart"><i class="iconfont icon-heart"></i></span><span>HadYang</span>
+  </span>
+</div>
+
+    </footer>
+
+    <div class="back-to-top" id="back-to-top">
+      <i class="iconfont icon-up"></i>
+    </div>
+  </div>
+  
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/slideout@1.0.1/dist/slideout.min.js" integrity="sha256-t+zJ/g8/KXIJMjSVQdnibt4dlaDxc9zXr/9oNPeWqdg=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.js" integrity="sha256-XVLffZaxoWfGUEbdzuLi7pwaUJv1cecsQJQqGLe7axY=" crossorigin="anonymous"></script>
+
+
+
+<script type="text/javascript" src="/js/main.min.c12618f9a600c40bd024996677e951e64d3487006775aeb22e200c990006c5c7.js"></script>
+  <script type="text/javascript">
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$','$'], ['\\(','\\)']],
+        }
+    };
+  </script>
+  <script async src="https://cdn.jsdelivr.net/npm/mathjax@3.0.5/es5/tex-mml-chtml.js" integrity="sha256-HGLuEfFcsUJGhvB8cQ8nr0gai9EucOOaIxFw7qxmd+w=" crossorigin="anonymous"></script>
+
+
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+	ga('create', 'UA-157595781-2', 'auto');
+	ga('set', 'anonymizeIp', true);
+	ga('send', 'pageview');
+}
+</script>
+<script async src='https://www.google-analytics.com/analytics.js'></script>
+
+
+
+
+
+
+
+</body>
+</html>

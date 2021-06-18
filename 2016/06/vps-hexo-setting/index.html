@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>VPS上搭建Hexo静态博客 - HadYang</title>
+  <meta name="renderer" content="webkit" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<meta name="theme-color" content="#f8f5ec" />
+<meta name="msapplication-navbutton-color" content="#f8f5ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
+
+
+<meta name="author" content="HadYang" /><meta name="description" content="最近在提交百度收录的时候发现github将百度的爬虫给禁掉了，百度收录不了github上的网站。后来试过用CDN但是没有适合，最终还是将博客重新部署在VPS上，这样就解决了百度爬虫的问题。
+" /><meta name="keywords" content="Java" />
+
+
+
+
+
+
+<meta name="generator" content="Hugo 0.73.0 with theme even" />
+
+
+<link rel="canonical" href="https://hadyang.github.io/2016/06/vps-hexo-setting/" />
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="manifest" href="/manifest.json">
+<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
+
+
+
+<link href="/sass/main.min.75c01efdcbc2767fdfe1f22f5a6fccc8c390d3cda325742f698bd0c6344144be.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.css" integrity="sha256-7TyXnr2YU040zfSP+rEcz29ggW4j56/ujTPwjMzyqFY=" crossorigin="anonymous">
+
+
+<meta property="og:title" content="VPS上搭建Hexo静态博客" />
+<meta property="og:description" content="最近在提交百度收录的时候发现github将百度的爬虫给禁掉了，百度收录不了github上的网站。后来试过用CDN但是没有适合，最终还是将博客重新部署在VPS上，这样就解决了百度爬虫的问题。" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://hadyang.github.io/2016/06/vps-hexo-setting/" />
+<meta property="article:published_time" content="2016-06-23T00:00:00+00:00" />
+<meta property="article:modified_time" content="2016-06-23T00:00:00+00:00" />
+<meta itemprop="name" content="VPS上搭建Hexo静态博客">
+<meta itemprop="description" content="最近在提交百度收录的时候发现github将百度的爬虫给禁掉了，百度收录不了github上的网站。后来试过用CDN但是没有适合，最终还是将博客重新部署在VPS上，这样就解决了百度爬虫的问题。">
+<meta itemprop="datePublished" content="2016-06-23T00:00:00&#43;00:00" />
+<meta itemprop="dateModified" content="2016-06-23T00:00:00&#43;00:00" />
+<meta itemprop="wordCount" content="1139">
+
+
+
+<meta itemprop="keywords" content="博客,教程," /><meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="VPS上搭建Hexo静态博客"/>
+<meta name="twitter:description" content="最近在提交百度收录的时候发现github将百度的爬虫给禁掉了，百度收录不了github上的网站。后来试过用CDN但是没有适合，最终还是将博客重新部署在VPS上，这样就解决了百度爬虫的问题。"/>
+
+<!--[if lte IE 9]>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js"></script>
+<![endif]-->
+
+<!--[if lt IE 9]>
+  <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+<![endif]-->
+
+</head>
+<body>
+  <div id="mobile-navbar" class="mobile-navbar">
+  <div class="mobile-header-logo">
+    <a href="/" class="logo">HadYang</a>
+  </div>
+  <div class="mobile-navbar-icon">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
+<nav id="mobile-menu" class="mobile-menu slideout-menu">
+  <ul class="mobile-menu-list">
+    <a href="https://hadyang.github.io/interview/">
+        <li class="mobile-menu-item">Interview</li>
+      </a><a href="/categories/">
+        <li class="mobile-menu-item">分类</li>
+      </a>
+  </ul>
+
+  
+
+
+</nav>
+
+  <div class="container" id="mobile-panel">
+    <header id="header" class="header">
+        <div class="logo-wrapper">
+  <a href="/" class="logo">HadYang</a>
+</div>
+
+
+
+
+
+<nav class="site-navbar">
+  <ul id="menu" class="menu">
+    <li class="menu-item">
+        <a class="menu-item-link" href="https://hadyang.github.io/interview/">Interview</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/categories/">分类</a>
+      </li>
+  </ul>
+</nav>
+
+    </header>
+
+    <main id="main" class="main">
+      <div class="content-wrapper">
+        <div id="content" class="content">
+          <article class="post">
+    
+    <header class="post-header">
+      <h1 class="post-title">VPS上搭建Hexo静态博客</h1>
+
+      <div class="post-meta">
+        <span class="post-time"> 2016-06-23 </span>
+        <div class="post-category">
+            <a href="/categories/vps/"> VPS </a>
+            </div>
+          <span class="more-meta"> 约 1139 字 </span>
+          <span class="more-meta"> 预计阅读 3 分钟 </span>
+        
+      </div>
+    </header>
+
+    <div class="post-toc" id="post-toc">
+  <h2 class="post-toc-title">文章目录</h2>
+  <div class="post-toc-content always-active">
+    <nav id="TableOfContents">
+  <ul>
+    <li>
+      <ul>
+        <li><a href="#准备">准备</a></li>
+        <li><a href="#服务器配置">服务器配置</a></li>
+        <li><a href="#客户端">客户端</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+  </div>
+</div>
+    <div class="post-content">
+      <p>最近在提交百度收录的时候发现github将百度的爬虫给禁掉了，百度收录不了github上的网站。后来试过用CDN但是没有适合，最终还是将博客重新部署在VPS上，这样就解决了百度爬虫的问题。</p>
+<h3 id="准备">准备</h3>
+<ul>
+<li>独立IP服务器，可以在<a href="http://bandwagonhost.com/">搬瓦工</a>上购买。搬瓦工上的VPS可以用来翻墙而且性价比很高，很适合作为静态博客服务器。</li>
+<li>域名，域名可以在<a href="https://sg.godaddy.com/zh?countryview=1">godaddy</a>上购买，支持支付宝付款。godaddy是全球最大的域名注册商，最主要的是不需要备案。</li>
+<li>SSH密钥，用来登录VPS和上传网站。</li>
+</ul>
+<h3 id="服务器配置">服务器配置</h3>
+<ol>
+<li>使用putty等工具连接上VPS，使用root权限添加用户，修改密码。</li>
+</ol>
+<div class="highlight"><pre class="chroma"><code class="language-fallback" data-lang="fallback">[root@VM_32_44_centos /]# adduser hexo
+[root@VM_32_44_centos /]# passwd hexo
+</code></pre></div><p>Centos-minial版本本身没有sudo命令，为了方便我们要先安装sudo。</p>
+<div class="highlight"><pre class="chroma"><code class="language-fallback" data-lang="fallback">[root@VM_32_44_centos www]# yum install sudo
+</code></pre></div><p>赋予hexo root权限，在/etc/sudoers中添加一行</p>
+<div class="highlight"><pre class="chroma"><code class="language-fallback" data-lang="fallback">root        ALL=(ALL)       ALL
+hexo        ALL=(ALL)       ALL #这个是添加的
+</code></pre></div><ol start="2">
+<li>将ssh公钥添加到/home/hexo/.ssh文件夹下面，并重命名为authorized_keys。</li>
+</ol>
+<blockquote>
+<p>注意<code>.ssh</code>文件夹的权限为700，<code>authorized_keys</code>的权限为600。</p>
+</blockquote>
+<ol start="3">
+<li>添加nginx源，将以下代码添加到/etc/yum.repos.d/nginx.repo中。</li>
+</ol>
+<div class="highlight"><pre class="chroma"><code class="language-fallback" data-lang="fallback">[nginx]
+name=nginx repo
+baseurl=http://nginx.org/packages/centos/$releasever/$basearch/
+gpgcheck=0
+enabled=1
+</code></pre></div><ol start="4">
+<li>安装nginx。</li>
+</ol>
+<div class="highlight"><pre class="chroma"><code class="language-fallback" data-lang="fallback">[root@VM_32_44_centos /]# yum install nginx
+</code></pre></div><ol start="5">
+<li>删除nginx虚拟主机配置文件</li>
+</ol>
+<div class="highlight"><pre class="chroma"><code class="language-fallback" data-lang="fallback">[root@VM_32_44_centos /]# rm /etc/nginx/conf.d/*
+</code></pre></div><ol start="6">
+<li>将以下内容添加到<code>/etc/nginx/conf.d/hexo.conf</code>中</li>
+</ol>
+<div class="highlight"><pre class="chroma"><code class="language-fallback" data-lang="fallback">server {
+  root /home/hexo/www;  #网站根目录
+  index index.html index.htm;
+  server_name www.astayang.com;   #你的域名
+  location / {
+    try_files $uri $uri/ /index.html;
+  }
+}
+</code></pre></div><ol start="7">
+<li>
+<p>修改nginx配置文件，将/etc/nginx/nginx.conf中的<code>user</code>值修改为<code>hexo</code>。</p>
+</li>
+<li>
+<p>切换到hexo用户，并新建www文件夹，作为网站根目录。</p>
+</li>
+</ol>
+<div class="highlight"><pre class="chroma"><code class="language-fallback" data-lang="fallback">[astayang@VM_32_44_centos /]$ su hexo
+Password:
+[hexo@VM_32_44_centos /]$ cd ~
+[hexo@VM_32_44_centos ~]$ ls
+[hexo@VM_32_44_centos ~]$ mkdir www
+[hexo@VM_32_44_centos ~]$ ls
+www
+</code></pre></div><ol start="9">
+<li>启动nginx服务，并验证nginx配置</li>
+</ol>
+<div class="highlight"><pre class="chroma"><code class="language-fallback" data-lang="fallback">[hexo@VM_32_44_centos hexo]# sudo nginx -t
+nginx: the configuration file /etc/nginx/nginx.conf syntax is ok
+nginx: configuration file /etc/nginx/nginx.conf test is successful
+</code></pre></div><p>如果输出和上面的一致就说明配置文件没有问题，接下来就启动nginx服务，并设置为开机启动。</p>
+<div class="highlight"><pre class="chroma"><code class="language-fallback" data-lang="fallback">[hexo@VM_32_44_centos hexo]# sudo systemctl start nginx
+[hexo@VM_32_44_centos hexo]# sudo systemctl enable nginx
+</code></pre></div><p>在/home/hexo/www文件夹下添加index.html文件。</p>
+<div class="highlight"><pre class="chroma"><code class="language-fallback" data-lang="fallback">[hexo@VM_32_44_centos www]$ echo &#34;This is index.html&#34; &gt; index.html
+</code></pre></div><p>在浏览器中输入VPS的IP地址，这是会出现<code>This is index.html</code>字样，删除index.html。</p>
+<ol start="10">
+<li>配置git</li>
+</ol>
+<div class="highlight"><pre class="chroma"><code class="language-fallback" data-lang="fallback">[hexo@VM_32_44_centos www]$ sudo yum install git
+</code></pre></div><p>安装完成后，初始化git仓库</p>
+<div class="highlight"><pre class="chroma"><code class="language-fallback" data-lang="fallback">[hexo@VM_32_44_centos ~]$ mkdir hexo.git
+[hexo@VM_32_44_centos ~]$ cd hexo.git/
+[hexo@VM_32_44_centos hexo.git]$ git init --bare
+Initialized empty Git repository in /home/hexo/hexo.git/
+</code></pre></div><p>将以下内容添加到<code>hexo.git/hooks/post-receive</code>中，并将post-receive文件权限改为755。</p>
+<div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash"><span class="cp">#!/bin/bash
+</span><span class="cp"></span><span class="nv">GIT_REPO</span><span class="o">=</span>/home/hexo/hexo.git
+<span class="nv">TMP_GIT_CLONE</span><span class="o">=</span>/tmp/HexoBlog
+<span class="nv">PUBLIC_WWW</span><span class="o">=</span>/home/hexo/www
+rm -rf <span class="si">${</span><span class="nv">TMP_GIT_CLONE</span><span class="si">}</span>
+git clone <span class="nv">$GIT_REPO</span> <span class="nv">$TMP_GIT_CLONE</span>
+rm -rf <span class="si">${</span><span class="nv">PUBLIC_WWW</span><span class="si">}</span>/*
+cp -rf <span class="si">${</span><span class="nv">TMP_GIT_CLONE</span><span class="si">}</span>/* <span class="si">${</span><span class="nv">PUBLIC_WWW</span><span class="si">}</span>
+</code></pre></div><div class="highlight"><pre class="chroma"><code class="language-fallback" data-lang="fallback">[hexo@VM_32_44_centos ~]$ chmod 755 hexo.git/hooks/post-receive
+</code></pre></div><p>以上就将服务器配置完毕，下面就需要配置客户端。</p>
+<h3 id="客户端">客户端</h3>
+<p>在hexo根目录_config.yml中添加部署配置</p>
+<div class="highlight"><pre class="chroma"><code class="language-fallback" data-lang="fallback">deploy:
+- type: git
+  repo: ssh://hexo@VPS的IP:ssh的端口/home/hexo/hexo.git
+  branch: master
+</code></pre></div><p>使用hexo命令将网站部署到VPS。</p>
+    </div>
+
+    
+<footer class="post-footer">
+      <div class="post-tags">
+          <a href="/tags/%E5%8D%9A%E5%AE%A2/">博客</a>
+          <a href="/tags/%E6%95%99%E7%A8%8B/">教程</a>
+          </div>
+      <nav class="post-nav">
+        <a class="prev" href="/2016/06/java-linkedhashmap-source/">
+            <i class="iconfont icon-left"></i>
+            <span class="prev-text nav-default">LinkedHashMap源码解析</span>
+            <span class="prev-text nav-mobile">上一篇</span>
+          </a>
+        <a class="next" href="/2016/06/java-hashmap-source/">
+            <span class="next-text nav-default">HashMap源码解析</span>
+            <span class="next-text nav-mobile">下一篇</span>
+            <i class="iconfont icon-right"></i>
+          </a>
+      </nav>
+    </footer>
+  </article>
+        </div>
+        <div id="gitalk-container"></div>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js" crossorigin="anonymous"></script>
+    <script type="text/javascript">
+      var gitalk = new Gitalk({
+        id: '\/2016\/06\/vps-hexo-setting\/',
+        title: 'VPS上搭建Hexo静态博客',
+        clientID: '64b9f11ba0a3291ee49e',
+        clientSecret: '8632b99db733cc33fd8f6fe85680f63f0db9d872',
+        repo: 'hadyang.github.io',
+        owner: 'hadyang',
+        admin: ['hadyang'],
+        body: decodeURI(location.href)
+      });
+      gitalk.render('gitalk-container');
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://github.com/gitalk/gitalk">comments powered by gitalk.</a></noscript>
+
+  
+
+  
+
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="social-links">
+  <a href="" type="application/rss+xml" class="iconfont icon-rss" title="rss"></a>
+</div>
+
+<div class="copyright">
+  <span class="power-by">
+    由 <a class="hexo-link" href="https://gohugo.io">Hugo</a> 强力驱动
+  </span>
+  <span class="division">|</span>
+  <span class="theme-info">
+    主题 -
+    <a class="theme-link" href="https://github.com/olOwOlo/hugo-theme-even">Even</a>
+  </span>
+
+  
+
+  <span class="copyright-year">
+    &copy; 
+    2017 - 
+    2021<span class="heart"><i class="iconfont icon-heart"></i></span><span>HadYang</span>
+  </span>
+</div>
+
+    </footer>
+
+    <div class="back-to-top" id="back-to-top">
+      <i class="iconfont icon-up"></i>
+    </div>
+  </div>
+  
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/slideout@1.0.1/dist/slideout.min.js" integrity="sha256-t+zJ/g8/KXIJMjSVQdnibt4dlaDxc9zXr/9oNPeWqdg=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.js" integrity="sha256-XVLffZaxoWfGUEbdzuLi7pwaUJv1cecsQJQqGLe7axY=" crossorigin="anonymous"></script>
+
+
+
+<script type="text/javascript" src="/js/main.min.c12618f9a600c40bd024996677e951e64d3487006775aeb22e200c990006c5c7.js"></script>
+  <script type="text/javascript">
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$','$'], ['\\(','\\)']],
+        }
+    };
+  </script>
+  <script async src="https://cdn.jsdelivr.net/npm/mathjax@3.0.5/es5/tex-mml-chtml.js" integrity="sha256-HGLuEfFcsUJGhvB8cQ8nr0gai9EucOOaIxFw7qxmd+w=" crossorigin="anonymous"></script>
+
+
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+	ga('create', 'UA-157595781-2', 'auto');
+	ga('set', 'anonymizeIp', true);
+	ga('send', 'pageview');
+}
+</script>
+<script async src='https://www.google-analytics.com/analytics.js'></script>
+
+
+
+
+
+
+
+</body>
+</html>

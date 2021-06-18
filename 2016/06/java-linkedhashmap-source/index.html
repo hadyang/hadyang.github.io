@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>LinkedHashMap源码解析 - HadYang</title>
+  <meta name="renderer" content="webkit" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<meta name="theme-color" content="#f8f5ec" />
+<meta name="msapplication-navbutton-color" content="#f8f5ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
+
+
+<meta name="author" content="HadYang" /><meta name="description" content="LinkedHashMap是HashMap的子类，其与HashMap最大的区别就是 使用了一个双向链表对结点进行存储，通过这个链表可以实现Map中的数据有序。在HashMap中遍历数据是根据key的哈希值遍历的，LinkedHashMap可以根据key插入的顺序或者结点的访问顺序进行遍历。当我们需要记录插入Map结点的顺序时，可以使用LinkedHashMap。同时LinkedHashMap是线程不同步的，如果需要进行同步可以使用Collections.synchronizedMap(new LinkedHashMap(...))。
+" /><meta name="keywords" content="Java" />
+
+
+
+
+
+
+<meta name="generator" content="Hugo 0.73.0 with theme even" />
+
+
+<link rel="canonical" href="https://hadyang.github.io/2016/06/java-linkedhashmap-source/" />
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="manifest" href="/manifest.json">
+<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
+
+
+
+<link href="/sass/main.min.75c01efdcbc2767fdfe1f22f5a6fccc8c390d3cda325742f698bd0c6344144be.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.css" integrity="sha256-7TyXnr2YU040zfSP+rEcz29ggW4j56/ujTPwjMzyqFY=" crossorigin="anonymous">
+
+
+<meta property="og:title" content="LinkedHashMap源码解析" />
+<meta property="og:description" content="LinkedHashMap是HashMap的子类，其与HashMap最大的区别就是 使用了一个双向链表对结点进行存储，通过这个链表可以实现Map中的数据有序。在HashMap中遍历数据是根据key的哈希值遍历的，LinkedHashMap可以根据key插入的顺序或者结点的访问顺序进行遍历。当我们需要记录插入Map结点的顺序时，可以使用LinkedHashMap。同时LinkedHashMap是线程不同步的，如果需要进行同步可以使用Collections.synchronizedMap(new LinkedHashMap(...))。" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://hadyang.github.io/2016/06/java-linkedhashmap-source/" />
+<meta property="article:published_time" content="2016-06-23T00:00:00+00:00" />
+<meta property="article:modified_time" content="2016-06-23T00:00:00+00:00" />
+<meta itemprop="name" content="LinkedHashMap源码解析">
+<meta itemprop="description" content="LinkedHashMap是HashMap的子类，其与HashMap最大的区别就是 使用了一个双向链表对结点进行存储，通过这个链表可以实现Map中的数据有序。在HashMap中遍历数据是根据key的哈希值遍历的，LinkedHashMap可以根据key插入的顺序或者结点的访问顺序进行遍历。当我们需要记录插入Map结点的顺序时，可以使用LinkedHashMap。同时LinkedHashMap是线程不同步的，如果需要进行同步可以使用Collections.synchronizedMap(new LinkedHashMap(...))。">
+<meta itemprop="datePublished" content="2016-06-23T00:00:00&#43;00:00" />
+<meta itemprop="dateModified" content="2016-06-23T00:00:00&#43;00:00" />
+<meta itemprop="wordCount" content="1198">
+
+
+
+<meta itemprop="keywords" content="源码,集合," /><meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="LinkedHashMap源码解析"/>
+<meta name="twitter:description" content="LinkedHashMap是HashMap的子类，其与HashMap最大的区别就是 使用了一个双向链表对结点进行存储，通过这个链表可以实现Map中的数据有序。在HashMap中遍历数据是根据key的哈希值遍历的，LinkedHashMap可以根据key插入的顺序或者结点的访问顺序进行遍历。当我们需要记录插入Map结点的顺序时，可以使用LinkedHashMap。同时LinkedHashMap是线程不同步的，如果需要进行同步可以使用Collections.synchronizedMap(new LinkedHashMap(...))。"/>
+
+<!--[if lte IE 9]>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js"></script>
+<![endif]-->
+
+<!--[if lt IE 9]>
+  <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+<![endif]-->
+
+</head>
+<body>
+  <div id="mobile-navbar" class="mobile-navbar">
+  <div class="mobile-header-logo">
+    <a href="/" class="logo">HadYang</a>
+  </div>
+  <div class="mobile-navbar-icon">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
+<nav id="mobile-menu" class="mobile-menu slideout-menu">
+  <ul class="mobile-menu-list">
+    <a href="https://hadyang.github.io/interview/">
+        <li class="mobile-menu-item">Interview</li>
+      </a><a href="/categories/">
+        <li class="mobile-menu-item">分类</li>
+      </a>
+  </ul>
+
+  
+
+
+</nav>
+
+  <div class="container" id="mobile-panel">
+    <header id="header" class="header">
+        <div class="logo-wrapper">
+  <a href="/" class="logo">HadYang</a>
+</div>
+
+
+
+
+
+<nav class="site-navbar">
+  <ul id="menu" class="menu">
+    <li class="menu-item">
+        <a class="menu-item-link" href="https://hadyang.github.io/interview/">Interview</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/categories/">分类</a>
+      </li>
+  </ul>
+</nav>
+
+    </header>
+
+    <main id="main" class="main">
+      <div class="content-wrapper">
+        <div id="content" class="content">
+          <article class="post">
+    
+    <header class="post-header">
+      <h1 class="post-title">LinkedHashMap源码解析</h1>
+
+      <div class="post-meta">
+        <span class="post-time"> 2016-06-23 </span>
+        <div class="post-category">
+            <a href="/categories/java/"> Java </a>
+            </div>
+          <span class="more-meta"> 约 1198 字 </span>
+          <span class="more-meta"> 预计阅读 3 分钟 </span>
+        
+      </div>
+    </header>
+
+    <div class="post-toc" id="post-toc">
+  <h2 class="post-toc-title">文章目录</h2>
+  <div class="post-toc-content always-active">
+    <nav id="TableOfContents">
+  <ul>
+    <li>
+      <ul>
+        <li><a href="#linkedhashmapentry">LinkedHashMap.Entry</a></li>
+        <li><a href="#linkedhashmapput">LinkedHashMap.put</a></li>
+        <li><a href="#accessorder">accessOrder</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+  </div>
+</div>
+    <div class="post-content">
+      <p><code>LinkedHashMap</code>是<code>HashMap</code>的子类，其与HashMap最大的区别就是 <strong>使用了一个双向链表对结点进行存储，通过这个链表可以实现Map中的数据有序</strong>。在HashMap中遍历数据是根据key的哈希值遍历的，<code>LinkedHashMap</code>可以根据key插入的顺序或者结点的访问顺序进行遍历。当我们需要记录插入Map结点的顺序时，可以使用<code>LinkedHashMap</code>。同时<code>LinkedHashMap</code>是线程不同步的，如果需要进行同步可以使用<code>Collections.synchronizedMap(new LinkedHashMap(...))</code>。</p>
+<h3 id="linkedhashmapentry">LinkedHashMap.Entry</h3>
+<p><code>LinkedHashMap.Entry</code>是<code>LinkedHashMap</code>的内部类，继承自<code>HashMap.Node</code>，是<code>LinkedHashMap</code>中的结点类型。它相比于<code>HashMap.Node</code>就增加了两个引用，构成双向链表。</p>
+<div class="highlight"><pre class="chroma"><code class="language-Java" data-lang="Java"><span class="kd">static</span> <span class="kd">class</span> <span class="nc">Entry</span><span class="o">&lt;</span><span class="n">K</span><span class="o">,</span><span class="n">V</span><span class="o">&gt;</span> <span class="kd">extends</span> <span class="n">HashMap</span><span class="o">.</span><span class="na">Node</span><span class="o">&lt;</span><span class="n">K</span><span class="o">,</span><span class="n">V</span><span class="o">&gt;</span> <span class="o">{</span>
+    <span class="n">Entry</span><span class="o">&lt;</span><span class="n">K</span><span class="o">,</span><span class="n">V</span><span class="o">&gt;</span> <span class="n">before</span><span class="o">,</span> <span class="n">after</span><span class="o">;</span>
+    <span class="n">Entry</span><span class="o">(</span><span class="kt">int</span> <span class="n">hash</span><span class="o">,</span> <span class="n">K</span> <span class="n">key</span><span class="o">,</span> <span class="n">V</span> <span class="n">value</span><span class="o">,</span> <span class="n">Node</span><span class="o">&lt;</span><span class="n">K</span><span class="o">,</span><span class="n">V</span><span class="o">&gt;</span> <span class="n">next</span><span class="o">)</span> <span class="o">{</span>
+        <span class="kd">super</span><span class="o">(</span><span class="n">hash</span><span class="o">,</span> <span class="n">key</span><span class="o">,</span> <span class="n">value</span><span class="o">,</span> <span class="n">next</span><span class="o">);</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div><h3 id="linkedhashmapput">LinkedHashMap.put</h3>
+<p><code>LinkedHashMap</code>的put方法继承自HashMap，在HashMap源码解析中我们已经提到了这个方法，其中需要注意的是<code>LinkedHashMap</code>重写了<code>HashMap</code>中的<code>newNode</code>方法，这样就可以替换掉<code>HashMap.Node</code>。</p>
+<div class="highlight"><pre class="chroma"><code class="language-Java" data-lang="Java"><span class="n">Node</span><span class="o">&lt;</span><span class="n">K</span><span class="o">,</span><span class="n">V</span><span class="o">&gt;</span> <span class="nf">newNode</span><span class="o">(</span><span class="kt">int</span> <span class="n">hash</span><span class="o">,</span> <span class="n">K</span> <span class="n">key</span><span class="o">,</span> <span class="n">V</span> <span class="n">value</span><span class="o">,</span> <span class="n">Node</span><span class="o">&lt;</span><span class="n">K</span><span class="o">,</span><span class="n">V</span><span class="o">&gt;</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+    <span class="n">LinkedHashMap</span><span class="o">.</span><span class="na">Entry</span><span class="o">&lt;</span><span class="n">K</span><span class="o">,</span><span class="n">V</span><span class="o">&gt;</span> <span class="n">p</span> <span class="o">=</span>
+        <span class="k">new</span> <span class="n">LinkedHashMap</span><span class="o">.</span><span class="na">Entry</span><span class="o">&lt;</span><span class="n">K</span><span class="o">,</span><span class="n">V</span><span class="o">&gt;(</span><span class="n">hash</span><span class="o">,</span> <span class="n">key</span><span class="o">,</span> <span class="n">value</span><span class="o">,</span> <span class="n">e</span><span class="o">);</span>
+    <span class="n">linkNodeLast</span><span class="o">(</span><span class="n">p</span><span class="o">);</span>
+    <span class="k">return</span> <span class="n">p</span><span class="o">;</span>
+<span class="o">}</span>
+</code></pre></div><p>在newNode方法的最后，将新建的对象加入双向链表的尾部。</p>
+<h3 id="accessorder">accessOrder</h3>
+<p>在LinkedHashMap中保存了三个主要的成员变量：</p>
+<div class="highlight"><pre class="chroma"><code class="language-Java" data-lang="Java"><span class="kd">transient</span> <span class="n">LinkedHashMap</span><span class="o">.</span><span class="na">Entry</span><span class="o">&lt;</span><span class="n">K</span><span class="o">,</span><span class="n">V</span><span class="o">&gt;</span> <span class="n">head</span><span class="o">;</span>
+
+<span class="kd">transient</span> <span class="n">LinkedHashMap</span><span class="o">.</span><span class="na">Entry</span><span class="o">&lt;</span><span class="n">K</span><span class="o">,</span><span class="n">V</span><span class="o">&gt;</span> <span class="n">tail</span><span class="o">;</span>
+
+<span class="kd">final</span> <span class="kt">boolean</span> <span class="n">accessOrder</span><span class="o">;</span>
+</code></pre></div><p>分别代表双向链表的头、尾，以及LinkedHashMap的遍历顺序，accessOrder为false则表示按照结点插入顺序遍历，否则按结点访问顺序遍历。</p>
+<p>结点插入顺序比较好理解，但是结点访问顺序就有点难懂，下面我们写个实例来看看两种顺序的区别。</p>
+<h4 id="插入顺序">插入顺序</h4>
+<div class="highlight"><pre class="chroma"><code class="language-Java" data-lang="Java"><span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="o">,</span> <span class="n">String</span><span class="o">&gt;</span> <span class="n">map</span> <span class="o">=</span> <span class="k">new</span> <span class="n">LinkedHashMap</span><span class="o">&lt;&gt;(</span><span class="n">16</span><span class="o">,</span><span class="n">0</span><span class="o">.</span><span class="na">75f</span><span class="o">,</span><span class="kc">false</span><span class="o">);</span>
+<span class="n">map</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">&#34;apple&#34;</span><span class="o">,</span> <span class="s">&#34;苹果&#34;</span><span class="o">);</span>
+<span class="n">map</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">&#34;watermelon&#34;</span><span class="o">,</span> <span class="s">&#34;西瓜&#34;</span><span class="o">);</span>
+<span class="n">map</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">&#34;banana&#34;</span><span class="o">,</span> <span class="s">&#34;香蕉&#34;</span><span class="o">);</span>
+<span class="n">map</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">&#34;peach&#34;</span><span class="o">,</span> <span class="s">&#34;桃子&#34;</span><span class="o">);</span>
+
+
+<span class="k">for</span> <span class="o">(</span><span class="n">Object</span> <span class="n">o</span> <span class="o">:</span> <span class="n">map</span><span class="o">.</span><span class="na">entrySet</span><span class="o">())</span> <span class="o">{</span>
+    <span class="n">Map</span><span class="o">.</span><span class="na">Entry</span> <span class="n">entry</span> <span class="o">=</span> <span class="o">(</span><span class="n">Map</span><span class="o">.</span><span class="na">Entry</span><span class="o">)</span> <span class="n">o</span><span class="o">;</span>
+    <span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">entry</span><span class="o">.</span><span class="na">getKey</span><span class="o">()</span> <span class="o">+</span> <span class="s">&#34;=&#34;</span> <span class="o">+</span> <span class="n">entry</span><span class="o">.</span><span class="na">getValue</span><span class="o">());</span>
+<span class="o">}</span>
+</code></pre></div><p>输出结果：</p>
+<div class="highlight"><pre class="chroma"><code class="language-fallback" data-lang="fallback">apple=苹果
+watermelon=西瓜
+banana=香蕉
+peach=桃子
+</code></pre></div><h4 id="访问顺序">访问顺序</h4>
+<div class="highlight"><pre class="chroma"><code class="language-Java" data-lang="Java"><span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="o">,</span> <span class="n">String</span><span class="o">&gt;</span> <span class="n">map</span> <span class="o">=</span> <span class="k">new</span> <span class="n">LinkedHashMap</span><span class="o">&lt;&gt;(</span><span class="n">16</span><span class="o">,</span><span class="n">0</span><span class="o">.</span><span class="na">75f</span><span class="o">,</span><span class="kc">true</span><span class="o">);</span>
+<span class="n">map</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">&#34;apple&#34;</span><span class="o">,</span> <span class="s">&#34;苹果&#34;</span><span class="o">);</span>
+<span class="n">map</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">&#34;watermelon&#34;</span><span class="o">,</span> <span class="s">&#34;西瓜&#34;</span><span class="o">);</span>
+<span class="n">map</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">&#34;banana&#34;</span><span class="o">,</span> <span class="s">&#34;香蕉&#34;</span><span class="o">);</span>
+<span class="n">map</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">&#34;peach&#34;</span><span class="o">,</span> <span class="s">&#34;桃子&#34;</span><span class="o">);</span>
+
+<span class="n">map</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="s">&#34;banana&#34;</span><span class="o">);</span>
+<span class="n">map</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="s">&#34;apple&#34;</span><span class="o">);</span>
+
+<span class="k">for</span> <span class="o">(</span><span class="n">Object</span> <span class="n">o</span> <span class="o">:</span> <span class="n">map</span><span class="o">.</span><span class="na">entrySet</span><span class="o">())</span> <span class="o">{</span>
+    <span class="n">Map</span><span class="o">.</span><span class="na">Entry</span> <span class="n">entry</span> <span class="o">=</span> <span class="o">(</span><span class="n">Map</span><span class="o">.</span><span class="na">Entry</span><span class="o">)</span> <span class="n">o</span><span class="o">;</span>
+    <span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">entry</span><span class="o">.</span><span class="na">getKey</span><span class="o">()</span> <span class="o">+</span> <span class="s">&#34;=&#34;</span> <span class="o">+</span> <span class="n">entry</span><span class="o">.</span><span class="na">getValue</span><span class="o">());</span>
+<span class="o">}</span>
+</code></pre></div><p>输出结果：</p>
+<div class="highlight"><pre class="chroma"><code class="language-fallback" data-lang="fallback">watermelon=西瓜
+peach=桃子
+banana=香蕉
+apple=苹果
+</code></pre></div><p>从上面我们可以看出访问过的元素都输出在最后，这是为什么呢？我们来看看get方法。</p>
+<div class="highlight"><pre class="chroma"><code class="language-Java" data-lang="Java"><span class="kd">public</span> <span class="n">V</span> <span class="nf">get</span><span class="o">(</span><span class="n">Object</span> <span class="n">key</span><span class="o">)</span> <span class="o">{</span>
+    <span class="n">Node</span><span class="o">&lt;</span><span class="n">K</span><span class="o">,</span><span class="n">V</span><span class="o">&gt;</span> <span class="n">e</span><span class="o">;</span>
+    <span class="k">if</span> <span class="o">((</span><span class="n">e</span> <span class="o">=</span> <span class="n">getNode</span><span class="o">(</span><span class="n">hash</span><span class="o">(</span><span class="n">key</span><span class="o">),</span> <span class="n">key</span><span class="o">))</span> <span class="o">==</span> <span class="kc">null</span><span class="o">)</span>
+        <span class="k">return</span> <span class="kc">null</span><span class="o">;</span>
+    <span class="k">if</span> <span class="o">(</span><span class="n">accessOrder</span><span class="o">)</span>
+        <span class="n">afterNodeAccess</span><span class="o">(</span><span class="n">e</span><span class="o">);</span>
+    <span class="k">return</span> <span class="n">e</span><span class="o">.</span><span class="na">value</span><span class="o">;</span>
+<span class="o">}</span>
+</code></pre></div><p>如果accessOrder为true，也就是访问顺序，就会调用afterNodeAccess方法，afterNodeAccess方法就是将这个结点放到链表的尾部。</p>
+<blockquote>
+<p>put方法内部也会触发afterNodeAccess方法，所以要注意put方法也算访问元素，会导致List的遍历顺序发生改变</p>
+</blockquote>
+    </div>
+
+    
+<footer class="post-footer">
+      <div class="post-tags">
+          <a href="/tags/%E6%BA%90%E7%A0%81/">源码</a>
+          <a href="/tags/%E9%9B%86%E5%90%88/">集合</a>
+          </div>
+      <nav class="post-nav">
+        <a class="prev" href="/2016/06/flatbuffer-first/">
+            <i class="iconfont icon-left"></i>
+            <span class="prev-text nav-default">FlatBuffer初体验</span>
+            <span class="prev-text nav-mobile">上一篇</span>
+          </a>
+        <a class="next" href="/2016/06/vps-hexo-setting/">
+            <span class="next-text nav-default">VPS上搭建Hexo静态博客</span>
+            <span class="next-text nav-mobile">下一篇</span>
+            <i class="iconfont icon-right"></i>
+          </a>
+      </nav>
+    </footer>
+  </article>
+        </div>
+        <div id="gitalk-container"></div>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js" crossorigin="anonymous"></script>
+    <script type="text/javascript">
+      var gitalk = new Gitalk({
+        id: '\/2016\/06\/java-linkedhashmap-source\/',
+        title: 'LinkedHashMap源码解析',
+        clientID: '64b9f11ba0a3291ee49e',
+        clientSecret: '8632b99db733cc33fd8f6fe85680f63f0db9d872',
+        repo: 'hadyang.github.io',
+        owner: 'hadyang',
+        admin: ['hadyang'],
+        body: decodeURI(location.href)
+      });
+      gitalk.render('gitalk-container');
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://github.com/gitalk/gitalk">comments powered by gitalk.</a></noscript>
+
+  
+
+  
+
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="social-links">
+  <a href="" type="application/rss+xml" class="iconfont icon-rss" title="rss"></a>
+</div>
+
+<div class="copyright">
+  <span class="power-by">
+    由 <a class="hexo-link" href="https://gohugo.io">Hugo</a> 强力驱动
+  </span>
+  <span class="division">|</span>
+  <span class="theme-info">
+    主题 -
+    <a class="theme-link" href="https://github.com/olOwOlo/hugo-theme-even">Even</a>
+  </span>
+
+  
+
+  <span class="copyright-year">
+    &copy; 
+    2017 - 
+    2021<span class="heart"><i class="iconfont icon-heart"></i></span><span>HadYang</span>
+  </span>
+</div>
+
+    </footer>
+
+    <div class="back-to-top" id="back-to-top">
+      <i class="iconfont icon-up"></i>
+    </div>
+  </div>
+  
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/slideout@1.0.1/dist/slideout.min.js" integrity="sha256-t+zJ/g8/KXIJMjSVQdnibt4dlaDxc9zXr/9oNPeWqdg=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.js" integrity="sha256-XVLffZaxoWfGUEbdzuLi7pwaUJv1cecsQJQqGLe7axY=" crossorigin="anonymous"></script>
+
+
+
+<script type="text/javascript" src="/js/main.min.c12618f9a600c40bd024996677e951e64d3487006775aeb22e200c990006c5c7.js"></script>
+  <script type="text/javascript">
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$','$'], ['\\(','\\)']],
+        }
+    };
+  </script>
+  <script async src="https://cdn.jsdelivr.net/npm/mathjax@3.0.5/es5/tex-mml-chtml.js" integrity="sha256-HGLuEfFcsUJGhvB8cQ8nr0gai9EucOOaIxFw7qxmd+w=" crossorigin="anonymous"></script>
+
+
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+	ga('create', 'UA-157595781-2', 'auto');
+	ga('set', 'anonymizeIp', true);
+	ga('send', 'pageview');
+}
+</script>
+<script async src='https://www.google-analytics.com/analytics.js'></script>
+
+
+
+
+
+
+
+</body>
+</html>

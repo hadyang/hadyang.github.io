@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>【Innodb】Undo Log - HadYang</title>
+  <meta name="renderer" content="webkit" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<meta name="theme-color" content="#f8f5ec" />
+<meta name="msapplication-navbutton-color" content="#f8f5ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
+
+
+<meta name="author" content="HadYang" /><meta name="description" content="Undo Log Undo Log 是 Innodb 中重要的日志系统，包含系统对数据操作的逆操作，用于事务回滚和非锁定一致性读（MVCC）。 Undo Log 中存储的是逻辑日志，因此需要进行持久" /><meta name="keywords" content="Java" />
+
+
+
+
+
+
+<meta name="generator" content="Hugo 0.73.0 with theme even" />
+
+
+<link rel="canonical" href="https://hadyang.github.io/2021/01/innodb-undolog/" />
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="manifest" href="/manifest.json">
+<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
+
+
+
+<link href="/sass/main.min.75c01efdcbc2767fdfe1f22f5a6fccc8c390d3cda325742f698bd0c6344144be.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.css" integrity="sha256-7TyXnr2YU040zfSP+rEcz29ggW4j56/ujTPwjMzyqFY=" crossorigin="anonymous">
+
+
+<meta property="og:title" content="【Innodb】Undo Log" />
+<meta property="og:description" content="Undo Log Undo Log 是 Innodb 中重要的日志系统，包含系统对数据操作的逆操作，用于事务回滚和非锁定一致性读（MVCC）。 Undo Log 中存储的是逻辑日志，因此需要进行持久" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://hadyang.github.io/2021/01/innodb-undolog/" />
+<meta property="article:published_time" content="2021-01-03T00:00:00+00:00" />
+<meta property="article:modified_time" content="2021-01-03T00:00:00+00:00" />
+<meta itemprop="name" content="【Innodb】Undo Log">
+<meta itemprop="description" content="Undo Log Undo Log 是 Innodb 中重要的日志系统，包含系统对数据操作的逆操作，用于事务回滚和非锁定一致性读（MVCC）。 Undo Log 中存储的是逻辑日志，因此需要进行持久">
+<meta itemprop="datePublished" content="2021-01-03T00:00:00&#43;00:00" />
+<meta itemprop="dateModified" content="2021-01-03T00:00:00&#43;00:00" />
+<meta itemprop="wordCount" content="1651">
+
+
+
+<meta itemprop="keywords" content="" /><meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="【Innodb】Undo Log"/>
+<meta name="twitter:description" content="Undo Log Undo Log 是 Innodb 中重要的日志系统，包含系统对数据操作的逆操作，用于事务回滚和非锁定一致性读（MVCC）。 Undo Log 中存储的是逻辑日志，因此需要进行持久"/>
+
+<!--[if lte IE 9]>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js"></script>
+<![endif]-->
+
+<!--[if lt IE 9]>
+  <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+<![endif]-->
+
+</head>
+<body>
+  <div id="mobile-navbar" class="mobile-navbar">
+  <div class="mobile-header-logo">
+    <a href="/" class="logo">HadYang</a>
+  </div>
+  <div class="mobile-navbar-icon">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
+<nav id="mobile-menu" class="mobile-menu slideout-menu">
+  <ul class="mobile-menu-list">
+    <a href="https://hadyang.github.io/interview/">
+        <li class="mobile-menu-item">Interview</li>
+      </a><a href="/categories/">
+        <li class="mobile-menu-item">分类</li>
+      </a>
+  </ul>
+
+  
+
+
+</nav>
+
+  <div class="container" id="mobile-panel">
+    <header id="header" class="header">
+        <div class="logo-wrapper">
+  <a href="/" class="logo">HadYang</a>
+</div>
+
+
+
+
+
+<nav class="site-navbar">
+  <ul id="menu" class="menu">
+    <li class="menu-item">
+        <a class="menu-item-link" href="https://hadyang.github.io/interview/">Interview</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/categories/">分类</a>
+      </li>
+  </ul>
+</nav>
+
+    </header>
+
+    <main id="main" class="main">
+      <div class="content-wrapper">
+        <div id="content" class="content">
+          <article class="post">
+    
+    <header class="post-header">
+      <h1 class="post-title">【Innodb】Undo Log</h1>
+
+      <div class="post-meta">
+        <span class="post-time"> 2021-01-03 </span>
+        <div class="post-category">
+            <a href="/categories/database/"> Database </a>
+            </div>
+          <span class="more-meta"> 约 1651 字 </span>
+          <span class="more-meta"> 预计阅读 4 分钟 </span>
+        
+      </div>
+    </header>
+
+    <div class="post-toc" id="post-toc">
+  <h2 class="post-toc-title">文章目录</h2>
+  <div class="post-toc-content always-active">
+    <nav id="TableOfContents">
+  <ul>
+    <li><a href="#undo-log">Undo Log</a>
+      <ul>
+        <li><a href="#数据结构">数据结构</a></li>
+        <li><a href="#事务开启时">事务开启时</a></li>
+        <li><a href="#事务提交时">事务提交时</a></li>
+        <li><a href="#事务回滚时">事务回滚时</a></li>
+        <li><a href="#mvcc">MVCC</a></li>
+        <li><a href="#purge-流程">Purge 流程</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+  </div>
+</div>
+    <div class="post-content">
+      <h2 id="undo-log">Undo Log</h2>
+<p>Undo Log 是 Innodb 中重要的日志系统，包含系统对数据操作的逆操作，用于事务回滚和非锁定一致性读（MVCC）。 Undo Log 中存储的是逻辑日志，因此需要进行持久性保护，在写入 Undo Log 的同时也会写入 Redo Log。</p>
+<p>Undo Log 包含 Insert Undo 和 Update Undo ，其中 Undate Undo 包含更新和删除两种操作。对于 Insert Log 在事务提交后就可以清理，而 Update Log 由于 MVCC 的要求在满足一定条件下，由 Purge Thread 清理。对记录的删除操作也是在（TODO）</p>
+<h3 id="数据结构">数据结构</h3>
+<p>Innodb 采用 <strong>回滚段（Rollback Segment）</strong> 的方式管理 Undo Log 的并发写入和持久化，每个回滚段包含多个 <strong>撤销日志槽（Undo Log Slot）</strong>。总共 128 个回滚段分布在多个文件中，临时表空间中占用 32 个，根据配置的不同系统表空间中至少 1 个，Undo 表空间最多 95 个。</p>
+<p>回滚段用 <strong>Undo Log 对象（trx_undo_t）</strong> 来管理撤销日志槽，每个 Undo Log 对象都对应一个撤销日志槽。事务开启时，会给该事务指定一个回滚段，事务所有 Undo Log 的分配都在该回滚段进行。一个事务最多可以关联四个撤销日志（Undo Log 对象），以下每种操作类型都可以分配一个：</p>
+<ul>
+<li>用户定义表上的插入操作</li>
+<li>用户定义表上的更新和删除操作</li>
+<li>用户定义临时表上的插入操作</li>
+<li>用户定义临时表上的更新和删除操作</li>
+</ul>
+<p>当事务提交后，需要 Purge 的回滚段会被放入 Purge Queue，待 Purge Thread 处理。</p>
+<p>回滚段使用了三种类型 <code>xxx_cache_list</code>、<code>xxx_undo_list</code> 和 <code>history_list</code> 链表来管理 Undo Log 对象。 <code>xxx_cache_list</code> 管理可复用的 Undo Log 对象，当一个事务提交后，会根据其 Undo Log 满足某种条件时，为减少存储的占用，会将其加入 <code>xxx_cache_list</code> 以供后续的事务使用；<code>xxx_undo_list</code> 管理正在被使用的 Undo Log 对象；<code>history_list</code> 管理已提交的 Update Undo Log 对象（按 trx_no 排序），为 Innodb 提供 MVCC 的能力。Insert Undo Log 是新插入的，所以不需要提供 MVCC 的能力，不会放入 <code>history_list</code>。</p>
+<h3 id="事务开启时">事务开启时</h3>
+<ol>
+<li>分配回滚段：以 round-robin 方式从回滚段数组中获取可用的回滚段
+<ol>
+<li>若数据表为临时表，则从临时表空间获取回滚段</li>
+<li>若数据表为普通表，则从系统表空间或 Undo 表空间获取回滚段</li>
+</ol>
+</li>
+<li>分配回滚段成功：获取可用的 <code>trx_undo_t</code>
+<ol>
+<li>从 <code>xxx_cache_list</code> 中获取可用 <code>trx_undo_t</code></li>
+<li>若未能重用 <code>trx_undo_t</code> ，则从回滚段中分配一个新的 Undo Log Slot，分配 Undo Log Page，并初始化 <code>trx_undo_t</code></li>
+</ol>
+</li>
+<li>分配 <code>trx_undo_t</code> 成功后，会将 <code>trx_undo_t</code> 加入 <code>xxx_undo_list</code></li>
+<li>写入 Undo Log
+<ol>
+<li>旧记录的回滚指针&amp;事务ID</li>
+<li>旧记录中被修改的相关属性值</li>
+</ol>
+</li>
+<li>构建回滚指针，事务提交时写入聚集索引中</li>
+</ol>
+<p><img src="assists/undo_transaction_begin.png" alt=""></p>
+<h3 id="事务提交时">事务提交时</h3>
+<ol>
+<li>若当前回滚段未在 Purge Queue 中，则将其加入</li>
+<li>若 <code>trx_undo_t</code> 为 update 类型，则将 <code>trx_undo_t</code> 中的 <code>TRX_UNDO_HISTORY_NODE</code>指针加入 <code>history_list</code></li>
+<li>复用 <code>trx_undo_t</code> ：
+<ol>
+<li>若当前事务的 <code>trx_undo_t</code> 只占用一个 Page，并且剩余 1/4 的空间，则将其加入 <code>xxx_cache_list</code></li>
+<li>若不能复用则释放 <code>trx_undo_t</code></li>
+</ol>
+</li>
+</ol>
+<p><img src="assists/undo_transaction_commit.png" alt=""></p>
+<h3 id="事务回滚时">事务回滚时</h3>
+<ol>
+<li>根据 Undo Log 获取旧记录信息</li>
+<li>删除操作：清除删除标记</li>
+<li>更新操作
+<ol>
+<li>in-palce：回滚数据到老版本</li>
+<li>二级索引：</li>
+</ol>
+</li>
+<li>插入操作：删除聚集索引&amp;二级索引</li>
+</ol>
+<h3 id="mvcc">MVCC</h3>
+<p>Innodb 中的 MVCC 通过 Undo Log 构建，Undo Log 中包含旧行的数据信息。由于在聚集索引中包含了 <strong>回滚指针</strong>，每次行数据的修改都会更改这个指针，回滚指针中包含事务ID 和 Undo Log 记录。回滚指针就构成了一个行数据的快照链，可以通过这个快照链对旧数据进行构建。</p>
+<p>对于二级索引来说，二级索引记录中并未包含回滚指针，只在其所在页上存储最大的事务ID（PAGE_MAX_TRX_ID）。如果该事务ID对当前事务是可见的，那么快照就是当前数据。否则，就回表查询聚集索引，通过事务ID来构建快照。</p>
+<h3 id="purge-流程">Purge 流程</h3>
+<p>在上面有说到，事务提交时都会将回滚段放入 Purge Queue，Purge 逻辑会遍历 Purge Queue，从中取出回滚段。Piurge 逻辑会清理掉其中不再被访问的 Undo Log，并将页内标记删除的操作从物理上清理掉。</p>
+<ol>
+<li>可见性确认：Purge 线程 Clone 出一份最老版本活跃 View，在这个 View 之前的所有版本都可以清理</li>
+<li>获取需要 Purge 的多个 Undo Log，并分配到多个工作线程中</li>
+<li>Purge 工作线程
+<ol>
+<li>标记删除：物理清除所有聚集索引和二级索引</li>
+<li>清理索引：由于二级索引顺序的更新是 标记删除+插入 ，所以需要对二级索引进行清理</li>
+</ol>
+</li>
+<li>清理 <code>history_list</code>
+<ol>
+<li>遍历 Purge Queue，获取回滚段</li>
+<li>从回滚段中的 <code>history_list</code> 查找不再被访问事务撤销日志 trx_1 并清理</li>
+<li>在 trx_1 Undo Log 所在的 Undo Log Segment 上，寻找其他可清理的事务（减少随机读取）</li>
+<li>直到没有能清理的 Undo Log 为止</li>
+</ol>
+</li>
+</ol>
+
+    </div>
+
+    
+<footer class="post-footer">
+      
+      <nav class="post-nav">
+        <a class="prev" href="/2021/03/golang-mem-concurrency/">
+            <i class="iconfont icon-left"></i>
+            <span class="prev-text nav-default">【Golang进阶】内存同步模型</span>
+            <span class="prev-text nav-mobile">上一篇</span>
+          </a>
+        <a class="next" href="/2021/01/innodb-index-page-structure/">
+            <span class="next-text nav-default">【Innodb】索引页</span>
+            <span class="next-text nav-mobile">下一篇</span>
+            <i class="iconfont icon-right"></i>
+          </a>
+      </nav>
+    </footer>
+  </article>
+        </div>
+        <div id="gitalk-container"></div>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js" crossorigin="anonymous"></script>
+    <script type="text/javascript">
+      var gitalk = new Gitalk({
+        id: '\/2021\/01\/innodb-undolog\/',
+        title: '【Innodb】Undo Log',
+        clientID: '64b9f11ba0a3291ee49e',
+        clientSecret: '8632b99db733cc33fd8f6fe85680f63f0db9d872',
+        repo: 'hadyang.github.io',
+        owner: 'hadyang',
+        admin: ['hadyang'],
+        body: decodeURI(location.href)
+      });
+      gitalk.render('gitalk-container');
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://github.com/gitalk/gitalk">comments powered by gitalk.</a></noscript>
+
+  
+
+  
+
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="social-links">
+  <a href="" type="application/rss+xml" class="iconfont icon-rss" title="rss"></a>
+</div>
+
+<div class="copyright">
+  <span class="power-by">
+    由 <a class="hexo-link" href="https://gohugo.io">Hugo</a> 强力驱动
+  </span>
+  <span class="division">|</span>
+  <span class="theme-info">
+    主题 -
+    <a class="theme-link" href="https://github.com/olOwOlo/hugo-theme-even">Even</a>
+  </span>
+
+  
+
+  <span class="copyright-year">
+    &copy; 
+    2017 - 
+    2021<span class="heart"><i class="iconfont icon-heart"></i></span><span>HadYang</span>
+  </span>
+</div>
+
+    </footer>
+
+    <div class="back-to-top" id="back-to-top">
+      <i class="iconfont icon-up"></i>
+    </div>
+  </div>
+  
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/slideout@1.0.1/dist/slideout.min.js" integrity="sha256-t+zJ/g8/KXIJMjSVQdnibt4dlaDxc9zXr/9oNPeWqdg=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.js" integrity="sha256-XVLffZaxoWfGUEbdzuLi7pwaUJv1cecsQJQqGLe7axY=" crossorigin="anonymous"></script>
+
+
+
+<script type="text/javascript" src="/js/main.min.c12618f9a600c40bd024996677e951e64d3487006775aeb22e200c990006c5c7.js"></script>
+  <script type="text/javascript">
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$','$'], ['\\(','\\)']],
+        }
+    };
+  </script>
+  <script async src="https://cdn.jsdelivr.net/npm/mathjax@3.0.5/es5/tex-mml-chtml.js" integrity="sha256-HGLuEfFcsUJGhvB8cQ8nr0gai9EucOOaIxFw7qxmd+w=" crossorigin="anonymous"></script>
+
+
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+	ga('create', 'UA-157595781-2', 'auto');
+	ga('set', 'anonymizeIp', true);
+	ga('send', 'pageview');
+}
+</script>
+<script async src='https://www.google-analytics.com/analytics.js'></script>
+
+
+
+
+
+
+
+</body>
+</html>

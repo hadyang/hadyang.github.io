@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>单例模式 - HadYang</title>
+  <meta name="renderer" content="webkit" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<meta name="theme-color" content="#f8f5ec" />
+<meta name="msapplication-navbutton-color" content="#f8f5ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
+
+
+<meta name="author" content="HadYang" /><meta name="description" content="有一定开发经验的人一定都听说过单例模式，可以说单例模式是一种最简单的设计模式，同时使用的也是很多的。单例指仅仅被实例化一次的类，单例模式通常被用来代替那些本质上唯一的系统组件，比如文件系统、管理器等等。
+" /><meta name="keywords" content="Java" />
+
+
+
+
+
+
+<meta name="generator" content="Hugo 0.73.0 with theme even" />
+
+
+<link rel="canonical" href="https://hadyang.github.io/2016/07/pattern-singleton/" />
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="manifest" href="/manifest.json">
+<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
+
+
+
+<link href="/sass/main.min.75c01efdcbc2767fdfe1f22f5a6fccc8c390d3cda325742f698bd0c6344144be.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.css" integrity="sha256-7TyXnr2YU040zfSP+rEcz29ggW4j56/ujTPwjMzyqFY=" crossorigin="anonymous">
+
+
+<meta property="og:title" content="单例模式" />
+<meta property="og:description" content="有一定开发经验的人一定都听说过单例模式，可以说单例模式是一种最简单的设计模式，同时使用的也是很多的。单例指仅仅被实例化一次的类，单例模式通常被用来代替那些本质上唯一的系统组件，比如文件系统、管理器等等。" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://hadyang.github.io/2016/07/pattern-singleton/" />
+<meta property="article:published_time" content="2016-07-06T00:00:00+00:00" />
+<meta property="article:modified_time" content="2016-07-06T00:00:00+00:00" />
+<meta itemprop="name" content="单例模式">
+<meta itemprop="description" content="有一定开发经验的人一定都听说过单例模式，可以说单例模式是一种最简单的设计模式，同时使用的也是很多的。单例指仅仅被实例化一次的类，单例模式通常被用来代替那些本质上唯一的系统组件，比如文件系统、管理器等等。">
+<meta itemprop="datePublished" content="2016-07-06T00:00:00&#43;00:00" />
+<meta itemprop="dateModified" content="2016-07-06T00:00:00&#43;00:00" />
+<meta itemprop="wordCount" content="1076">
+
+
+
+<meta itemprop="keywords" content="Java,Enum," /><meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="单例模式"/>
+<meta name="twitter:description" content="有一定开发经验的人一定都听说过单例模式，可以说单例模式是一种最简单的设计模式，同时使用的也是很多的。单例指仅仅被实例化一次的类，单例模式通常被用来代替那些本质上唯一的系统组件，比如文件系统、管理器等等。"/>
+
+<!--[if lte IE 9]>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js"></script>
+<![endif]-->
+
+<!--[if lt IE 9]>
+  <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+<![endif]-->
+
+</head>
+<body>
+  <div id="mobile-navbar" class="mobile-navbar">
+  <div class="mobile-header-logo">
+    <a href="/" class="logo">HadYang</a>
+  </div>
+  <div class="mobile-navbar-icon">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
+<nav id="mobile-menu" class="mobile-menu slideout-menu">
+  <ul class="mobile-menu-list">
+    <a href="https://hadyang.github.io/interview/">
+        <li class="mobile-menu-item">Interview</li>
+      </a><a href="/categories/">
+        <li class="mobile-menu-item">分类</li>
+      </a>
+  </ul>
+
+  
+
+
+</nav>
+
+  <div class="container" id="mobile-panel">
+    <header id="header" class="header">
+        <div class="logo-wrapper">
+  <a href="/" class="logo">HadYang</a>
+</div>
+
+
+
+
+
+<nav class="site-navbar">
+  <ul id="menu" class="menu">
+    <li class="menu-item">
+        <a class="menu-item-link" href="https://hadyang.github.io/interview/">Interview</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/categories/">分类</a>
+      </li>
+  </ul>
+</nav>
+
+    </header>
+
+    <main id="main" class="main">
+      <div class="content-wrapper">
+        <div id="content" class="content">
+          <article class="post">
+    
+    <header class="post-header">
+      <h1 class="post-title">单例模式</h1>
+
+      <div class="post-meta">
+        <span class="post-time"> 2016-07-06 </span>
+        <div class="post-category">
+            <a href="/categories/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/"> 设计模式 </a>
+            </div>
+          <span class="more-meta"> 约 1076 字 </span>
+          <span class="more-meta"> 预计阅读 3 分钟 </span>
+        
+      </div>
+    </header>
+
+    <div class="post-toc" id="post-toc">
+  <h2 class="post-toc-title">文章目录</h2>
+  <div class="post-toc-content always-active">
+    <nav id="TableOfContents">
+  <ul>
+    <li>
+      <ul>
+        <li><a href="#饿汉单例模式">饿汉单例模式</a></li>
+        <li><a href="#懒汉单例模式">懒汉单例模式</a></li>
+        <li><a href="#静态内部类单例模式">静态内部类单例模式</a></li>
+        <li><a href="#枚举单例">枚举单例</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+  </div>
+</div>
+    <div class="post-content">
+      <p>有一定开发经验的人一定都听说过单例模式，可以说单例模式是一种最简单的设计模式，同时使用的也是很多的。单例指仅仅被实例化一次的类，单例模式通常被用来代替那些本质上唯一的系统组件，比如文件系统、管理器等等。</p>
+<p>虽然说单例模式理解起来很简单，但是其实现方法有很多，比如：饿汉单例模式、懒汉单例模式、静态内部类单例模式等等，下面我们就一一介绍各种实现方法，并说明他们的适用情况和优缺点。</p>
+<h3 id="饿汉单例模式">饿汉单例模式</h3>
+<p>饿汉单例模式将单例对象作为私有静态类常量，这样可以保证<code>instance</code>的<code>new</code>过程是线程安全的，因为类域是在类加载阶段进行初始化，在这个阶段JVM会保证线程安全。在这种实现方式下，类加载速度较慢，但是获取单例的速度较快。</p>
+<div class="highlight"><pre class="chroma"><code class="language-Java" data-lang="Java"><span class="kd">public</span> <span class="kd">class</span> <span class="nc">App</span> <span class="o">{</span>
+  <span class="kd">private</span> <span class="kd">static</span> <span class="kd">final</span> <span class="n">App</span> <span class="n">instance</span> <span class="o">=</span> <span class="k">new</span> <span class="n">App</span><span class="o">();</span>
+
+  <span class="kd">private</span> <span class="nf">App</span><span class="o">(){};</span>
+
+  <span class="kd">public</span> <span class="kd">static</span> <span class="n">App</span> <span class="nf">getInstance</span><span class="o">(){</span>
+    <span class="k">return</span> <span class="n">instance</span><span class="o">;</span>
+  <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div><h3 id="懒汉单例模式">懒汉单例模式</h3>
+<p>懒汉单例模式将<code>instance</code>的初始化延迟到客户端第一次调用<code>getInstance</code>方法时，这就是懒的精髓。但是这种实现方式在每次获取单例对象的时候都要加锁，所以在大量线程使用单例的情况下比较费时。</p>
+<blockquote>
+<p>懒汉单例模式和饿汉单例模式的优缺点正好相反。</p>
+</blockquote>
+<div class="highlight"><pre class="chroma"><code class="language-Java" data-lang="Java"><span class="kd">public</span> <span class="kd">class</span> <span class="nc">App</span> <span class="o">{</span>
+  <span class="kd">private</span> <span class="kd">static</span> <span class="kd">final</span> <span class="n">App</span> <span class="n">instance</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
+
+  <span class="kd">private</span> <span class="nf">App</span><span class="o">(){};</span>
+
+  <span class="kd">public</span> <span class="kd">static</span> <span class="kd">synchronized</span> <span class="n">App</span> <span class="nf">getInstance</span><span class="o">(){</span>
+    <span class="k">if</span> <span class="o">(</span><span class="n">instance</span> <span class="o">==</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+      <span class="n">instance</span> <span class="o">=</span> <span class="k">new</span> <span class="n">App</span><span class="o">();</span>
+    <span class="o">}</span>
+    <span class="k">return</span> <span class="n">instance</span><span class="o">;</span>
+  <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div><h3 id="静态内部类单例模式">静态内部类单例模式</h3>
+<p>这种方式同样使用了类加载机制，保证了初始化instance时线程安全。同时这种方式还能做到延迟加载的目的，只有第一次调用<code>App getInstance()</code>时才会初始化<code>instance</code>，静态内部类的实现方式集合了懒汉和饿汉两种方法的优点，这是一种比较推荐的单例模式的实现方法。</p>
+<div class="highlight"><pre class="chroma"><code class="language-Java" data-lang="Java"><span class="kd">public</span> <span class="kd">class</span> <span class="nc">App</span> <span class="o">{</span>
+  <span class="kd">private</span> <span class="nf">App</span><span class="o">(){};</span>
+
+  <span class="kd">public</span> <span class="kd">static</span> <span class="n">App</span> <span class="nf">getInstance</span><span class="o">(){</span>
+
+    <span class="k">return</span> <span class="n">AppHolder</span><span class="o">.</span><span class="na">instance</span><span class="o">;</span>
+  <span class="o">}</span>
+
+  <span class="kd">private</span> <span class="kd">static</span> <span class="kd">class</span> <span class="nc">AppHolder</span><span class="o">{</span>
+    <span class="kd">private</span> <span class="kd">static</span> <span class="kd">final</span> <span class="n">App</span> <span class="n">instance</span> <span class="o">=</span> <span class="k">new</span> <span class="n">App</span><span class="o">();</span>
+  <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div><h3 id="枚举单例">枚举单例</h3>
+<p>这种方式是Effective Java作者Josh Bloch 提倡的方式，它不仅能避免多线程同步问题，而且还能防止反序列化重新创建新的对象，由于枚举是Java1.5之后才推出的，使用的比较少。</p>
+<p>在上面所有的实现方式中，反序列化都是不安全的——会出现重新创建对象的情况。通过反序列化可以将一个单例的实例对象写到磁盘，然后再读取出来，从而获取一个实例。即使构造函数是私有的，反序列化时依然可以通过特殊途径去创建类的一个新的实例，相当于调用该类的构造函数。反序列化操作提供了一个特别的函数——<code>readResolve()</code>，这个方法可以让开发人员控制对象的反序列化。例如，上述几个实现方法中如果要杜绝单例对象在反序列化的时候重新生成对象，那么必须加入以下方法：</p>
+<div class="highlight"><pre class="chroma"><code class="language-Java" data-lang="Java"><span class="kd">private</span> <span class="n">Object</span> <span class="nf">readResolve</span><span class="o">()</span> <span class="k">throw</span> <span class="n">ObjectStreamException</span><span class="o">{</span>
+  <span class="k">return</span> <span class="n">instance</span><span class="o">;</span>
+<span class="o">}</span>
+</code></pre></div><p>也就是在<code>readResolve()</code>中将<code>instance</code>对象返回，而不是默认重新生成一个新的对象。对于枚举，并不存在这个问题，因为即使反序列化也不会重新生成对象。</p>
+<div class="highlight"><pre class="chroma"><code class="language-Java" data-lang="Java"><span class="kd">public</span> <span class="kd">enum</span> <span class="n">App</span> <span class="o">{</span>
+  <span class="n">INSTANCE</span>
+
+  <span class="kd">public</span> <span class="kt">void</span> <span class="nf">doSomething</span><span class="o">(){</span>
+    <span class="o">...</span>
+  <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div>
+    </div>
+
+    
+<footer class="post-footer">
+      <div class="post-tags">
+          <a href="/tags/java/">Java</a>
+          <a href="/tags/enum/">Enum</a>
+          </div>
+      <nav class="post-nav">
+        <a class="prev" href="/2016/07/pattern-obvobserver/">
+            <i class="iconfont icon-left"></i>
+            <span class="prev-text nav-default">观察者模式</span>
+            <span class="prev-text nav-mobile">上一篇</span>
+          </a>
+        <a class="next" href="/2016/07/idea-build-with-gradle/">
+            <span class="next-text nav-default">IDEA通过Gradle打包可执行Jar</span>
+            <span class="next-text nav-mobile">下一篇</span>
+            <i class="iconfont icon-right"></i>
+          </a>
+      </nav>
+    </footer>
+  </article>
+        </div>
+        <div id="gitalk-container"></div>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js" crossorigin="anonymous"></script>
+    <script type="text/javascript">
+      var gitalk = new Gitalk({
+        id: '\/2016\/07\/pattern-singleton\/',
+        title: '单例模式',
+        clientID: '64b9f11ba0a3291ee49e',
+        clientSecret: '8632b99db733cc33fd8f6fe85680f63f0db9d872',
+        repo: 'hadyang.github.io',
+        owner: 'hadyang',
+        admin: ['hadyang'],
+        body: decodeURI(location.href)
+      });
+      gitalk.render('gitalk-container');
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://github.com/gitalk/gitalk">comments powered by gitalk.</a></noscript>
+
+  
+
+  
+
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="social-links">
+  <a href="" type="application/rss+xml" class="iconfont icon-rss" title="rss"></a>
+</div>
+
+<div class="copyright">
+  <span class="power-by">
+    由 <a class="hexo-link" href="https://gohugo.io">Hugo</a> 强力驱动
+  </span>
+  <span class="division">|</span>
+  <span class="theme-info">
+    主题 -
+    <a class="theme-link" href="https://github.com/olOwOlo/hugo-theme-even">Even</a>
+  </span>
+
+  
+
+  <span class="copyright-year">
+    &copy; 
+    2017 - 
+    2021<span class="heart"><i class="iconfont icon-heart"></i></span><span>HadYang</span>
+  </span>
+</div>
+
+    </footer>
+
+    <div class="back-to-top" id="back-to-top">
+      <i class="iconfont icon-up"></i>
+    </div>
+  </div>
+  
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/slideout@1.0.1/dist/slideout.min.js" integrity="sha256-t+zJ/g8/KXIJMjSVQdnibt4dlaDxc9zXr/9oNPeWqdg=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.js" integrity="sha256-XVLffZaxoWfGUEbdzuLi7pwaUJv1cecsQJQqGLe7axY=" crossorigin="anonymous"></script>
+
+
+
+<script type="text/javascript" src="/js/main.min.c12618f9a600c40bd024996677e951e64d3487006775aeb22e200c990006c5c7.js"></script>
+  <script type="text/javascript">
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$','$'], ['\\(','\\)']],
+        }
+    };
+  </script>
+  <script async src="https://cdn.jsdelivr.net/npm/mathjax@3.0.5/es5/tex-mml-chtml.js" integrity="sha256-HGLuEfFcsUJGhvB8cQ8nr0gai9EucOOaIxFw7qxmd+w=" crossorigin="anonymous"></script>
+
+
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+	ga('create', 'UA-157595781-2', 'auto');
+	ga('set', 'anonymizeIp', true);
+	ga('send', 'pageview');
+}
+</script>
+<script async src='https://www.google-analytics.com/analytics.js'></script>
+
+
+
+
+
+
+
+</body>
+</html>

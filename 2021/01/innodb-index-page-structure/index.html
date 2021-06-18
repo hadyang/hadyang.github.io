@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>【Innodb】索引页 - HadYang</title>
+  <meta name="renderer" content="webkit" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<meta name="theme-color" content="#f8f5ec" />
+<meta name="msapplication-navbutton-color" content="#f8f5ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
+
+
+<meta name="author" content="HadYang" /><meta name="description" content="InnoDB的数据页有很多种，比如，索引页，Undo页，Inode页，系统页，Blob页等，一共有10多种。本文主要介绍最常见的索引页。 索引" /><meta name="keywords" content="Java" />
+
+
+
+
+
+
+<meta name="generator" content="Hugo 0.73.0 with theme even" />
+
+
+<link rel="canonical" href="https://hadyang.github.io/2021/01/innodb-index-page-structure/" />
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="manifest" href="/manifest.json">
+<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
+
+
+
+<link href="/sass/main.min.75c01efdcbc2767fdfe1f22f5a6fccc8c390d3cda325742f698bd0c6344144be.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.css" integrity="sha256-7TyXnr2YU040zfSP+rEcz29ggW4j56/ujTPwjMzyqFY=" crossorigin="anonymous">
+
+
+<meta property="og:title" content="【Innodb】索引页" />
+<meta property="og:description" content="InnoDB的数据页有很多种，比如，索引页，Undo页，Inode页，系统页，Blob页等，一共有10多种。本文主要介绍最常见的索引页。 索引" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://hadyang.github.io/2021/01/innodb-index-page-structure/" />
+<meta property="article:published_time" content="2021-01-03T00:00:00+00:00" />
+<meta property="article:modified_time" content="2021-01-03T00:00:00+00:00" />
+<meta itemprop="name" content="【Innodb】索引页">
+<meta itemprop="description" content="InnoDB的数据页有很多种，比如，索引页，Undo页，Inode页，系统页，Blob页等，一共有10多种。本文主要介绍最常见的索引页。 索引">
+<meta itemprop="datePublished" content="2021-01-03T00:00:00&#43;00:00" />
+<meta itemprop="dateModified" content="2021-01-03T00:00:00&#43;00:00" />
+<meta itemprop="wordCount" content="1665">
+
+
+
+<meta itemprop="keywords" content="" /><meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="【Innodb】索引页"/>
+<meta name="twitter:description" content="InnoDB的数据页有很多种，比如，索引页，Undo页，Inode页，系统页，Blob页等，一共有10多种。本文主要介绍最常见的索引页。 索引"/>
+
+<!--[if lte IE 9]>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js"></script>
+<![endif]-->
+
+<!--[if lt IE 9]>
+  <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+<![endif]-->
+
+</head>
+<body>
+  <div id="mobile-navbar" class="mobile-navbar">
+  <div class="mobile-header-logo">
+    <a href="/" class="logo">HadYang</a>
+  </div>
+  <div class="mobile-navbar-icon">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
+<nav id="mobile-menu" class="mobile-menu slideout-menu">
+  <ul class="mobile-menu-list">
+    <a href="https://hadyang.github.io/interview/">
+        <li class="mobile-menu-item">Interview</li>
+      </a><a href="/categories/">
+        <li class="mobile-menu-item">分类</li>
+      </a>
+  </ul>
+
+  
+
+
+</nav>
+
+  <div class="container" id="mobile-panel">
+    <header id="header" class="header">
+        <div class="logo-wrapper">
+  <a href="/" class="logo">HadYang</a>
+</div>
+
+
+
+
+
+<nav class="site-navbar">
+  <ul id="menu" class="menu">
+    <li class="menu-item">
+        <a class="menu-item-link" href="https://hadyang.github.io/interview/">Interview</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/categories/">分类</a>
+      </li>
+  </ul>
+</nav>
+
+    </header>
+
+    <main id="main" class="main">
+      <div class="content-wrapper">
+        <div id="content" class="content">
+          <article class="post">
+    
+    <header class="post-header">
+      <h1 class="post-title">【Innodb】索引页</h1>
+
+      <div class="post-meta">
+        <span class="post-time"> 2021-01-03 </span>
+        <div class="post-category">
+            <a href="/categories/database/"> Database </a>
+            </div>
+          <span class="more-meta"> 约 1665 字 </span>
+          <span class="more-meta"> 预计阅读 4 分钟 </span>
+        
+      </div>
+    </header>
+
+    <div class="post-toc" id="post-toc">
+  <h2 class="post-toc-title">文章目录</h2>
+  <div class="post-toc-content always-active">
+    <nav id="TableOfContents">
+  <ul>
+    <li><a href="#数据页头page-header">数据页头（Page Header）</a></li>
+    <li><a href="#最大最小记录infimum--supremum">最大最小记录（infimum &amp; supremum）</a></li>
+    <li><a href="#用户记录user-records">用户记录（User Records）</a></li>
+    <li><a href="#数据目录page-directory">数据目录（Page Directory）</a></li>
+  </ul>
+</nav>
+  </div>
+</div>
+    <div class="post-content">
+      <p>InnoDB的数据页有很多种，比如，索引页，Undo页，Inode页，系统页，Blob页等，一共有10多种。本文主要介绍最常见的索引页。 索引数据页包括七个部分，数据页文件头，数据页头，最大最小记录，用户记录，空闲空间，数据目录，数据页尾部。</p>
+<p><img src="assists/innodb_index_page.png" alt=""></p>
+<ol>
+<li><strong>FIL Header&amp;Tail</strong> 这两个字段是所有类型的 Page 所通用的。在其中通过 <code>FIL_PAGE_PREV</code> 和 <code>FIL_PAGE_NEXT</code> 两个字段，指向索引键上前后（按一定顺序）相邻的 Page，以此构成一个双向链表。这个双向链表能关联该 Page 这一层级的所有 B 树节点。</li>
+<li><strong>Index Header</strong> 包含多个用于管理索引和记录的字段，下面会详细介绍</li>
+<li><strong>FSEG （File Segment）</strong> 索引根节点的 Page 包含 FSEG ，该 FSEG 包含该索引使用的所有文件 Segmnet。其他索引页的该字段均置0，不被使用</li>
+<li><strong>System Record Innodb</strong> 包含两个 System Record，分别是 infimum and supremum。它们被记录在页的固定位置，因此总能通过偏移量找到。</li>
+<li><strong>User Records</strong> 存储用户数据，每条记录都包含一个 Header 以及 数据列。在 Header 中包含指向递增顺序上的下一条记录，以此构成一个单向链表。</li>
+<li><strong>Page Directory</strong> 该字段从 FIL Tail 向下增长，包含当前页的部分记录（每4条或8条）</li>
+</ol>
+<h2 id="数据页头page-header">数据页头（Page Header）</h2>
+<ol>
+<li><strong>PAGE_INDEX_ID</strong> 该页所属索引的ID</li>
+<li><strong>PAGE_MAX_TRX_ID</strong> 对该页中任意记录事务的最大ID</li>
+<li><strong>PAGE_N_HEAP</strong> 该页包含的记录总数，包括  infimum 和 supremum 记录，以及被删除的记录。此外，最高位被用来标记这个数据页是否存了新格式的记录(compact和redundant)</li>
+<li><strong>PAGE_N_RECS</strong> 该页包含的未删除记录总数</li>
+<li><strong>PAGE_HEAP_TOP</strong> <code>User Recodrs</code> 的最大偏移量，在该偏移量之上则是 <code>Free Space</code></li>
+<li><strong>PAGE_FREE</strong> 删除记录的链表，记录被删除，会放到这个链表头上，如果这个页上有记录要插入，可以先从这里分配空间，如果空间不够，才从空闲地址(PAGE_HEAP_TOP)分配。注意放到这个链表里面的，都是被purge线程彻底删除的记录，delete-marked 的记录不在这里。</li>
+<li><strong>PAGE_GARBAGE:</strong> 被删除记录链表所占用的空间大小</li>
+<li><strong>PAGE_LAST_INSERT</strong> 该页上最近一次插入记录的偏移量，主要用来加速后续插入操作</li>
+<li><strong>PAGE_DIRECTION</strong> 最近一次插入记录的方向，可以取 LEFT, RIGHT, 和 NO_DIRECTION。每次插入记录时，都会和上次插入记录进行比较，以决定插入方向，主要用来加速后续插入操作</li>
+<li><strong>PAGE_N_DIRECTION</strong> 同一个方向上连续插入的记录数，主要用来加速后续插入操作</li>
+<li><strong>PAGE_N_DIR_SLOTS</strong> Page Directory 中 Slot 的个数</li>
+<li><strong>PAGE_LEVEL</strong> 当前页在索引中的层级（深度），叶子节点的 Level=0，随着越靠近B树根节点 Level 也随之增长。在一个层级为3的B树中，根节点的 Level=2</li>
+</ol>
+<h2 id="最大最小记录infimum--supremum">最大最小记录（infimum &amp; supremum）</h2>
+<p>每个索引页都包含两条系统记录，并且位于页中的固定位置。这两条系统记录有特殊的header，“infimum” 和 “supremum” 字符串是其唯一的数据。</p>
+<p>infimum 记录代表在该页中最小的记录，其 Next Record 指针指向该页用户记录中最小的那条记录，作为扫描用户记录的固定入口。</p>
+<p>supremum 记录代表在该页中最大的记录，其 Next Record 指针始终是 NULL，用户记录中最大记录的 Next Record 指向 supremum</p>
+<h2 id="用户记录user-records">用户记录（User Records）</h2>
+<p>用户记录按其插入的顺序放置在页中，同时可能会使用已删除记录的空间，并且通过 Next Record 指针建立一个单向链表。该单向链表从 infimum 开始，将所有的用户记录按增序串起来，并以 supremum 结束。通过这个链表，可以按增序扫描该页中所有用户记录。</p>
+<p>通过在 FIL Header 中的 Next Page 指针，我们可以按增序扫描索引中所有页。因此，对于增序扫描全表的操作可以如下进行：</p>
+<ol>
+<li>通过 B树找到最小的页</li>
+<li>从最小页的 infimum 记录开始，按 Next Record 进行遍历</li>
+<li>如果当前记录为 supremum 则跳转到 5</li>
+<li>遍历 Next Record 直到条件 3</li>
+<li>如果 Next Page 不存在则遍历结束，如果存在则跳转到 2</li>
+</ol>
+<p>用户记录中存储实际的用户数据，在创建表结构的时候可以通过 DDL 语句设置不同的行格式，包含 REDUNDANT、COMPACT、DYNAMIC 和 COMPRESSED。</p>
+<h2 id="数据目录page-directory">数据目录（Page Directory）</h2>
+<p>数据目录是一个包含记录指针的变长数组，其中的元素被称为 Slot 。Innodb 中的数据目录是一个稀疏表，并非所有的记录都有对应的 Slot。在一个满的页上，数据目录中一个 Slot 对应 6 条记录。</p>
+<p>数据目录中的 Slot 按键的增序排列，而非堆的顺序。比如，对于一组记录 <code>'A''B''F''D'</code>，其数据目录存储结构如下 <code>(pointer to 'A') (pointer to 'B') (pointer to 'D') (pointer to 'F')</code>。由于 Slot 按顺序排列，并且每个 Slot 大小固定，因此很容易通过二分法进行查找。</p>
+<!-- 
+
+## 参考
+
+1. https://blog.jcole.us/2013/01/07/the-physical-structure-of-innodb-index-pages/
+2. https://dev.mysql.com/doc/internals/en/innodb-page-directory.html
+3. https://www.zhihu.com/question/268388266/answer/337074461
+4. http://mysql.taobao.org/monthly/2018/04/03/
+5. https://dba.stackexchange.com/questions/220877/how-are-page-splits-determined-internally-in-mysql 
+6. 
+
+-->
+
+    </div>
+
+    
+<footer class="post-footer">
+      
+      <nav class="post-nav">
+        <a class="prev" href="/2021/01/innodb-undolog/">
+            <i class="iconfont icon-left"></i>
+            <span class="prev-text nav-default">【Innodb】Undo Log</span>
+            <span class="prev-text nav-mobile">上一篇</span>
+          </a>
+        <a class="next" href="/2020/12/innodb-memory/">
+            <span class="next-text nav-default">【Innodb】内存使用</span>
+            <span class="next-text nav-mobile">下一篇</span>
+            <i class="iconfont icon-right"></i>
+          </a>
+      </nav>
+    </footer>
+  </article>
+        </div>
+        <div id="gitalk-container"></div>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js" crossorigin="anonymous"></script>
+    <script type="text/javascript">
+      var gitalk = new Gitalk({
+        id: '\/2021\/01\/innodb-index-page-structure\/',
+        title: '【Innodb】索引页',
+        clientID: '64b9f11ba0a3291ee49e',
+        clientSecret: '8632b99db733cc33fd8f6fe85680f63f0db9d872',
+        repo: 'hadyang.github.io',
+        owner: 'hadyang',
+        admin: ['hadyang'],
+        body: decodeURI(location.href)
+      });
+      gitalk.render('gitalk-container');
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://github.com/gitalk/gitalk">comments powered by gitalk.</a></noscript>
+
+  
+
+  
+
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="social-links">
+  <a href="" type="application/rss+xml" class="iconfont icon-rss" title="rss"></a>
+</div>
+
+<div class="copyright">
+  <span class="power-by">
+    由 <a class="hexo-link" href="https://gohugo.io">Hugo</a> 强力驱动
+  </span>
+  <span class="division">|</span>
+  <span class="theme-info">
+    主题 -
+    <a class="theme-link" href="https://github.com/olOwOlo/hugo-theme-even">Even</a>
+  </span>
+
+  
+
+  <span class="copyright-year">
+    &copy; 
+    2017 - 
+    2021<span class="heart"><i class="iconfont icon-heart"></i></span><span>HadYang</span>
+  </span>
+</div>
+
+    </footer>
+
+    <div class="back-to-top" id="back-to-top">
+      <i class="iconfont icon-up"></i>
+    </div>
+  </div>
+  
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/slideout@1.0.1/dist/slideout.min.js" integrity="sha256-t+zJ/g8/KXIJMjSVQdnibt4dlaDxc9zXr/9oNPeWqdg=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.js" integrity="sha256-XVLffZaxoWfGUEbdzuLi7pwaUJv1cecsQJQqGLe7axY=" crossorigin="anonymous"></script>
+
+
+
+<script type="text/javascript" src="/js/main.min.c12618f9a600c40bd024996677e951e64d3487006775aeb22e200c990006c5c7.js"></script>
+  <script type="text/javascript">
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$','$'], ['\\(','\\)']],
+        }
+    };
+  </script>
+  <script async src="https://cdn.jsdelivr.net/npm/mathjax@3.0.5/es5/tex-mml-chtml.js" integrity="sha256-HGLuEfFcsUJGhvB8cQ8nr0gai9EucOOaIxFw7qxmd+w=" crossorigin="anonymous"></script>
+
+
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+	ga('create', 'UA-157595781-2', 'auto');
+	ga('set', 'anonymizeIp', true);
+	ga('send', 'pageview');
+}
+</script>
+<script async src='https://www.google-analytics.com/analytics.js'></script>
+
+
+
+
+
+
+
+</body>
+</html>

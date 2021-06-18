@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>【What is this】什么是一致性？ - HadYang</title>
+  <meta name="renderer" content="webkit" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<meta name="theme-color" content="#f8f5ec" />
+<meta name="msapplication-navbutton-color" content="#f8f5ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
+
+
+<meta name="author" content="HadYang" /><meta name="description" content="一致性的含义 在计算机领域，一致性的使用场景是多样的，在不同的场景下其含义也大相径庭，主要包括：事务一致性、分布式一致性以及一致性哈希。 事务一" /><meta name="keywords" content="Java" />
+
+
+
+
+
+
+<meta name="generator" content="Hugo 0.73.0 with theme even" />
+
+
+<link rel="canonical" href="https://hadyang.github.io/2020/06/consistency/" />
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="manifest" href="/manifest.json">
+<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
+
+
+
+<link href="/sass/main.min.75c01efdcbc2767fdfe1f22f5a6fccc8c390d3cda325742f698bd0c6344144be.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.css" integrity="sha256-7TyXnr2YU040zfSP+rEcz29ggW4j56/ujTPwjMzyqFY=" crossorigin="anonymous">
+
+
+<meta property="og:title" content="【What is this】什么是一致性？" />
+<meta property="og:description" content="一致性的含义 在计算机领域，一致性的使用场景是多样的，在不同的场景下其含义也大相径庭，主要包括：事务一致性、分布式一致性以及一致性哈希。 事务一" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://hadyang.github.io/2020/06/consistency/" />
+<meta property="article:published_time" content="2020-06-05T00:00:00+00:00" />
+<meta property="article:modified_time" content="2020-06-05T00:00:00+00:00" />
+<meta itemprop="name" content="【What is this】什么是一致性？">
+<meta itemprop="description" content="一致性的含义 在计算机领域，一致性的使用场景是多样的，在不同的场景下其含义也大相径庭，主要包括：事务一致性、分布式一致性以及一致性哈希。 事务一">
+<meta itemprop="datePublished" content="2020-06-05T00:00:00&#43;00:00" />
+<meta itemprop="dateModified" content="2020-06-05T00:00:00&#43;00:00" />
+<meta itemprop="wordCount" content="2644">
+
+
+
+<meta itemprop="keywords" content="" /><meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="【What is this】什么是一致性？"/>
+<meta name="twitter:description" content="一致性的含义 在计算机领域，一致性的使用场景是多样的，在不同的场景下其含义也大相径庭，主要包括：事务一致性、分布式一致性以及一致性哈希。 事务一"/>
+
+<!--[if lte IE 9]>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js"></script>
+<![endif]-->
+
+<!--[if lt IE 9]>
+  <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+<![endif]-->
+
+</head>
+<body>
+  <div id="mobile-navbar" class="mobile-navbar">
+  <div class="mobile-header-logo">
+    <a href="/" class="logo">HadYang</a>
+  </div>
+  <div class="mobile-navbar-icon">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
+<nav id="mobile-menu" class="mobile-menu slideout-menu">
+  <ul class="mobile-menu-list">
+    <a href="https://hadyang.github.io/interview/">
+        <li class="mobile-menu-item">Interview</li>
+      </a><a href="/categories/">
+        <li class="mobile-menu-item">分类</li>
+      </a>
+  </ul>
+
+  
+
+
+</nav>
+
+  <div class="container" id="mobile-panel">
+    <header id="header" class="header">
+        <div class="logo-wrapper">
+  <a href="/" class="logo">HadYang</a>
+</div>
+
+
+
+
+
+<nav class="site-navbar">
+  <ul id="menu" class="menu">
+    <li class="menu-item">
+        <a class="menu-item-link" href="https://hadyang.github.io/interview/">Interview</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/categories/">分类</a>
+      </li>
+  </ul>
+</nav>
+
+    </header>
+
+    <main id="main" class="main">
+      <div class="content-wrapper">
+        <div id="content" class="content">
+          <article class="post">
+    
+    <header class="post-header">
+      <h1 class="post-title">【What is this】什么是一致性？</h1>
+
+      <div class="post-meta">
+        <span class="post-time"> 2020-06-05 </span>
+        <div class="post-category">
+            <a href="/categories/what-it-is/"> What it is </a>
+            </div>
+          <span class="more-meta"> 约 2644 字 </span>
+          <span class="more-meta"> 预计阅读 6 分钟 </span>
+        
+      </div>
+    </header>
+
+    <div class="post-toc" id="post-toc">
+  <h2 class="post-toc-title">文章目录</h2>
+  <div class="post-toc-content always-active">
+    <nav id="TableOfContents">
+  <ul>
+    <li><a href="#一致性的含义">一致性的含义</a></li>
+    <li><a href="#线性一致性">线性一致性</a>
+      <ul>
+        <li><a href="#可序列化">可序列化</a></li>
+      </ul>
+    </li>
+    <li><a href="#顺序一致性">顺序一致性</a></li>
+    <li><a href="#因果一致性">因果一致性</a></li>
+    <li><a href="#单调读一致性">单调读一致性</a></li>
+    <li><a href="#读写一致性">读写一致性</a></li>
+    <li><a href="#最终一致性模型">最终一致性模型</a></li>
+    <li><a href="#cap-定理">CAP 定理</a></li>
+    <li><a href="#常见的存储系统">常见的存储系统</a></li>
+    <li><a href="#参考文档">参考文档</a></li>
+  </ul>
+</nav>
+  </div>
+</div>
+    <div class="post-content">
+      <h2 id="一致性的含义">一致性的含义</h2>
+<p>在计算机领域，一致性的使用场景是多样的，在不同的场景下其含义也大相径庭，主要包括：事务一致性、分布式一致性以及一致性哈希。</p>
+<p><strong>事务一致性</strong> 是事务 ACID 特性中的一项，是指对数据有特定的预期状态，任何数据修改必须满足这些状态。事务一致性本身应属于应用层的属性，因为数据的预期状态，即约束，是应用层的状态。应用程序可以借助数据库的原子性、隔离性以及持久性来实现一致性。</p>
+<p><strong>一致性哈希</strong> 是一种 <strong>负载均衡</strong> 的算法，不是一种哈希算法。一致性哈希常常用于集群中，节点失效后数据的平滑过渡，以减少数据的大量迁移。</p>
+<p><strong>分布式一致性</strong> 主要是针对分布式环境中，针对各节点之间的延迟和节点失效等问题来协调副本之间的状态。下面就聊聊数据复制与分布式一致性的问题，造成分布式一致性问题的原因主要有两个： <strong>并发写</strong> 和 <strong>网络延迟</strong>。在大多数的复制场景下，我们都会选择一主多从的集群架构，以此来解决并发写的问题。</p>
+<h2 id="线性一致性">线性一致性</h2>
+<p>线性一致性，又被称作强一致性、原子一致性，是分布式一致性中最强的一致性模型。原子一致性指在分布式环境中，数据存在于集群中多个节点，当数据被写入集群中一个节点后，其他所有节点对数据都是 <strong>立即可见</strong> 的，并且操作是 <strong>原子</strong> 的。</p>
+<blockquote>
+<p>比较文本化的定义如下：任何对数据 $A$ 的读取，均返回最近一次写的结果。</p>
+</blockquote>
+<p><img src="assists/2020-06-06-14-51-16.png" alt=""></p>
+<blockquote>
+<p>上图中，a 满足线性一致性，b 不满足线性一致性</p>
+</blockquote>
+<p>线性一致性是最严格的模型，在这个模型下，用户每次查询都能返回期望的值，是确定的。但是在分布式环境中，很少有保持线性一致性的系统，因为这样做的代价太高，会牺牲系统的可用性。</p>
+<h3 id="可序列化">可序列化</h3>
+<p>可序列化是一种事务隔离级别，当事务需要读写多个数据对象时，其 <strong>保证执行结果与多个事务串行执行的效果相同</strong>。串行执行的顺序与事务真正执行的顺序无关。</p>
+<p>可线性化是读 <em>最近写</em> （单个对象）的保证，它不会将多个操作打包为事务，所以它也不能防止写倾斜，即不能有效的处理并发写。</p>
+<p>数据库会提供可序列化和可线性化，这种组合又被称为 <strong>严格的可串行化</strong> 或 <strong>强的单副本可串行化</strong>。基于 2PL 或者 <em>真正串行</em> 执行都是典型的 可线性化。</p>
+<p>一致性快照（MVCC），根据事务为数据建立快照数据。MVCC 一定是非可线性化的，MVCC 通过保存一致性快照来避免读加锁，其性质导致它不能包含 <em>最近写</em>，所以从快照中读取就是非线性化。</p>
+<h2 id="顺序一致性">顺序一致性</h2>
+<p>顺序一致性是相比于线性一致性弱一些的一致性模型，顺序一致性的定义如下：如果对集群的读写操作与每个节点执行这些操作的顺序一致，则认为集群拥有 <strong>顺序一致性</strong>。</p>
+<p>在顺序一致性中，没有读最近写的要求。因此相比与线性一致性，顺序一致性少了实时性的要求。可以把线性一致性定义为具有实时约束的顺序一致性。</p>
+<p><img src="assists/2020-06-06-14-51-28.png" alt=""></p>
+<blockquote>
+<p>上图中，a 满足顺序一致性，b 不满足顺序一致性</p>
+</blockquote>
+<p>上图中，b 不满足顺序一致性的点在于，Node3 读取顺序与 Node4 读取顺序不一致。可以看出，a 中的数据并不满足全局时钟的顺序，但是同样满足顺序一致性。</p>
+<h2 id="因果一致性">因果一致性</h2>
+<p>因果一致性要求对于两个有因果关联的操作结果，必须以相同的顺序对所有节点可见。因果一致性是比顺序一致性弱的一致性模型，并发的写入在不同节点看到的顺序可能不一致。</p>
+<p><img src="assists/2020-06-06-14-51-47.png" alt=""></p>
+<blockquote>
+<p>上图中，a 满足因果一致性，b 不满足因果一致性</p>
+</blockquote>
+<p>在图 a 中，所有节点都在 $W(A)=2$ 之前执行 $R(A)=1$ ，这就导致 $W(A)=1$ 与 $W(A)=2$ 产生因果关系。所以 Node3 和 Node4 必须保证这两个操作的顺序，而不关心 $W(A)=3$ 的顺序。而图 b 恰好违反了 $W(A)=1$ 与 $W(A)=2$ 的因果关系。</p>
+<p>可以看出因果一致性中，各操作只是部分有序，相比与顺序一致性的全序关系来说，因果一致性只满足偏序关系。因此在系统满足顺序一致性的情况下，也同样满足因果一致性，反之则不然。</p>
+<h2 id="单调读一致性">单调读一致性</h2>
+<p>单调读一致性是比线性一致性弱，但是比最终一致性强的保证。当读取数据时，单调读保证，如果某个用户依次对 $A$ 进行多次读取，则不会看到回滚现象，即在读取较新值后又发生读旧值的情况。</p>
+<p><img src="assists/2020-06-06-14-52-01.png" alt=""></p>
+<p>上图就是不符合单调读的情况，这种情况的出现主要是因为，异步复制导致数据延迟。实现单调读的一种方式是，确保每个用户总是从固定的同一副本执行读取操作。当该副本失效后，则用户读请求转发到其他副本。</p>
+<h2 id="读写一致性">读写一致性</h2>
+<p>读写一致性，也称为写后读一致性，即用户总能看到自己最近提交的更新。但是对其他用户则没有这种保证。</p>
+<p><img src="assists/2020-06-06-14-52-11.png" alt=""></p>
+<p>上图就是不符合读写一致性的情况，要让用户获得读写一致性，可以考虑以下方案：</p>
+<ul>
+<li>如果用户访问可能被修改的内容，则从主节点读取，否则在从节点读取</li>
+<li>跟踪最近更新时间，如果在主从同步延迟时间之内，则从主节点读取，否则在从节点读取</li>
+</ul>
+<h2 id="最终一致性模型">最终一致性模型</h2>
+<p>最终一致性是一种很弱的一致性模型，指的是多个节点的数据不一致是暂时的状态，如果没有更多的数据写入，则经过一段时间后，所有副本最终后呈现一致的状态。</p>
+<p>理论上来说，最终一致性没有延迟的上限。正常情况下，数据复制可能只有不到1秒的延迟，但是如果系统已接近设计上限，或网络存在问题，则延迟的时间窗口可能增加到几分钟。</p>
+<h2 id="cap-定理">CAP 定理</h2>
+<p>CAP 定理是在分布式系统实践中的经验法则，CAP 定理的内容是针对一个分布式系统，不能同时满足以下三点：一致性、可用性和分区容错性。</p>
+<ul>
+<li><strong>一致性</strong>（Consistency）：等同原子一致性，即强一致性</li>
+<li><strong>可用性</strong>（Availability）：每次请求都能获取到非错的响应，但是不保证获取的数据为最新数据</li>
+<li><strong>分区容错性</strong>（Partition tolerance）：分区相当于对通信的时限要求。系统如果不能在时限内达成数据一致性，就意味着发生了分区的情况。</li>
+</ul>
+<p>在分布式系统中，节点分区是常见的，所以分区容错是必须保证的。在这种情况下，我们就需要对 C 和 A 进行权衡。例如现在有 P1 和 P2 两个分区，如果我们允许单个分区进行数据更新，那么就会丧失（强）一致性；如果我们不允许单个分区更新，那么就会导致两个分区均处于不可用状态，丧失可用性。</p>
+<h2 id="常见的存储系统">常见的存储系统</h2>
+<p>上面说到这么多的一致性模型，那么常见的存储系统都分别满足哪些模型呢？这里列举 MySQL 、Redis 和 Zookeeper来说明，同时也能加深对一致性模型的理解。</p>
+<p>首先 Zookeeper 是保证顺序一致性的，ZK 里使用 ZAB 作为共识算法。当写操作到达主节点后，其将操作同步发送到 Follwer 节点，当大于集群 quorum 个数的节点确认后，主节点提交写操作。对于没有确认的节点，主节点会按操作的先后顺序，依次发送给 Follwer 节点。</p>
+<p>MySQL 和 Redis 能保证的一致性模型，根据它们的同步配置不同而不同。如果集群开启的是全异步复制，即所有 Slave 和 Master 都是异步，则只能保证最终一致性。如果开启半同步复制，即部分 Slave 与 Master 进行同步复制，则能保证顺序一致性。如果开启全同步复制，则能保证线性一致性。</p>
+<p>单调读一致性和读写一致性需要应用层的配合处理，单靠存储系统很难跟踪用户请求，处理代价太大。</p>
+<h2 id="参考文档">参考文档</h2>
+<ul>
+<li><a href="https://zh.wikipedia.org/wiki/%E4%B8%80%E8%87%B4%E5%93%88%E5%B8%8C">一致性哈希</a></li>
+<li><a href="https://zh.wikipedia.org/wiki/CAP%E5%AE%9A%E7%90%86">CAP定理</a></li>
+<li><a href="https://en.wikipedia.org/wiki/Consistency_model#Strict_consistency">Consistency model</a></li>
+<li><a href="https://www.cs.helsinki.fi/webfm_send/1256">Distributed Systems:Replication and Consistency</a></li>
+</ul>
+
+    </div>
+
+    
+<footer class="post-footer">
+      
+      <nav class="post-nav">
+        <a class="prev" href="/2020/06/replication/">
+            <i class="iconfont icon-left"></i>
+            <span class="prev-text nav-default">【What is this】什么是复制？</span>
+            <span class="prev-text nav-mobile">上一篇</span>
+          </a>
+        <a class="next" href="/2020/05/consensus/">
+            <span class="next-text nav-default">【What is this】什么是共识算法？</span>
+            <span class="next-text nav-mobile">下一篇</span>
+            <i class="iconfont icon-right"></i>
+          </a>
+      </nav>
+    </footer>
+  </article>
+        </div>
+        <div id="gitalk-container"></div>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js" crossorigin="anonymous"></script>
+    <script type="text/javascript">
+      var gitalk = new Gitalk({
+        id: '\/2020\/06\/consistency\/',
+        title: '【What is this】什么是一致性？',
+        clientID: '64b9f11ba0a3291ee49e',
+        clientSecret: '8632b99db733cc33fd8f6fe85680f63f0db9d872',
+        repo: 'hadyang.github.io',
+        owner: 'hadyang',
+        admin: ['hadyang'],
+        body: decodeURI(location.href)
+      });
+      gitalk.render('gitalk-container');
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://github.com/gitalk/gitalk">comments powered by gitalk.</a></noscript>
+
+  
+
+  
+
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="social-links">
+  <a href="" type="application/rss+xml" class="iconfont icon-rss" title="rss"></a>
+</div>
+
+<div class="copyright">
+  <span class="power-by">
+    由 <a class="hexo-link" href="https://gohugo.io">Hugo</a> 强力驱动
+  </span>
+  <span class="division">|</span>
+  <span class="theme-info">
+    主题 -
+    <a class="theme-link" href="https://github.com/olOwOlo/hugo-theme-even">Even</a>
+  </span>
+
+  
+
+  <span class="copyright-year">
+    &copy; 
+    2017 - 
+    2021<span class="heart"><i class="iconfont icon-heart"></i></span><span>HadYang</span>
+  </span>
+</div>
+
+    </footer>
+
+    <div class="back-to-top" id="back-to-top">
+      <i class="iconfont icon-up"></i>
+    </div>
+  </div>
+  
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/slideout@1.0.1/dist/slideout.min.js" integrity="sha256-t+zJ/g8/KXIJMjSVQdnibt4dlaDxc9zXr/9oNPeWqdg=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.js" integrity="sha256-XVLffZaxoWfGUEbdzuLi7pwaUJv1cecsQJQqGLe7axY=" crossorigin="anonymous"></script>
+
+
+
+<script type="text/javascript" src="/js/main.min.c12618f9a600c40bd024996677e951e64d3487006775aeb22e200c990006c5c7.js"></script>
+  <script type="text/javascript">
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$','$'], ['\\(','\\)']],
+        }
+    };
+  </script>
+  <script async src="https://cdn.jsdelivr.net/npm/mathjax@3.0.5/es5/tex-mml-chtml.js" integrity="sha256-HGLuEfFcsUJGhvB8cQ8nr0gai9EucOOaIxFw7qxmd+w=" crossorigin="anonymous"></script>
+
+
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+	ga('create', 'UA-157595781-2', 'auto');
+	ga('set', 'anonymizeIp', true);
+	ga('send', 'pageview');
+}
+</script>
+<script async src='https://www.google-analytics.com/analytics.js'></script>
+
+
+
+
+
+
+
+</body>
+</html>

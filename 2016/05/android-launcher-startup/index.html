@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>启动Launcher - HadYang</title>
+  <meta name="renderer" content="webkit" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<meta name="theme-color" content="#f8f5ec" />
+<meta name="msapplication-navbutton-color" content="#f8f5ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
+
+
+<meta name="author" content="HadYang" /><meta name="description" content="在上一篇文章《Android系统开机过程分析》中，我们分析了从init进程到系统服务启动的整个过程，虽然写的很简单（很多东西了解的不是很全面，后面会慢慢修改），但是整个启动过程还是很复杂，涉及的东西很多。今天我们来分析一下Android系统中用户第一个看见的App&amp;ndash;Launcher的启动过程。
+" /><meta name="keywords" content="Java" />
+
+
+
+
+
+
+<meta name="generator" content="Hugo 0.73.0 with theme even" />
+
+
+<link rel="canonical" href="https://hadyang.github.io/2016/05/android-launcher-startup/" />
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="manifest" href="/manifest.json">
+<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
+
+
+
+<link href="/sass/main.min.75c01efdcbc2767fdfe1f22f5a6fccc8c390d3cda325742f698bd0c6344144be.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.css" integrity="sha256-7TyXnr2YU040zfSP+rEcz29ggW4j56/ujTPwjMzyqFY=" crossorigin="anonymous">
+
+
+<meta property="og:title" content="启动Launcher" />
+<meta property="og:description" content="在上一篇文章《Android系统开机过程分析》中，我们分析了从init进程到系统服务启动的整个过程，虽然写的很简单（很多东西了解的不是很全面，后面会慢慢修改），但是整个启动过程还是很复杂，涉及的东西很多。今天我们来分析一下Android系统中用户第一个看见的App&ndash;Launcher的启动过程。" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://hadyang.github.io/2016/05/android-launcher-startup/" />
+<meta property="article:published_time" content="2016-05-27T00:00:00+00:00" />
+<meta property="article:modified_time" content="2016-05-27T00:00:00+00:00" />
+<meta itemprop="name" content="启动Launcher">
+<meta itemprop="description" content="在上一篇文章《Android系统开机过程分析》中，我们分析了从init进程到系统服务启动的整个过程，虽然写的很简单（很多东西了解的不是很全面，后面会慢慢修改），但是整个启动过程还是很复杂，涉及的东西很多。今天我们来分析一下Android系统中用户第一个看见的App&ndash;Launcher的启动过程。">
+<meta itemprop="datePublished" content="2016-05-27T00:00:00&#43;00:00" />
+<meta itemprop="dateModified" content="2016-05-27T00:00:00&#43;00:00" />
+<meta itemprop="wordCount" content="654">
+
+
+
+<meta itemprop="keywords" content="源码," /><meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="启动Launcher"/>
+<meta name="twitter:description" content="在上一篇文章《Android系统开机过程分析》中，我们分析了从init进程到系统服务启动的整个过程，虽然写的很简单（很多东西了解的不是很全面，后面会慢慢修改），但是整个启动过程还是很复杂，涉及的东西很多。今天我们来分析一下Android系统中用户第一个看见的App&ndash;Launcher的启动过程。"/>
+
+<!--[if lte IE 9]>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js"></script>
+<![endif]-->
+
+<!--[if lt IE 9]>
+  <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+<![endif]-->
+
+</head>
+<body>
+  <div id="mobile-navbar" class="mobile-navbar">
+  <div class="mobile-header-logo">
+    <a href="/" class="logo">HadYang</a>
+  </div>
+  <div class="mobile-navbar-icon">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
+<nav id="mobile-menu" class="mobile-menu slideout-menu">
+  <ul class="mobile-menu-list">
+    <a href="https://hadyang.github.io/interview/">
+        <li class="mobile-menu-item">Interview</li>
+      </a><a href="/categories/">
+        <li class="mobile-menu-item">分类</li>
+      </a>
+  </ul>
+
+  
+
+
+</nav>
+
+  <div class="container" id="mobile-panel">
+    <header id="header" class="header">
+        <div class="logo-wrapper">
+  <a href="/" class="logo">HadYang</a>
+</div>
+
+
+
+
+
+<nav class="site-navbar">
+  <ul id="menu" class="menu">
+    <li class="menu-item">
+        <a class="menu-item-link" href="https://hadyang.github.io/interview/">Interview</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/categories/">分类</a>
+      </li>
+  </ul>
+</nav>
+
+    </header>
+
+    <main id="main" class="main">
+      <div class="content-wrapper">
+        <div id="content" class="content">
+          <article class="post">
+    
+    <header class="post-header">
+      <h1 class="post-title">启动Launcher</h1>
+
+      <div class="post-meta">
+        <span class="post-time"> 2016-05-27 </span>
+        <div class="post-category">
+            <a href="/categories/android/"> Android </a>
+            </div>
+          <span class="more-meta"> 约 654 字 </span>
+          <span class="more-meta"> 预计阅读 2 分钟 </span>
+        
+      </div>
+    </header>
+
+    <div class="post-toc" id="post-toc">
+  <h2 class="post-toc-title">文章目录</h2>
+  <div class="post-toc-content always-active">
+    <nav id="TableOfContents"></nav>
+  </div>
+</div>
+    <div class="post-content">
+      <p>在上一篇文章《Android系统开机过程分析》中，我们分析了从init进程到系统服务启动的整个过程，虽然写的很简单（很多东西了解的不是很全面，后面会慢慢修改），但是整个启动过程还是很复杂，涉及的东西很多。今天我们来分析一下Android系统中用户第一个看见的App&ndash;Launcher的启动过程。</p>
+<p>从《Android系统开机过程分析》这篇文章中的Step9开始，接着分析。</p>
+<ul>
+<li>Step0 &ndash; SystemServer.run</li>
+</ul>
+<div class="highlight"><pre class="chroma"><code class="language-Java" data-lang="Java"><span class="kd">private</span> <span class="kt">void</span> <span class="nf">run</span><span class="o">()</span> <span class="o">{</span>
+    <span class="k">try</span> <span class="o">{</span>
+        <span class="c1">//Step9.1
+</span><span class="c1"></span>        <span class="n">startBootstrapServices</span><span class="o">();</span>
+        <span class="c1">//Step9.2
+</span><span class="c1"></span>        <span class="n">startCoreServices</span><span class="o">();</span>
+        <span class="c1">//启动其他服务，包括网络、彩信等等，还启动了Launcher
+</span><span class="c1"></span>        <span class="c1">//Step1
+</span><span class="c1"></span>        <span class="n">startOtherServices</span><span class="o">();</span>
+    <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="n">Throwable</span> <span class="n">ex</span><span class="o">)</span> <span class="o">{</span>
+        <span class="o">...</span>
+        <span class="k">throw</span> <span class="n">ex</span><span class="o">;</span>
+    <span class="o">}</span> <span class="k">finally</span> <span class="o">{</span>
+        <span class="o">...</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div><ul>
+<li>Step1 &ndash; SystemServer.startOtherServices</li>
+</ul>
+<div class="highlight"><pre class="chroma"><code class="language-Java" data-lang="Java"><span class="kd">private</span> <span class="kt">void</span> <span class="nf">startOtherServices</span><span class="o">()</span> <span class="o">{</span>
+        <span class="o">...</span>
+        <span class="c1">//Step2
+</span><span class="c1"></span>        <span class="n">mActivityManagerService</span><span class="o">.</span><span class="na">systemReady</span><span class="o">(</span><span class="k">new</span> <span class="n">Runnable</span><span class="o">()</span> <span class="o">{</span>
+            <span class="nd">@Override</span>
+            <span class="kd">public</span> <span class="kt">void</span> <span class="nf">run</span><span class="o">()</span> <span class="o">{</span>
+                <span class="o">...</span>
+                <span class="k">try</span> <span class="o">{</span>
+		    <span class="c1">//启动SystemUIService
+</span><span class="c1"></span>                    <span class="n">startSystemUi</span><span class="o">(</span><span class="n">context</span><span class="o">);</span>
+                <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="n">Throwable</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+                    <span class="n">reportWtf</span><span class="o">(</span><span class="s">&#34;starting System UI&#34;</span><span class="o">,</span> <span class="n">e</span><span class="o">);</span>
+                <span class="o">}</span>
+                <span class="o">...</span>
+        <span class="o">});</span>
+    <span class="o">}</span>
+</code></pre></div><ul>
+<li>Step2 &ndash; ActivityManagerService.systemReady</li>
+</ul>
+<div class="highlight"><pre class="chroma"><code class="language-Java" data-lang="Java"><span class="c1">//com.android.server.am.ActivityManagerService.java
+</span><span class="c1"></span><span class="kd">public</span> <span class="kt">void</span> <span class="nf">systemReady</span><span class="o">(</span><span class="kd">final</span> <span class="n">Runnable</span> <span class="n">goingCallback</span><span class="o">)</span> <span class="o">{</span>
+        <span class="kd">synchronized</span><span class="o">(</span><span class="k">this</span><span class="o">)</span> <span class="o">{</span>
+            <span class="k">if</span> <span class="o">(</span><span class="n">mSystemReady</span><span class="o">)</span> <span class="o">{</span>
+                <span class="c1">// If we&#39;re done calling all the receivers, run the next &#34;boot phase&#34; passed in
+</span><span class="c1"></span>                <span class="c1">// by the SystemServer
+</span><span class="c1"></span>                <span class="k">if</span> <span class="o">(</span><span class="n">goingCallback</span> <span class="o">!=</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+                    <span class="n">goingCallback</span><span class="o">.</span><span class="na">run</span><span class="o">();</span>
+                <span class="o">}</span>
+                <span class="k">return</span><span class="o">;</span>
+            <span class="o">}</span>
+
+            <span class="o">...</span>
+           <span class="c1">//Step3
+</span><span class="c1"></span>           <span class="n">startHomeActivityLocked</span><span class="o">(</span><span class="n">mCurrentUserId</span><span class="o">,</span> <span class="s">&#34;systemReady&#34;</span><span class="o">);</span>
+<span class="o">}</span>
+</code></pre></div><ul>
+<li>Step3 &ndash; ActivityManagerService.startHomeActivityLocked</li>
+</ul>
+<div class="highlight"><pre class="chroma"><code class="language-Java" data-lang="Java"><span class="kt">boolean</span> <span class="nf">startHomeActivityLocked</span><span class="o">(</span><span class="kt">int</span> <span class="n">userId</span><span class="o">,</span> <span class="n">String</span> <span class="n">reason</span><span class="o">)</span> <span class="o">{</span>
+        <span class="o">...</span>
+        <span class="c1">//Step3.1
+</span><span class="c1"></span>        <span class="n">Intent</span> <span class="n">intent</span> <span class="o">=</span> <span class="n">getHomeIntent</span><span class="o">();</span>
+        <span class="c1">//通过上一步获取的intent来解析有哪些Launcher应用
+</span><span class="c1"></span>        <span class="n">ActivityInfo</span> <span class="n">aInfo</span> <span class="o">=</span>
+            <span class="n">resolveActivityInfo</span><span class="o">(</span><span class="n">intent</span><span class="o">,</span> <span class="n">STOCK_PM_FLAGS</span><span class="o">,</span> <span class="n">userId</span><span class="o">);</span>
+        <span class="k">if</span> <span class="o">(</span><span class="n">aInfo</span> <span class="o">!=</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+            <span class="o">...</span>
+            <span class="k">if</span> <span class="o">(</span><span class="n">app</span> <span class="o">==</span> <span class="kc">null</span> <span class="o">||</span> <span class="n">app</span><span class="o">.</span><span class="na">instrumentationClass</span> <span class="o">==</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+                <span class="n">intent</span><span class="o">.</span><span class="na">setFlags</span><span class="o">(</span><span class="n">intent</span><span class="o">.</span><span class="na">getFlags</span><span class="o">()</span> <span class="o">|</span> <span class="n">Intent</span><span class="o">.</span><span class="na">FLAG_ACTIVITY_NEW_TASK</span><span class="o">);</span>
+                <span class="c1">//Step4
+</span><span class="c1"></span>                <span class="n">mStackSupervisor</span><span class="o">.</span><span class="na">startHomeActivity</span><span class="o">(</span><span class="n">intent</span><span class="o">,</span> <span class="n">aInfo</span><span class="o">,</span> <span class="n">reason</span><span class="o">);</span>
+            <span class="o">}</span>
+        <span class="o">}</span>
+        <span class="k">return</span> <span class="kc">true</span><span class="o">;</span>
+    <span class="o">}</span>
+</code></pre></div><ul>
+<li>Step3.1 &ndash; ActivityManagerService.getHomeIntent</li>
+</ul>
+<div class="highlight"><pre class="chroma"><code class="language-Java" data-lang="Java"><span class="n">Intent</span> <span class="nf">getHomeIntent</span><span class="o">()</span> <span class="o">{</span>
+        <span class="c1">//mTopAction==action.main
+</span><span class="c1"></span>        <span class="c1">//mTopData==null
+</span><span class="c1"></span>        <span class="n">Intent</span> <span class="n">intent</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Intent</span><span class="o">(</span><span class="n">mTopAction</span><span class="o">,</span> <span class="n">mTopData</span> <span class="o">!=</span> <span class="kc">null</span> <span class="o">?</span> <span class="n">Uri</span><span class="o">.</span><span class="na">parse</span><span class="o">(</span><span class="n">mTopData</span><span class="o">)</span> <span class="o">:</span> <span class="kc">null</span><span class="o">);</span>
+        <span class="n">intent</span><span class="o">.</span><span class="na">setComponent</span><span class="o">(</span><span class="n">mTopComponent</span><span class="o">);</span>
+        <span class="k">if</span> <span class="o">(</span><span class="n">mFactoryTest</span> <span class="o">!=</span> <span class="n">FactoryTest</span><span class="o">.</span><span class="na">FACTORY_TEST_LOW_LEVEL</span><span class="o">)</span> <span class="o">{</span>
+             <span class="c1">//在Launcher的主Activity有`android.intent.category.HOME`属性
+</span><span class="c1"></span>            <span class="n">intent</span><span class="o">.</span><span class="na">addCategory</span><span class="o">(</span><span class="n">Intent</span><span class="o">.</span><span class="na">CATEGORY_HOME</span><span class="o">);</span>
+        <span class="o">}</span>
+        <span class="k">return</span> <span class="n">intent</span><span class="o">;</span>
+<span class="o">}</span>
+</code></pre></div><ul>
+<li>Step4 &ndash; ActivityStackSupervisor.startHomeActivity</li>
+</ul>
+<div class="highlight"><pre class="chroma"><code class="language-Java" data-lang="Java"><span class="kt">void</span> <span class="nf">startHomeActivity</span><span class="o">(</span><span class="n">Intent</span> <span class="n">intent</span><span class="o">,</span> <span class="n">ActivityInfo</span> <span class="n">aInfo</span><span class="o">,</span> <span class="n">String</span> <span class="n">reason</span><span class="o">)</span> <span class="o">{</span>
+        <span class="c1">//将Home所在的Activity栈移动到前台
+</span><span class="c1"></span>        <span class="n">moveHomeStackTaskToTop</span><span class="o">(</span><span class="n">HOME_ACTIVITY_TYPE</span><span class="o">,</span> <span class="n">reason</span><span class="o">);</span>
+
+        <span class="c1">//下面就进入到Activity的启动过程
+</span><span class="c1"></span>        <span class="n">startActivityLocked</span><span class="o">(</span><span class="kc">null</span> <span class="cm">/* caller */</span><span class="o">,</span> <span class="n">intent</span><span class="o">,</span> <span class="kc">null</span> <span class="cm">/* resolvedType */</span><span class="o">,</span> <span class="n">aInfo</span><span class="o">,</span>
+                <span class="kc">null</span> <span class="cm">/* voiceSession */</span><span class="o">,</span> <span class="kc">null</span> <span class="cm">/* voiceInteractor */</span><span class="o">,</span> <span class="kc">null</span> <span class="cm">/* resultTo */</span><span class="o">,</span>
+                <span class="kc">null</span> <span class="cm">/* resultWho */</span><span class="o">,</span> <span class="n">0</span> <span class="cm">/* requestCode */</span><span class="o">,</span> <span class="n">0</span> <span class="cm">/* callingPid */</span><span class="o">,</span> <span class="n">0</span> <span class="cm">/* callingUid */</span><span class="o">,</span>
+                <span class="kc">null</span> <span class="cm">/* callingPackage */</span><span class="o">,</span> <span class="n">0</span> <span class="cm">/* realCallingPid */</span><span class="o">,</span> <span class="n">0</span> <span class="cm">/* realCallingUid */</span><span class="o">,</span>
+                <span class="n">0</span> <span class="cm">/* startFlags */</span><span class="o">,</span> <span class="kc">null</span> <span class="cm">/* options */</span><span class="o">,</span> <span class="kc">false</span> <span class="cm">/* ignoreTargetSecurity */</span><span class="o">,</span>
+                <span class="kc">false</span> <span class="cm">/* componentSpecified */</span><span class="o">,</span>
+                <span class="kc">null</span> <span class="cm">/* outActivity */</span><span class="o">,</span> <span class="kc">null</span> <span class="cm">/* container */</span><span class="o">,</span>  <span class="kc">null</span> <span class="cm">/* inTask */</span><span class="o">);</span>
+
+          <span class="o">...</span>   
+<span class="o">}</span>
+</code></pre></div>
+    </div>
+
+    
+<footer class="post-footer">
+      <div class="post-tags">
+          <a href="/tags/%E6%BA%90%E7%A0%81/">源码</a>
+          </div>
+      <nav class="post-nav">
+        <a class="prev" href="/2016/05/activity-startup/">
+            <i class="iconfont icon-left"></i>
+            <span class="prev-text nav-default">Activity启动过程</span>
+            <span class="prev-text nav-mobile">上一篇</span>
+          </a>
+        <a class="next" href="/2016/05/android-system-startup/">
+            <span class="next-text nav-default">Android系统开机过程分析</span>
+            <span class="next-text nav-mobile">下一篇</span>
+            <i class="iconfont icon-right"></i>
+          </a>
+      </nav>
+    </footer>
+  </article>
+        </div>
+        <div id="gitalk-container"></div>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js" crossorigin="anonymous"></script>
+    <script type="text/javascript">
+      var gitalk = new Gitalk({
+        id: '\/2016\/05\/android-launcher-startup\/',
+        title: '启动Launcher',
+        clientID: '64b9f11ba0a3291ee49e',
+        clientSecret: '8632b99db733cc33fd8f6fe85680f63f0db9d872',
+        repo: 'hadyang.github.io',
+        owner: 'hadyang',
+        admin: ['hadyang'],
+        body: decodeURI(location.href)
+      });
+      gitalk.render('gitalk-container');
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://github.com/gitalk/gitalk">comments powered by gitalk.</a></noscript>
+
+  
+
+  
+
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="social-links">
+  <a href="" type="application/rss+xml" class="iconfont icon-rss" title="rss"></a>
+</div>
+
+<div class="copyright">
+  <span class="power-by">
+    由 <a class="hexo-link" href="https://gohugo.io">Hugo</a> 强力驱动
+  </span>
+  <span class="division">|</span>
+  <span class="theme-info">
+    主题 -
+    <a class="theme-link" href="https://github.com/olOwOlo/hugo-theme-even">Even</a>
+  </span>
+
+  
+
+  <span class="copyright-year">
+    &copy; 
+    2017 - 
+    2021<span class="heart"><i class="iconfont icon-heart"></i></span><span>HadYang</span>
+  </span>
+</div>
+
+    </footer>
+
+    <div class="back-to-top" id="back-to-top">
+      <i class="iconfont icon-up"></i>
+    </div>
+  </div>
+  
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/slideout@1.0.1/dist/slideout.min.js" integrity="sha256-t+zJ/g8/KXIJMjSVQdnibt4dlaDxc9zXr/9oNPeWqdg=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.js" integrity="sha256-XVLffZaxoWfGUEbdzuLi7pwaUJv1cecsQJQqGLe7axY=" crossorigin="anonymous"></script>
+
+
+
+<script type="text/javascript" src="/js/main.min.c12618f9a600c40bd024996677e951e64d3487006775aeb22e200c990006c5c7.js"></script>
+  <script type="text/javascript">
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$','$'], ['\\(','\\)']],
+        }
+    };
+  </script>
+  <script async src="https://cdn.jsdelivr.net/npm/mathjax@3.0.5/es5/tex-mml-chtml.js" integrity="sha256-HGLuEfFcsUJGhvB8cQ8nr0gai9EucOOaIxFw7qxmd+w=" crossorigin="anonymous"></script>
+
+
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+	ga('create', 'UA-157595781-2', 'auto');
+	ga('set', 'anonymizeIp', true);
+	ga('send', 'pageview');
+}
+</script>
+<script async src='https://www.google-analytics.com/analytics.js'></script>
+
+
+
+
+
+
+
+</body>
+</html>

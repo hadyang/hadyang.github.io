@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>【Golang进阶】结构体与接口 - HadYang</title>
+  <meta name="renderer" content="webkit" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<meta name="theme-color" content="#f8f5ec" />
+<meta name="msapplication-navbutton-color" content="#f8f5ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
+
+
+<meta name="author" content="HadYang" /><meta name="description" content="在之前的 《【Golang进阶】函数与栈》文章中，我们通过汇编学习了 Go 的栈结构。今天，我们也通过汇编再来看看结构体和方法调用的实现。 结构体初始" /><meta name="keywords" content="Java" />
+
+
+
+
+
+
+<meta name="generator" content="Hugo 0.73.0 with theme even" />
+
+
+<link rel="canonical" href="https://hadyang.github.io/2021/04/golang-struct-interface/" />
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="manifest" href="/manifest.json">
+<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
+
+
+
+<link href="/sass/main.min.75c01efdcbc2767fdfe1f22f5a6fccc8c390d3cda325742f698bd0c6344144be.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.css" integrity="sha256-7TyXnr2YU040zfSP+rEcz29ggW4j56/ujTPwjMzyqFY=" crossorigin="anonymous">
+
+
+<meta property="og:title" content="【Golang进阶】结构体与接口" />
+<meta property="og:description" content="在之前的 《【Golang进阶】函数与栈》文章中，我们通过汇编学习了 Go 的栈结构。今天，我们也通过汇编再来看看结构体和方法调用的实现。 结构体初始" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://hadyang.github.io/2021/04/golang-struct-interface/" />
+<meta property="article:published_time" content="2021-04-10T00:00:00+00:00" />
+<meta property="article:modified_time" content="2021-04-10T00:00:00+00:00" />
+<meta itemprop="name" content="【Golang进阶】结构体与接口">
+<meta itemprop="description" content="在之前的 《【Golang进阶】函数与栈》文章中，我们通过汇编学习了 Go 的栈结构。今天，我们也通过汇编再来看看结构体和方法调用的实现。 结构体初始">
+<meta itemprop="datePublished" content="2021-04-10T00:00:00&#43;00:00" />
+<meta itemprop="dateModified" content="2021-04-10T00:00:00&#43;00:00" />
+<meta itemprop="wordCount" content="1784">
+
+
+
+<meta itemprop="keywords" content="" /><meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="【Golang进阶】结构体与接口"/>
+<meta name="twitter:description" content="在之前的 《【Golang进阶】函数与栈》文章中，我们通过汇编学习了 Go 的栈结构。今天，我们也通过汇编再来看看结构体和方法调用的实现。 结构体初始"/>
+
+<!--[if lte IE 9]>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js"></script>
+<![endif]-->
+
+<!--[if lt IE 9]>
+  <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+<![endif]-->
+
+</head>
+<body>
+  <div id="mobile-navbar" class="mobile-navbar">
+  <div class="mobile-header-logo">
+    <a href="/" class="logo">HadYang</a>
+  </div>
+  <div class="mobile-navbar-icon">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
+<nav id="mobile-menu" class="mobile-menu slideout-menu">
+  <ul class="mobile-menu-list">
+    <a href="https://hadyang.github.io/interview/">
+        <li class="mobile-menu-item">Interview</li>
+      </a><a href="/categories/">
+        <li class="mobile-menu-item">分类</li>
+      </a>
+  </ul>
+
+  
+
+
+</nav>
+
+  <div class="container" id="mobile-panel">
+    <header id="header" class="header">
+        <div class="logo-wrapper">
+  <a href="/" class="logo">HadYang</a>
+</div>
+
+
+
+
+
+<nav class="site-navbar">
+  <ul id="menu" class="menu">
+    <li class="menu-item">
+        <a class="menu-item-link" href="https://hadyang.github.io/interview/">Interview</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/categories/">分类</a>
+      </li>
+  </ul>
+</nav>
+
+    </header>
+
+    <main id="main" class="main">
+      <div class="content-wrapper">
+        <div id="content" class="content">
+          <article class="post">
+    
+    <header class="post-header">
+      <h1 class="post-title">【Golang进阶】结构体与接口</h1>
+
+      <div class="post-meta">
+        <span class="post-time"> 2021-04-10 </span>
+        <div class="post-category">
+            <a href="/categories/go/"> Go </a>
+            </div>
+          <span class="more-meta"> 约 1784 字 </span>
+          <span class="more-meta"> 预计阅读 4 分钟 </span>
+        
+      </div>
+    </header>
+
+    <div class="post-toc" id="post-toc">
+  <h2 class="post-toc-title">文章目录</h2>
+  <div class="post-toc-content always-active">
+    <nav id="TableOfContents">
+  <ul>
+    <li><a href="#结构体初始化">结构体初始化</a></li>
+    <li><a href="#结构体方法调用">结构体方法调用</a>
+      <ul>
+        <li><a href="#指针接收者">指针接收者</a></li>
+        <li><a href="#值接收者">值接收者</a></li>
+      </ul>
+    </li>
+    <li><a href="#接口初始化">接口初始化</a></li>
+    <li><a href="#接口方法调用">接口方法调用</a></li>
+    <li><a href="#方法集的奥秘">方法集的奥秘</a></li>
+    <li><a href="#参考文档">参考文档</a></li>
+  </ul>
+</nav>
+  </div>
+</div>
+    <div class="post-content">
+      <p>在之前的 <a href="https://hadyang.github.io/2021/04/golang-func-stack/">《【Golang进阶】函数与栈》</a>文章中，我们通过汇编学习了 Go 的栈结构。今天，我们也通过汇编再来看看结构体和方法调用的实现。</p>
+<h2 id="结构体初始化">结构体初始化</h2>
+<p>首先，我们定一个结构体 <code>Dog</code> 以及一个指针接收者的方法 <code>Say</code>。</p>
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">Dog</span> <span class="kd">struct</span> <span class="p">{</span>
+	<span class="nx">Name</span> <span class="kt">string</span>
+	<span class="nx">Age</span>  <span class="kt">int</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="p">(</span><span class="nx">t</span> <span class="nx">Dog</span><span class="p">)</span> <span class="nf">Sleep</span><span class="p">()</span> <span class="kt">string</span> <span class="p">{</span>
+	<span class="k">return</span> <span class="nx">t</span><span class="p">.</span><span class="nx">Name</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="p">(</span><span class="nx">t</span> <span class="o">*</span><span class="nx">Dog</span><span class="p">)</span> <span class="nf">Say</span><span class="p">()</span> <span class="kt">string</span> <span class="p">{</span>
+	<span class="k">return</span> <span class="nx">t</span><span class="p">.</span><span class="nx">Name</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+	<span class="kd">var</span> <span class="nx">d1</span> <span class="p">=</span> <span class="o">&amp;</span><span class="nx">Dog</span><span class="p">{</span><span class="s">&#34;WangWang&#34;</span><span class="p">,</span> <span class="mi">43</span><span class="p">}</span>
+	<span class="nx">a</span> <span class="o">:=</span> <span class="nx">d1</span><span class="p">.</span><span class="nf">Say</span><span class="p">()</span>
+	<span class="nx">b</span> <span class="o">:=</span> <span class="nx">d1</span><span class="p">.</span><span class="nf">Sleep</span><span class="p">()</span>
+	<span class="nx">_</span><span class="p">,</span> <span class="nx">_</span> <span class="p">=</span> <span class="nx">a</span><span class="p">,</span> <span class="nx">b</span>
+<span class="p">}</span>
+</code></pre></div><p>执行命令 <code>go tool compile -S -l -N main.go</code> 得到汇编代码，代码的 13 行进行 Struct 的初始化，并获取其地址。 <code>Dog</code> 包含两个成员变量，分别是 <code>string</code> 类型和 <code>int</code> 类型。 <code>int</code> 类型在底层结构中，是原生表示，但 <code>string</code> 是由一个结构体 <code>reflect.StringHeader</code> 表示的。</p>
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">StringHeader</span> <span class="kd">struct</span> <span class="p">{</span>
+	<span class="nx">Data</span> <span class="kt">uintptr</span>
+	<span class="nx">Len</span>  <span class="kt">int</span>
+<span class="p">}</span>
+</code></pre></div><p>可以看到 <code>StringHeader</code> 有两个变量，<code>Data</code> 指向内存中的一个地址， <code>Len</code> 表示字符串的长度（len 函数执行的结果），下面就来看看初始化的逻辑。</p>
+<div class="highlight"><pre class="chroma"><code class="language-text" data-lang="text">MOVQ	$0, &#34;&#34;..autotmp_4+112(SP)       ;StringHeader.Data=0
+XORPS	X0, X0                          ;X0=0
+MOVUPS	X0, &#34;&#34;..autotmp_4+120(SP)       ;StringHeader.Len=X0
+LEAQ	&#34;&#34;..autotmp_4+112(SP), AX       ;AX=&amp;StringHeader.Data
+MOVQ	AX, &#34;&#34;..autotmp_3+48(SP)        ;
+TESTB	AL, (AX)                        ;nil check
+MOVQ	$8, &#34;&#34;..autotmp_4+120(SP)       ;StringHeader.Len=8
+LEAQ	go.string.&#34;WangWang&#34;(SB), CX    ;CX=&amp;&#34;WangWang&#34;
+MOVQ	CX, &#34;&#34;..autotmp_4+112(SP)       ;StringHeader.Data=CX
+</code></pre></div><p>初始化完 Dog 的 <code>Name</code> 变量后，接着就是初始化 <code>Age</code> ，由于 int 类型本身很简单，因此其初始化过程也简单得多。</p>
+<div class="highlight"><pre class="chroma"><code class="language-text" data-lang="text">MOVQ	$43, &#34;&#34;..autotmp_2+56(SP)       ;Dog.Age=43
+MOVQ	AX, &#34;&#34;.d1+24(SP)                ;*d1=AX
+</code></pre></div><p>在上面的汇编代码中，有几个比较特殊的指令，下面一起来说明下：</p>
+<ol>
+<li><code>XORPS	X0, X0</code> 异或指令，这里仅仅是将 <code>X0</code> 寄存器置 0 （X0是浮点数寄存器）</li>
+<li><code>TESTB	AL, (AX)</code> 逻辑与指令，这里是用做 nil check，如果加载 <code>AX</code> 失败会触发段错误信号 <code>SIGSEGV</code>，触发 Go Runtime 抛出 Panic。选择 <code>TESTB</code> 仅仅是因为指令短小。</li>
+<li><code>go.string.&quot;WangWang&quot;(SB)</code> 重定向符号，这种带 <code>(SB)</code> 的都是用户获取重定向符号的地址</li>
+</ol>
+<p>关于重定向，我们这里再看下上面的代码， <code>go.string.&quot;WangWang&quot;(SB)</code> 在 <code>main</code> 函数中作为重定向符号引用，其具体地址会在 Link 阶段确定。</p>
+<div class="highlight"><pre class="chroma"><code class="language-fallback" data-lang="fallback">go.string.&#34;WangWang&#34; SRODATA dupok size=6
+	0x0000 57 61 6e 67 57 61 6e 67                          WangWang; 这里的二进制就是 &#34;WangWang&#34; 的字面值
+</code></pre></div><p>上面的汇编代码就是符号的定义，<code>SRODATA</code> 表示只读数据， <code>DUPOK</code> 表示单个二进制文件中可以有多个定义，但在 Link 阶段该符号会唯一对应一个地址。</p>
+<h2 id="结构体方法调用">结构体方法调用</h2>
+<h3 id="指针接收者">指针接收者</h3>
+<p>结构体的初始化完成，下面我们就来看看指针接收者的函数调用。</p>
+<div class="highlight"><pre class="chroma"><code class="language-text" data-lang="text">MOVQ	AX, (SP)            ;SP=d1
+CALL	&#34;&#34;.(*Dog).Say(SB)   ;调用 Say 函数，并且 SP=SP-8
+
+;下面是函数 Say 的汇编代码
+XORPS	X0, X0              ;X0=0
+MOVUPS	X0, &#34;&#34;.~r0+16(SP)   ;r0.Data=X0
+MOVQ	&#34;&#34;.t+8(SP), AX      ;AX=d1
+TESTB	AL, (AX)            ;nil check
+MOVQ	(AX), CX            ;CX=d1.Data
+MOVQ	8(AX), AX           ;AX=d1.Len
+MOVQ	CX, &#34;&#34;.~r0+16(SP)   ;r0.Data=CX
+MOVQ	AX, &#34;&#34;.~r0+24(SP)   ;r0.Len=AX
+RET                         ;
+</code></pre></div><p>在指针接收者的调用中，通过 <code>AX</code> 寄存器将接收者传递给被调用函数。也可以清晰的看到， Go 在进行函数调用时都使用 <strong>值拷贝</strong> 的方式，只不过指针的值拷贝还是指针。</p>
+<h3 id="值接收者">值接收者</h3>
+<p>相比于指针接收者函数，值接收者函数在调用前会进行更多的复制，占用 <strong>更多</strong> 的指令和栈空间。</p>
+<div class="highlight"><pre class="chroma"><code class="language-text" data-lang="text">MOVQ	&#34;&#34;.d1+40(SP), AX            ;
+TESTB	AL, (AX)                    ;
+MOVQ	(AX), CX                    ;
+MOVQ	8(AX), DX                   ;
+MOVQ	16(AX), AX                  ;
+MOVQ	CX, &#34;&#34;..autotmp_5+88(SP)    ;
+MOVQ	DX, &#34;&#34;..autotmp_5+96(SP)    ;
+MOVQ	AX, &#34;&#34;..autotmp_5+104(SP)   ;
+MOVQ	CX, (SP)                    ;复制 d1.StringHeader.Data
+MOVQ	DX, 8(SP)                   ;复制 d1.StringHeader.Len
+MOVQ	AX, 16(SP)                  ;复制 d1.Age
+CALL	&#34;&#34;.Dog.Sleep(SB)            ;
+</code></pre></div><p>可以看到即使 <code>d1</code> 是指针，Go 在编译时也会转化为值进行调用，并且 Go 会把接收者的数据拷贝一遍，当作参数传递给被调用函数。</p>
+<h2 id="接口初始化">接口初始化</h2>
+<p>接口的初始化有两种情况，分别是空接口 <code>interface{}</code> 和非空接口，空接口的实现是 <code>runtime.eface</code>，包含一个类型字段和一个指向底层数据的指针；非空接口的实现是 <code>runtime.iface</code>，包含 <code>itab</code> 类型的接口信息数据和一个指向底层数据的指针。</p>
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">iface</span> <span class="kd">struct</span> <span class="p">{</span>
+	<span class="nx">tab</span>  <span class="o">*</span><span class="nx">itab</span>
+	<span class="nx">data</span> <span class="nx">unsafe</span><span class="p">.</span><span class="nx">Pointer</span>
+<span class="p">}</span>
+
+<span class="kd">type</span> <span class="nx">eface</span> <span class="kd">struct</span> <span class="p">{</span>
+	<span class="nx">_type</span> <span class="o">*</span><span class="nx">_type</span>
+	<span class="nx">data</span>  <span class="nx">unsafe</span><span class="p">.</span><span class="nx">Pointer</span>
+<span class="p">}</span>
+</code></pre></div><p>定义接口 <code>Animal</code> 以及以 <code>Animal</code> 为入参的 <code>Night</code> 函数。</p>
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">Animal</span> <span class="kd">interface</span> <span class="p">{</span>
+	<span class="nf">Sleep</span><span class="p">()</span> <span class="kt">string</span>
+	<span class="nf">Say</span><span class="p">()</span> <span class="kt">string</span>
+<span class="p">}</span>
+<span class="kd">func</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+	<span class="kd">var</span> <span class="nx">d1</span> <span class="p">=</span> <span class="o">&amp;</span><span class="nx">Dog</span><span class="p">{</span><span class="s">&#34;WangWang&#34;</span><span class="p">,</span> <span class="mi">43</span><span class="p">}</span>
+	<span class="kd">var</span> <span class="nx">t1</span> <span class="nx">Animal</span> <span class="p">=</span> <span class="nx">d1</span>
+	<span class="kd">var</span> <span class="nx">t2</span> <span class="kd">interface</span><span class="p">{}</span> <span class="p">=</span> <span class="nx">d1</span>
+
+	<span class="nx">_</span> <span class="p">=</span> <span class="nx">t2</span>
+	<span class="nf">Night</span><span class="p">(</span><span class="nx">t1</span><span class="p">)</span>
+<span class="p">}</span>
+<span class="kd">func</span> <span class="nf">Night</span><span class="p">(</span><span class="nx">t</span> <span class="nx">Animal</span><span class="p">)</span> <span class="p">{</span>
+	<span class="nx">t</span><span class="p">.</span><span class="nf">Sleep</span><span class="p">()</span>
+<span class="p">}</span>
+</code></pre></div><p>通过汇编可以发现，非空接口中的 <code>itab</code> 信息是直接从重定向符号中获取，并且在编译时生成。</p>
+<div class="highlight"><pre class="chroma"><code class="language-text" data-lang="text">LEAQ	go.itab.*&#34;&#34;.Dog,&#34;&#34;.Animal(SB), CX   ;CX=&amp;(go.itab.*&#34;&#34;.Dog,&#34;&#34;.Animal)
+MOVQ	CX, &#34;&#34;.t1+56(SP)                    ;t1.itab=CX
+MOVQ	AX, &#34;&#34;.t1+64(SP)                    ;t1.data=AX
+</code></pre></div><p>空接口的 <code>_type</code> 同样也是从重定向符号中获取，编译时生成。其他操作与非空接口类型。</p>
+<div class="highlight"><pre class="chroma"><code class="language-text" data-lang="text">LEAQ	type.*&#34;&#34;.Dog(SB), CX                ;CX=&amp;(type.*&#34;&#34;.Dog)
+MOVQ	CX, &#34;&#34;.t2+40(SP)                    ;t1._type=CX
+MOVQ	AX, &#34;&#34;.t2+48(SP)                    ;t1.data=AX
+</code></pre></div><h2 id="接口方法调用">接口方法调用</h2>
+<p>在 <code>t1</code> 赋值完成后，就会把 <code>t1</code> 拷贝参数并调用 <code>Night</code> 方法。并通过 <code>itab</code> 定位方法的地址， <code>t.itab</code> 的结构由 <code>go.itab.*&quot;&quot;.Dog,&quot;&quot;.Animal</code> 表示</p>
+<div class="highlight"><pre class="chroma"><code class="language-text" data-lang="text">go.itab.*&#34;&#34;.Dog,&#34;&#34;.Animal SRODATA dupok size=40
+	0x0000 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  ................
+	0x0010 62 c0 18 19 00 00 00 00 00 00 00 00 00 00 00 00  b...............
+	0x0020 00 00 00 00 00 00 00 00                          ........
+	rel 0+8 t=1 type.&#34;&#34;.Animal+0
+	rel 8+8 t=1 type.*&#34;&#34;.Dog+0
+	rel 24+8 t=1 &#34;&#34;.(*Dog).Say+0
+	rel 32+8 t=1 &#34;&#34;.(*Dog).Sleep+0
+</code></pre></div><p>因此，<code>t1.itab+32</code> 指向方法 <code>&quot;&quot;.(*Dog).Sleep</code></p>
+<div class="highlight"><pre class="chroma"><code class="language-text" data-lang="text">MOVQ	&#34;&#34;.t+40(SP), AX     ;AX=t.itab
+TESTB	AL, (AX)            ;nil check
+MOVQ	32(AX), AX          ;AX=t1.itab+32
+MOVQ	&#34;&#34;.t+48(SP), CX     ;CX=t1.data
+MOVQ	CX, (SP)            ;
+CALL	AX                  ;call &#34;&#34;.(*Dog).Sleep
+</code></pre></div><h2 id="方法集的奥秘">方法集的奥秘</h2>
+<p>在 <code>main.go</code> 文件中，我们还能看到 <code>&quot;&quot;.(*Dog).Sleep STEXT ...</code> 的声明，但我们的代码并没有指针接收者的 <code>Sleep</code> 方法，这就是 Go 编译器自动生成的代码。通过汇编我们也能知道「<code>*T</code> 的方法集：所有声明以 <code>T</code> 或 <code>*T</code>为接收者的方法集合」这条规则的底层原因。</p>
+<div class="highlight"><pre class="chroma"><code class="language-text" data-lang="text">TESTB	AL, (AX)
+MOVQ	(AX), CX
+MOVQ	8(AX), DX
+MOVQ	16(AX), AX
+MOVQ	CX, &#34;&#34;..autotmp_3+56(SP)
+MOVQ	DX, &#34;&#34;..autotmp_3+64(SP)
+MOVQ	AX, &#34;&#34;..autotmp_3+72(SP)
+MOVQ	CX, (SP)
+MOVQ	DX, 8(SP)
+MOVQ	AX, 16(SP)
+PCDATA	$1, $1
+CALL	&#34;&#34;.Dog.Sleep(SB)
+</code></pre></div><p>上面是截取的 <code>&quot;&quot;.(*Dog).Sleep</code> 一段汇编，可以发现其结构与上一节 “值接收者” 中的汇编类似，都是通过指针 <strong>转换为值</strong> 并调用值接收者方法的策略。</p>
+<p>那这里我们思考下，既然可以通过代码生成来扩充接收者的方法集，那么能自动生成指针接收者的方法吗？</p>
+<p>答案是 <strong>不行</strong>。原因也很简单，值接收者是接收拷贝数据的，并不能找到原始数据的具体地址，因此也无法生成指针接受者。</p>
+<h2 id="参考文档">参考文档</h2>
+<p><a href="https://golang.org/doc/asm#directives">directives</a></p>
+
+    </div>
+
+    
+<footer class="post-footer">
+      
+      <nav class="post-nav">
+        <a class="prev" href="/2021/04/rocket-mq/">
+            <i class="iconfont icon-left"></i>
+            <span class="prev-text nav-default">RocketMQ 关键特性解析</span>
+            <span class="prev-text nav-mobile">上一篇</span>
+          </a>
+        <a class="next" href="/2021/04/golang-func-stack/">
+            <span class="next-text nav-default">【Golang进阶】函数与栈</span>
+            <span class="next-text nav-mobile">下一篇</span>
+            <i class="iconfont icon-right"></i>
+          </a>
+      </nav>
+    </footer>
+  </article>
+        </div>
+        <div id="gitalk-container"></div>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js" crossorigin="anonymous"></script>
+    <script type="text/javascript">
+      var gitalk = new Gitalk({
+        id: '\/2021\/04\/golang-struct-interface\/',
+        title: '【Golang进阶】结构体与接口',
+        clientID: '64b9f11ba0a3291ee49e',
+        clientSecret: '8632b99db733cc33fd8f6fe85680f63f0db9d872',
+        repo: 'hadyang.github.io',
+        owner: 'hadyang',
+        admin: ['hadyang'],
+        body: decodeURI(location.href)
+      });
+      gitalk.render('gitalk-container');
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://github.com/gitalk/gitalk">comments powered by gitalk.</a></noscript>
+
+  
+
+  
+
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="social-links">
+  <a href="" type="application/rss+xml" class="iconfont icon-rss" title="rss"></a>
+</div>
+
+<div class="copyright">
+  <span class="power-by">
+    由 <a class="hexo-link" href="https://gohugo.io">Hugo</a> 强力驱动
+  </span>
+  <span class="division">|</span>
+  <span class="theme-info">
+    主题 -
+    <a class="theme-link" href="https://github.com/olOwOlo/hugo-theme-even">Even</a>
+  </span>
+
+  
+
+  <span class="copyright-year">
+    &copy; 
+    2017 - 
+    2021<span class="heart"><i class="iconfont icon-heart"></i></span><span>HadYang</span>
+  </span>
+</div>
+
+    </footer>
+
+    <div class="back-to-top" id="back-to-top">
+      <i class="iconfont icon-up"></i>
+    </div>
+  </div>
+  
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/slideout@1.0.1/dist/slideout.min.js" integrity="sha256-t+zJ/g8/KXIJMjSVQdnibt4dlaDxc9zXr/9oNPeWqdg=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.js" integrity="sha256-XVLffZaxoWfGUEbdzuLi7pwaUJv1cecsQJQqGLe7axY=" crossorigin="anonymous"></script>
+
+
+
+<script type="text/javascript" src="/js/main.min.c12618f9a600c40bd024996677e951e64d3487006775aeb22e200c990006c5c7.js"></script>
+  <script type="text/javascript">
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$','$'], ['\\(','\\)']],
+        }
+    };
+  </script>
+  <script async src="https://cdn.jsdelivr.net/npm/mathjax@3.0.5/es5/tex-mml-chtml.js" integrity="sha256-HGLuEfFcsUJGhvB8cQ8nr0gai9EucOOaIxFw7qxmd+w=" crossorigin="anonymous"></script>
+
+
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+	ga('create', 'UA-157595781-2', 'auto');
+	ga('set', 'anonymizeIp', true);
+	ga('send', 'pageview');
+}
+</script>
+<script async src='https://www.google-analytics.com/analytics.js'></script>
+
+
+
+
+
+
+
+</body>
+</html>

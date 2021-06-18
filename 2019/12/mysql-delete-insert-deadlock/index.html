@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>MySQL 删除&amp;插入死锁分析 - HadYang</title>
+  <meta name="renderer" content="webkit" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<meta name="theme-color" content="#f8f5ec" />
+<meta name="msapplication-navbutton-color" content="#f8f5ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
+
+
+<meta name="author" content="HadYang" /><meta name="description" content="MySQL 死锁常常被人提起，在大学期间的数据库课程也会有所提及，但真正接触的 case 是没有过的。前段时间在线上发现了死锁，导致 MySQL 负载升高，连接不能及时释放，造成业务小范围瘫痪。这里死锁的场景是并发的 delete 和 insert...on duplicate update。
+" /><meta name="keywords" content="Java" />
+
+
+
+
+
+
+<meta name="generator" content="Hugo 0.73.0 with theme even" />
+
+
+<link rel="canonical" href="https://hadyang.github.io/2019/12/mysql-delete-insert-deadlock/" />
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="manifest" href="/manifest.json">
+<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
+
+
+
+<link href="/sass/main.min.75c01efdcbc2767fdfe1f22f5a6fccc8c390d3cda325742f698bd0c6344144be.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.css" integrity="sha256-7TyXnr2YU040zfSP+rEcz29ggW4j56/ujTPwjMzyqFY=" crossorigin="anonymous">
+
+
+<meta property="og:title" content="MySQL 删除&amp;插入死锁分析" />
+<meta property="og:description" content="MySQL 死锁常常被人提起，在大学期间的数据库课程也会有所提及，但真正接触的 case 是没有过的。前段时间在线上发现了死锁，导致 MySQL 负载升高，连接不能及时释放，造成业务小范围瘫痪。这里死锁的场景是并发的 delete 和 insert...on duplicate update。" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://hadyang.github.io/2019/12/mysql-delete-insert-deadlock/" />
+<meta property="article:published_time" content="2019-12-26T00:00:00+00:00" />
+<meta property="article:modified_time" content="2019-12-26T00:00:00+00:00" />
+<meta itemprop="name" content="MySQL 删除&amp;插入死锁分析">
+<meta itemprop="description" content="MySQL 死锁常常被人提起，在大学期间的数据库课程也会有所提及，但真正接触的 case 是没有过的。前段时间在线上发现了死锁，导致 MySQL 负载升高，连接不能及时释放，造成业务小范围瘫痪。这里死锁的场景是并发的 delete 和 insert...on duplicate update。">
+<meta itemprop="datePublished" content="2019-12-26T00:00:00&#43;00:00" />
+<meta itemprop="dateModified" content="2019-12-26T00:00:00&#43;00:00" />
+<meta itemprop="wordCount" content="1540">
+
+
+
+<meta itemprop="keywords" content="MySQL," /><meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="MySQL 删除&amp;插入死锁分析"/>
+<meta name="twitter:description" content="MySQL 死锁常常被人提起，在大学期间的数据库课程也会有所提及，但真正接触的 case 是没有过的。前段时间在线上发现了死锁，导致 MySQL 负载升高，连接不能及时释放，造成业务小范围瘫痪。这里死锁的场景是并发的 delete 和 insert...on duplicate update。"/>
+
+<!--[if lte IE 9]>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js"></script>
+<![endif]-->
+
+<!--[if lt IE 9]>
+  <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+<![endif]-->
+
+</head>
+<body>
+  <div id="mobile-navbar" class="mobile-navbar">
+  <div class="mobile-header-logo">
+    <a href="/" class="logo">HadYang</a>
+  </div>
+  <div class="mobile-navbar-icon">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
+<nav id="mobile-menu" class="mobile-menu slideout-menu">
+  <ul class="mobile-menu-list">
+    <a href="https://hadyang.github.io/interview/">
+        <li class="mobile-menu-item">Interview</li>
+      </a><a href="/categories/">
+        <li class="mobile-menu-item">分类</li>
+      </a>
+  </ul>
+
+  
+
+
+</nav>
+
+  <div class="container" id="mobile-panel">
+    <header id="header" class="header">
+        <div class="logo-wrapper">
+  <a href="/" class="logo">HadYang</a>
+</div>
+
+
+
+
+
+<nav class="site-navbar">
+  <ul id="menu" class="menu">
+    <li class="menu-item">
+        <a class="menu-item-link" href="https://hadyang.github.io/interview/">Interview</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/categories/">分类</a>
+      </li>
+  </ul>
+</nav>
+
+    </header>
+
+    <main id="main" class="main">
+      <div class="content-wrapper">
+        <div id="content" class="content">
+          <article class="post">
+    
+    <header class="post-header">
+      <h1 class="post-title">MySQL 删除&amp;插入死锁分析</h1>
+
+      <div class="post-meta">
+        <span class="post-time"> 2019-12-26 </span>
+        <div class="post-category">
+            <a href="/categories/database/"> Database </a>
+            </div>
+          <span class="more-meta"> 约 1540 字 </span>
+          <span class="more-meta"> 预计阅读 4 分钟 </span>
+        
+      </div>
+    </header>
+
+    <div class="post-toc" id="post-toc">
+  <h2 class="post-toc-title">文章目录</h2>
+  <div class="post-toc-content always-active">
+    <nav id="TableOfContents">
+  <ul>
+    <li><a href="#死锁日志分析">死锁日志分析</a></li>
+    <li><a href="#索引结构">索引结构</a></li>
+    <li><a href="#解决方案">解决方案</a></li>
+    <li><a href="#参考">参考</a></li>
+  </ul>
+</nav>
+  </div>
+</div>
+    <div class="post-content">
+      <p>MySQL 死锁常常被人提起，在大学期间的数据库课程也会有所提及，但真正接触的 case 是没有过的。前段时间在线上发现了死锁，导致 MySQL 负载升高，连接不能及时释放，造成业务小范围瘫痪。这里死锁的场景是并发的 <code>delete</code> 和 <code>insert...on duplicate update</code>。</p>
+<p>发生死锁的表结构如下：</p>
+<div class="highlight"><pre class="chroma"><code class="language-fallback" data-lang="fallback">CREATE TABLE `passengers_account_mapping` (
+	`id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT &#39;自增主键&#39;,
+	`cert_no` varchar(25) NOT NULL DEFAULT &#39;&#39; COMMENT &#39;证件号码&#39;,
+	`account_name` varchar(40) NOT NULL DEFAULT &#39;&#39; COMMENT &#39;用户账号名&#39;,
+	`cert_type` tinyint(1) NOT NULL DEFAULT &#39;0&#39; COMMENT &#39;证件类型&#39;,
+	`passenger_name` varchar(45) NOT NULL DEFAULT &#39;&#39; COMMENT &#39;乘客姓名&#39;,
+	PRIMARY KEY (`id`),
+	UNIQUE `uniq_account_passengers_name` (`cert_no`, `account_name`, `passenger_name`),
+	KEY `idx_account_name` (`account_name`)
+) ENGINE = InnoDB AUTO_INCREMENT = 2 CHARSET = utf8mb4;
+</code></pre></div><p><strong>事务隔离级别为：RR</strong></p>
+<h2 id="死锁日志分析">死锁日志分析</h2>
+<p>首先通过 <code>show engine innodb status;</code> 查处死锁相关日志信息。</p>
+<div class="highlight"><pre class="chroma"><code class="language-fallback" data-lang="fallback">2019-12-20 14:54:35 7fc9f8fe9700
+*** (1) TRANSACTION: //事务1
+TRANSACTION 83389013326, ACTIVE 0 sec updating or deleting
+mysql tables in use 1, locked 1 //使用一个表
+LOCK WAIT 4 lock struct(s), heap size 1184, 3 row lock(s), undo log entries 1 //有 4 个锁结构，3个行锁
+MySQL thread id 22442, OS thread handle 0x7fcdd8cd5700, query id 1334027037 10.88.104.204 t_account_rw updating
+`delete from passengers_account_mapping where account_name=&#39;c196cf184&#39;` //死锁发生时执行的 SQL 语句
+*** (1) WAITING FOR THIS LOCK TO BE GRANTED: //等待锁的信息
+RECORD LOCKS space id 2238 page no 28003 n bits 304 index `uniq_account_passengers_name` of table `account`.`passengers_account_mapping` trx id 83389013326 lock_mode X locks rec but not gap waiting //唯一索引上的排他锁（Record-Lock）
+*** (2) TRANSACTION: //事务2
+TRANSACTION 83389013325, ACTIVE 0 sec starting index read, thread declared inside InnoDB 4999
+mysql tables in use 1, locked 1
+3 lock struct(s), heap size 1184, 2 row lock(s)
+MySQL thread id 46111, OS thread handle 0x7fc9f8fe9700, query id 1334027030 10.88.104.202 t_account_rw update
+
+`INSERT INTO passengers_account_mapping (id, account_name, cert_no, cert_type, passenger_name) VALUES (0, &#39;c196cf184&#39;, &#39;6344_2iMxhPferW498&#39;, 0, &#39;杨琳&#39;) ON DUPLICATE KEY UPDATE updated_ts = &#39;2019-12-20 14:54:35.029&#39;;`
+
+*** (2) HOLDS THE LOCK(S): // 持有锁的信息
+RECORD LOCKS space id 2238 page no 28003 n bits 304 index `uniq_account_passengers_name` of table `account`.`passengers_account_mapping` trx id 83389013325 lock_mode X //唯一索引上的排他锁（Next-Key）
+*** (2) WAITING FOR THIS LOCK TO BE GRANTED: //等待锁的信息
+RECORD LOCKS space id 2238 page no 160778 n bits 216 index `PRIMARY` of table `account`.`passengers_account_mapping` trx id 83389013325 lock_mode X locks rec but not gap waiting //主键上的排他锁（Record-Lock）
+*** WE ROLL BACK TRANSACTION (2)//回滚事务2
+</code></pre></div><p>死锁日志的具体分析在上面的注释已说明，这里补充一些基础知识：</p>
+<ol>
+<li>事务隔离级别
+<ol>
+<li>RC：针对当前读，RC隔离级别保证对读取到的记录加锁 (记录锁)，存在幻读现象</li>
+<li>RR：针对当前读，<strong>RR隔离级别保证对读取到的记录加锁 (记录锁)，同时保证对读取的范围加锁，新的满足查询条件的记录不能够插入 (间隙锁)</strong>，不存在幻读现象。</li>
+</ol>
+</li>
+<li>锁的类型
+<ol>
+<li>按性质分
+<ol>
+<li>排他锁</li>
+<li>共享锁</li>
+</ol>
+</li>
+<li>按作用级别分
+<ol>
+<li>表</li>
+<li>页</li>
+<li>行</li>
+</ol>
+</li>
+<li>行锁的具体分类：
+<ol>
+<li>Record Lock：加到 <strong>索引记录</strong> 上的锁</li>
+<li>Gap Lock：对索引记录中的一段连续区域的锁</li>
+<li>Next-Key Lock：是记录锁和记录前的间隙锁的结合，解决了幻读问题</li>
+</ol>
+</li>
+</ol>
+</li>
+</ol>
+<p>从日志中可以看到，事务1当前想要获取唯一索引上的锁；事务2持有唯一索引上的锁，想要主键索引上的锁。这里造成死锁，可以猜测是事务1已获取主键索引上的锁。根据 MySQL 的加锁规则：<a href="https://dev.mysql.com/doc/refman/5.6/en/innodb-locks-set.html">Locks Set by Different SQL Statements in InnoDB</a>。官方文档的规则较多，这里我先解释两种语句的加锁规则：</p>
+<ol>
+<li>
+<p><code>DELETE</code> 会对所有符合条件的唯一索引或主键索引加 <code>Record Lock</code>、 非唯一索引加 <code>Next-Key Lock</code>。</p>
+<blockquote>
+<p><code>DELETE FROM ... WHERE ...</code> sets an exclusive next-key lock on every record the search encounters. However, only an index record lock is required for statements that lock rows using a unique index to search for a unique row.</p>
+</blockquote>
+</li>
+<li>
+<p><code>INSERT ... ON DUPLICATE KEY UPDATE</code> 当发生 <code>duplicate-key</code> 时，会对主键索引加 <code>Record Lock</code>，对唯一索引加 <code>Next-Key Lock</code>。</p>
+<blockquote>
+<p><code>INSERT ... ON DUPLICATE KEY UPDATE</code> differs from a simple <code>INSERT</code> in that an exclusive lock rather than a shared lock is placed on the row to be updated when a <code>duplicate-key</code> error occurs. An exclusive <code>index-record lock</code> is taken for a duplicate primary key value. An exclusive <code>next-key lock</code> is taken for a duplicate unique key value.</p>
+</blockquote>
+</li>
+</ol>
+<p>我们可以得到以下加锁流程：</p>
+<table>
+<thead>
+<tr>
+<th align="left">执行序列</th>
+<th align="left">事务1</th>
+<th align="left">事务2</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left">0</td>
+<td align="left">Hold NK Lock In <code>idx_account_name</code></td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left">1</td>
+<td align="left">Hold Record Lock In <code>PRIMARY</code></td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left">2</td>
+<td align="left"></td>
+<td align="left">Hold NK Lock In <code>uniq_account_passengers_name</code></td>
+</tr>
+<tr>
+<td align="left">3</td>
+<td align="left">Want Record Lock In <code>uniq_account_passengers_name</code></td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left">4</td>
+<td align="left"></td>
+<td align="left">Want Record Lock In <code>PRIMARY</code></td>
+</tr>
+</tbody>
+</table>
+<p>在第3、4步发生死锁，发生死锁主要的原因是加锁顺序不一致，那如何进行顺序一致的加锁处理？这里就需要对 MySQL 索引的存储结构有些理解。</p>
+<h2 id="索引结构">索引结构</h2>
+<p><code>idx_account_name</code> 索引属于非聚集索引（二级索引），非聚集索引的存储结构如下：</p>
+<p><img src="./assets/%E4%BA%8C%E7%BA%A7%E7%B4%A2%E5%BC%95%E7%BB%93%E6%9E%84.jpg" alt="二级索引结构"></p>
+<p>二级索引的B树结构中，指向的是聚集索引（主键索引）。所以针对 <code>delete from passengers_account_mapping where account_name='c196cf184'</code>，首先通过 <code>where</code> 子句条件找到 <code>account_name='c196cf184'</code> 的<code>idx_account_name</code> 索引并加锁，再找到对应的聚集索引，最后再将其他索引加锁。</p>
+<h2 id="解决方案">解决方案</h2>
+<p>上面说过死锁的问题在于加锁顺序不一致，所以解决方案就是再删除的业务逻辑中，使用 <code>PRIMARY</code> 或者 <code>uniq_account_passengers_name</code> 索引进行删除。</p>
+<h2 id="参考">参考</h2>
+<ul>
+<li><a href="https://www.cnblogs.com/tutar/p/5878651.html">MySQL 加锁处理分析</a></li>
+</ul>
+    </div>
+
+    
+<footer class="post-footer">
+      <div class="post-tags">
+          <a href="/tags/mysql/">MySQL</a>
+          </div>
+      <nav class="post-nav">
+        <a class="prev" href="/2020/05/consensus/">
+            <i class="iconfont icon-left"></i>
+            <span class="prev-text nav-default">【What is this】什么是共识算法？</span>
+            <span class="prev-text nav-mobile">上一篇</span>
+          </a>
+        <a class="next" href="/2019/03/socks-proxy/">
+            <span class="next-text nav-default">手写Socks5通信</span>
+            <span class="next-text nav-mobile">下一篇</span>
+            <i class="iconfont icon-right"></i>
+          </a>
+      </nav>
+    </footer>
+  </article>
+        </div>
+        <div id="gitalk-container"></div>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js" crossorigin="anonymous"></script>
+    <script type="text/javascript">
+      var gitalk = new Gitalk({
+        id: '\/2019\/12\/mysql-delete-insert-deadlock\/',
+        title: 'MySQL 删除\u0026插入死锁分析',
+        clientID: '64b9f11ba0a3291ee49e',
+        clientSecret: '8632b99db733cc33fd8f6fe85680f63f0db9d872',
+        repo: 'hadyang.github.io',
+        owner: 'hadyang',
+        admin: ['hadyang'],
+        body: decodeURI(location.href)
+      });
+      gitalk.render('gitalk-container');
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://github.com/gitalk/gitalk">comments powered by gitalk.</a></noscript>
+
+  
+
+  
+
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="social-links">
+  <a href="" type="application/rss+xml" class="iconfont icon-rss" title="rss"></a>
+</div>
+
+<div class="copyright">
+  <span class="power-by">
+    由 <a class="hexo-link" href="https://gohugo.io">Hugo</a> 强力驱动
+  </span>
+  <span class="division">|</span>
+  <span class="theme-info">
+    主题 -
+    <a class="theme-link" href="https://github.com/olOwOlo/hugo-theme-even">Even</a>
+  </span>
+
+  
+
+  <span class="copyright-year">
+    &copy; 
+    2017 - 
+    2021<span class="heart"><i class="iconfont icon-heart"></i></span><span>HadYang</span>
+  </span>
+</div>
+
+    </footer>
+
+    <div class="back-to-top" id="back-to-top">
+      <i class="iconfont icon-up"></i>
+    </div>
+  </div>
+  
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/slideout@1.0.1/dist/slideout.min.js" integrity="sha256-t+zJ/g8/KXIJMjSVQdnibt4dlaDxc9zXr/9oNPeWqdg=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.js" integrity="sha256-XVLffZaxoWfGUEbdzuLi7pwaUJv1cecsQJQqGLe7axY=" crossorigin="anonymous"></script>
+
+
+
+<script type="text/javascript" src="/js/main.min.c12618f9a600c40bd024996677e951e64d3487006775aeb22e200c990006c5c7.js"></script>
+  <script type="text/javascript">
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$','$'], ['\\(','\\)']],
+        }
+    };
+  </script>
+  <script async src="https://cdn.jsdelivr.net/npm/mathjax@3.0.5/es5/tex-mml-chtml.js" integrity="sha256-HGLuEfFcsUJGhvB8cQ8nr0gai9EucOOaIxFw7qxmd+w=" crossorigin="anonymous"></script>
+
+
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+	ga('create', 'UA-157595781-2', 'auto');
+	ga('set', 'anonymizeIp', true);
+	ga('send', 'pageview');
+}
+</script>
+<script async src='https://www.google-analytics.com/analytics.js'></script>
+
+
+
+
+
+
+
+</body>
+</html>

@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>【算法】LRU &amp;&amp; LFU - HadYang</title>
+  <meta name="renderer" content="webkit" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<meta name="theme-color" content="#f8f5ec" />
+<meta name="msapplication-navbutton-color" content="#f8f5ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
+
+
+<meta name="author" content="HadYang" /><meta name="description" content="今天在熟悉公司业务的时候，看到LFU算法，十分困惑。觉得和LRU算法差不多，于是仔细研究了一番，发现其实他们的思想是类似的&amp;ndash;通过一种机制来标记缓存中的元素，当缓存满时进行“末位”淘汰。
+" /><meta name="keywords" content="Java" />
+
+
+
+
+
+
+<meta name="generator" content="Hugo 0.73.0 with theme even" />
+
+
+<link rel="canonical" href="https://hadyang.github.io/2016/11/lru-lfu/" />
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="manifest" href="/manifest.json">
+<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
+
+
+
+<link href="/sass/main.min.75c01efdcbc2767fdfe1f22f5a6fccc8c390d3cda325742f698bd0c6344144be.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.css" integrity="sha256-7TyXnr2YU040zfSP+rEcz29ggW4j56/ujTPwjMzyqFY=" crossorigin="anonymous">
+
+
+<meta property="og:title" content="【算法】LRU &amp;&amp; LFU" />
+<meta property="og:description" content="今天在熟悉公司业务的时候，看到LFU算法，十分困惑。觉得和LRU算法差不多，于是仔细研究了一番，发现其实他们的思想是类似的&ndash;通过一种机制来标记缓存中的元素，当缓存满时进行“末位”淘汰。" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://hadyang.github.io/2016/11/lru-lfu/" />
+<meta property="article:published_time" content="2016-11-30T00:00:00+00:00" />
+<meta property="article:modified_time" content="2016-11-30T00:00:00+00:00" />
+<meta itemprop="name" content="【算法】LRU &amp;&amp; LFU">
+<meta itemprop="description" content="今天在熟悉公司业务的时候，看到LFU算法，十分困惑。觉得和LRU算法差不多，于是仔细研究了一番，发现其实他们的思想是类似的&ndash;通过一种机制来标记缓存中的元素，当缓存满时进行“末位”淘汰。">
+<meta itemprop="datePublished" content="2016-11-30T00:00:00&#43;00:00" />
+<meta itemprop="dateModified" content="2016-11-30T00:00:00&#43;00:00" />
+<meta itemprop="wordCount" content="644">
+
+
+
+<meta itemprop="keywords" content="Java,缓存," /><meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="【算法】LRU &amp;&amp; LFU"/>
+<meta name="twitter:description" content="今天在熟悉公司业务的时候，看到LFU算法，十分困惑。觉得和LRU算法差不多，于是仔细研究了一番，发现其实他们的思想是类似的&ndash;通过一种机制来标记缓存中的元素，当缓存满时进行“末位”淘汰。"/>
+
+<!--[if lte IE 9]>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js"></script>
+<![endif]-->
+
+<!--[if lt IE 9]>
+  <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+<![endif]-->
+
+</head>
+<body>
+  <div id="mobile-navbar" class="mobile-navbar">
+  <div class="mobile-header-logo">
+    <a href="/" class="logo">HadYang</a>
+  </div>
+  <div class="mobile-navbar-icon">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
+<nav id="mobile-menu" class="mobile-menu slideout-menu">
+  <ul class="mobile-menu-list">
+    <a href="https://hadyang.github.io/interview/">
+        <li class="mobile-menu-item">Interview</li>
+      </a><a href="/categories/">
+        <li class="mobile-menu-item">分类</li>
+      </a>
+  </ul>
+
+  
+
+
+</nav>
+
+  <div class="container" id="mobile-panel">
+    <header id="header" class="header">
+        <div class="logo-wrapper">
+  <a href="/" class="logo">HadYang</a>
+</div>
+
+
+
+
+
+<nav class="site-navbar">
+  <ul id="menu" class="menu">
+    <li class="menu-item">
+        <a class="menu-item-link" href="https://hadyang.github.io/interview/">Interview</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/categories/">分类</a>
+      </li>
+  </ul>
+</nav>
+
+    </header>
+
+    <main id="main" class="main">
+      <div class="content-wrapper">
+        <div id="content" class="content">
+          <article class="post">
+    
+    <header class="post-header">
+      <h1 class="post-title">【算法】LRU &amp;&amp; LFU</h1>
+
+      <div class="post-meta">
+        <span class="post-time"> 2016-11-30 </span>
+        <div class="post-category">
+            <a href="/categories/%E7%AE%97%E6%B3%95/"> 算法 </a>
+            </div>
+          <span class="more-meta"> 约 644 字 </span>
+          <span class="more-meta"> 预计阅读 2 分钟 </span>
+        
+      </div>
+    </header>
+
+    <div class="post-toc" id="post-toc">
+  <h2 class="post-toc-title">文章目录</h2>
+  <div class="post-toc-content always-active">
+    <nav id="TableOfContents">
+  <ul>
+    <li>
+      <ul>
+        <li><a href="#lru">LRU</a></li>
+        <li><a href="#lfu">LFU</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+  </div>
+</div>
+    <div class="post-content">
+      <p>今天在熟悉公司业务的时候，看到<a href="http://baike.baidu.com/link?url=njKbC1j8pqxN7q75i8U0db8AAE7uOKCbDWgmG1hVR6Ucm8xR5jiTAR_ACFDUiurrOMAUfIICIKtUziWtTYsvBa">LFU</a>算法，十分困惑。觉得和LRU算法差不多，于是仔细研究了一番，发现其实他们的思想是类似的&ndash;通过一种机制来标记缓存中的元素，当缓存满时进行“末位”淘汰。</p>
+<h3 id="lru">LRU</h3>
+<p>LRU（Least Recently Used），即最近最少使用算法，LRU算法是使用最多的缓存算法，它的实现更加符合业务实际。它关注的是 <strong>缓存数据的最近一次使用的时间</strong> ，该时间越长越容易被淘汰掉。下面给出LRU算法的Java实现。</p>
+<div class="highlight"><pre class="chroma"><code class="language-fallback" data-lang="fallback">...
+public class MemoryLRUCache&lt;K, V&gt; {
+
+    private LinkedHashMap&lt;K, V&gt; cache;
+
+    /**
+     * 缓存元素的个数
+     */
+    private int capacity;
+
+    private int size;
+
+    private static final int DEFAULT_CAPACITY = 10;
+
+    public MemoryLRUCache() {
+        this(DEFAULT_CAPACITY);
+    }
+
+    public MemoryLRUCache(int capacity) {
+        this.capacity = capacity;
+        //设置accessOrder为true，LinkedHashMap会自动将访问过的元素放置到队列到末尾
+        cache = new LinkedHashMap&lt;K, V&gt;(capacity, 0.75f, true);
+        size = 0;
+    }
+
+    public V get(K key) {
+        return cache.get(key);
+    }
+
+    public void put(K key, V value) {
+        if (size == capacity) {
+            Iterator&lt;Map.Entry&lt;K, V&gt;&gt; iterator = cache.entrySet().iterator();
+            iterator.next();
+            iterator.remove();
+            --size;
+        }
+
+        cache.put(key, value);
+        ++size;
+    }
+
+    public void clear() {
+        cache.clear();
+    }
+
+    public int size() {
+        return size;
+    }
+
+}
+
+</code></pre></div><h3 id="lfu">LFU</h3>
+<p>LFU（Least Frequently Used）即最近最少使用算法，LFU关注的是 <strong>缓存数据被使用的次数</strong> ，但是如果有一个曾经使用很多次的缓存数据，那么它就很难被淘汰出去，即使最近很长时间没有使用它。这就是LFU算法的缺点，很可能导致 “老数据” 迟迟不能淘汰，而一直被缓存。下面给出LFU算法的Java实现。</p>
+<div class="highlight"><pre class="chroma"><code class="language-fallback" data-lang="fallback">...
+public class MemoryLFUCache&lt;K, V&gt; {
+    private HashMap&lt;K, Entry&lt;K, V&gt;&gt; cache;
+
+    private int capacity;
+
+    private static final int DEFAULT_CAPACITY = 10;
+
+    private int size;
+
+
+    public MemoryLFUCache() {
+        this(DEFAULT_CAPACITY);
+    }
+
+    public MemoryLFUCache(int capacity) {
+        this.capacity = capacity;
+        cache = new HashMap&lt;K, Entry&lt;K, V&gt;&gt;(capacity);
+        size = 0;
+    }
+
+    public V get(K key) {
+        Entry&lt;K, V&gt; value = cache.get(key);
+        value.count++;
+        return value.value;
+    }
+
+    public void put(K key, V value) {
+        if (size == capacity) {
+            Entry&lt;K, V&gt; entry = Collections.min(cache.values());
+            cache.remove(entry.key);
+            --size;
+        }
+
+        cache.put(key, new Entry&lt;K, V&gt;(key, value));
+        ++size;
+    }
+
+    public int size() {
+        return size;
+    }
+
+    public void clear() {
+        cache.clear();
+    }
+
+    private static class Entry&lt;K, V&gt; implements Comparable&lt;Entry&gt; {
+        K key;
+        V value;
+        int count;
+
+        public Entry(K key, V value) {
+            this.key = key;
+            this.value = value;
+            this.count = 0;
+        }
+
+        public int compareTo(Entry o) {
+            return this.count - o.count;
+        }
+    }
+}
+</code></pre></div>
+    </div>
+
+    
+<footer class="post-footer">
+      <div class="post-tags">
+          <a href="/tags/java/">Java</a>
+          <a href="/tags/%E7%BC%93%E5%AD%98/">缓存</a>
+          </div>
+      <nav class="post-nav">
+        <a class="prev" href="/2016/12/java-list-for/">
+            <i class="iconfont icon-left"></i>
+            <span class="prev-text nav-default">Java List 遍历方式比较</span>
+            <span class="prev-text nav-mobile">上一篇</span>
+          </a>
+        <a class="next" href="/2016/11/idea-maven-jdk-version/">
+            <span class="next-text nav-default">Intellij Idea 修改 Maven 项目默认JDK版本</span>
+            <span class="next-text nav-mobile">下一篇</span>
+            <i class="iconfont icon-right"></i>
+          </a>
+      </nav>
+    </footer>
+  </article>
+        </div>
+        <div id="gitalk-container"></div>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js" crossorigin="anonymous"></script>
+    <script type="text/javascript">
+      var gitalk = new Gitalk({
+        id: '\/2016\/11\/lru-lfu\/',
+        title: '【算法】LRU \u0026\u0026 LFU',
+        clientID: '64b9f11ba0a3291ee49e',
+        clientSecret: '8632b99db733cc33fd8f6fe85680f63f0db9d872',
+        repo: 'hadyang.github.io',
+        owner: 'hadyang',
+        admin: ['hadyang'],
+        body: decodeURI(location.href)
+      });
+      gitalk.render('gitalk-container');
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://github.com/gitalk/gitalk">comments powered by gitalk.</a></noscript>
+
+  
+
+  
+
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="social-links">
+  <a href="" type="application/rss+xml" class="iconfont icon-rss" title="rss"></a>
+</div>
+
+<div class="copyright">
+  <span class="power-by">
+    由 <a class="hexo-link" href="https://gohugo.io">Hugo</a> 强力驱动
+  </span>
+  <span class="division">|</span>
+  <span class="theme-info">
+    主题 -
+    <a class="theme-link" href="https://github.com/olOwOlo/hugo-theme-even">Even</a>
+  </span>
+
+  
+
+  <span class="copyright-year">
+    &copy; 
+    2017 - 
+    2021<span class="heart"><i class="iconfont icon-heart"></i></span><span>HadYang</span>
+  </span>
+</div>
+
+    </footer>
+
+    <div class="back-to-top" id="back-to-top">
+      <i class="iconfont icon-up"></i>
+    </div>
+  </div>
+  
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/slideout@1.0.1/dist/slideout.min.js" integrity="sha256-t+zJ/g8/KXIJMjSVQdnibt4dlaDxc9zXr/9oNPeWqdg=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.js" integrity="sha256-XVLffZaxoWfGUEbdzuLi7pwaUJv1cecsQJQqGLe7axY=" crossorigin="anonymous"></script>
+
+
+
+<script type="text/javascript" src="/js/main.min.c12618f9a600c40bd024996677e951e64d3487006775aeb22e200c990006c5c7.js"></script>
+  <script type="text/javascript">
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$','$'], ['\\(','\\)']],
+        }
+    };
+  </script>
+  <script async src="https://cdn.jsdelivr.net/npm/mathjax@3.0.5/es5/tex-mml-chtml.js" integrity="sha256-HGLuEfFcsUJGhvB8cQ8nr0gai9EucOOaIxFw7qxmd+w=" crossorigin="anonymous"></script>
+
+
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+	ga('create', 'UA-157595781-2', 'auto');
+	ga('set', 'anonymizeIp', true);
+	ga('send', 'pageview');
+}
+</script>
+<script async src='https://www.google-analytics.com/analytics.js'></script>
+
+
+
+
+
+
+
+</body>
+</html>

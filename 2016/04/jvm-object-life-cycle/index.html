@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>深入Java虚拟机读书笔记——对象的生命周期 - HadYang</title>
+  <meta name="renderer" content="webkit" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<meta name="theme-color" content="#f8f5ec" />
+<meta name="msapplication-navbutton-color" content="#f8f5ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
+
+
+<meta name="author" content="HadYang" /><meta name="description" content="一旦一个类被装载、连接和初始化，它就随时可以被使用。程序可以访问它的静态字段，调用它的静态方法，或者创建它的实例。作为Java程序员有必要了解Java对象的生命周期。
+" /><meta name="keywords" content="Java" />
+
+
+
+
+
+
+<meta name="generator" content="Hugo 0.73.0 with theme even" />
+
+
+<link rel="canonical" href="https://hadyang.github.io/2016/04/jvm-object-life-cycle/" />
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="manifest" href="/manifest.json">
+<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
+
+
+
+<link href="/sass/main.min.75c01efdcbc2767fdfe1f22f5a6fccc8c390d3cda325742f698bd0c6344144be.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.css" integrity="sha256-7TyXnr2YU040zfSP+rEcz29ggW4j56/ujTPwjMzyqFY=" crossorigin="anonymous">
+
+
+<meta property="og:title" content="深入Java虚拟机读书笔记——对象的生命周期" />
+<meta property="og:description" content="一旦一个类被装载、连接和初始化，它就随时可以被使用。程序可以访问它的静态字段，调用它的静态方法，或者创建它的实例。作为Java程序员有必要了解Java对象的生命周期。" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://hadyang.github.io/2016/04/jvm-object-life-cycle/" />
+<meta property="article:published_time" content="2016-04-30T00:00:00+00:00" />
+<meta property="article:modified_time" content="2016-04-30T00:00:00+00:00" />
+<meta itemprop="name" content="深入Java虚拟机读书笔记——对象的生命周期">
+<meta itemprop="description" content="一旦一个类被装载、连接和初始化，它就随时可以被使用。程序可以访问它的静态字段，调用它的静态方法，或者创建它的实例。作为Java程序员有必要了解Java对象的生命周期。">
+<meta itemprop="datePublished" content="2016-04-30T00:00:00&#43;00:00" />
+<meta itemprop="dateModified" content="2016-04-30T00:00:00&#43;00:00" />
+<meta itemprop="wordCount" content="1529">
+
+
+
+<meta itemprop="keywords" content="虚拟机,笔记," /><meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="深入Java虚拟机读书笔记——对象的生命周期"/>
+<meta name="twitter:description" content="一旦一个类被装载、连接和初始化，它就随时可以被使用。程序可以访问它的静态字段，调用它的静态方法，或者创建它的实例。作为Java程序员有必要了解Java对象的生命周期。"/>
+
+<!--[if lte IE 9]>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js"></script>
+<![endif]-->
+
+<!--[if lt IE 9]>
+  <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+<![endif]-->
+
+</head>
+<body>
+  <div id="mobile-navbar" class="mobile-navbar">
+  <div class="mobile-header-logo">
+    <a href="/" class="logo">HadYang</a>
+  </div>
+  <div class="mobile-navbar-icon">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
+<nav id="mobile-menu" class="mobile-menu slideout-menu">
+  <ul class="mobile-menu-list">
+    <a href="https://hadyang.github.io/interview/">
+        <li class="mobile-menu-item">Interview</li>
+      </a><a href="/categories/">
+        <li class="mobile-menu-item">分类</li>
+      </a>
+  </ul>
+
+  
+
+
+</nav>
+
+  <div class="container" id="mobile-panel">
+    <header id="header" class="header">
+        <div class="logo-wrapper">
+  <a href="/" class="logo">HadYang</a>
+</div>
+
+
+
+
+
+<nav class="site-navbar">
+  <ul id="menu" class="menu">
+    <li class="menu-item">
+        <a class="menu-item-link" href="https://hadyang.github.io/interview/">Interview</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/categories/">分类</a>
+      </li>
+  </ul>
+</nav>
+
+    </header>
+
+    <main id="main" class="main">
+      <div class="content-wrapper">
+        <div id="content" class="content">
+          <article class="post">
+    
+    <header class="post-header">
+      <h1 class="post-title">深入Java虚拟机读书笔记——对象的生命周期</h1>
+
+      <div class="post-meta">
+        <span class="post-time"> 2016-04-30 </span>
+        <div class="post-category">
+            <a href="/categories/java/"> Java </a>
+            </div>
+          <span class="more-meta"> 约 1529 字 </span>
+          <span class="more-meta"> 预计阅读 4 分钟 </span>
+        
+      </div>
+    </header>
+
+    <div class="post-toc" id="post-toc">
+  <h2 class="post-toc-title">文章目录</h2>
+  <div class="post-toc-content always-active">
+    <nav id="TableOfContents">
+  <ul>
+    <li>
+      <ul>
+        <li><a href="#类实例化">类实例化</a></li>
+        <li><a href="#垃圾收集和对象的终结">垃圾收集和对象的终结</a></li>
+        <li><a href="#卸载类">卸载类</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+  </div>
+</div>
+    <div class="post-content">
+      <p>一旦一个类被装载、连接和初始化，它就随时可以被使用。程序可以访问它的静态字段，调用它的静态方法，或者创建它的实例。作为Java程序员有必要了解Java对象的生命周期。</p>
+<h3 id="类实例化">类实例化</h3>
+<p>在Java程序中，类可以被明确或隐含地实例化。明确的实例化类有四种途径：</p>
+<ul>
+<li>明确调用<code>new</code>。</li>
+<li>调用<code>Class</code>或者<code>java.lang.reflect.Constructor</code>对象的<code>newInstance</code>方法。</li>
+<li>调用任何现有对象的<code>clone</code>。</li>
+<li>通过<code>java.io.ObjectInputStream.getObject()</code>反序列化。</li>
+</ul>
+<p>隐含的实例化：</p>
+<ul>
+<li>可能是保存命令行参数的<code>String</code>对象。</li>
+<li>对于Java虚拟机装载的每个类，都会暗中实例化一个Class对象来代表这个类型</li>
+<li>当Java虚拟机装载了在常量池中包含<code>CONSTANT_String_info</code>入口的类的时候，它会创建新的<code>String</code>对象来表示这些常量字符串。</li>
+<li>执行包含字符串连接操作符的表达式会产生新的对象。</li>
+</ul>
+<p>Java编译器为它编译的每个类至少生成一个实例初始化方法。在Java class文件中，这个方法被称为<code>&lt;init&gt;</code>。针对源代码中每个类的构造方法，Java编译器都会产生一个<code>&lt;init&gt;()</code>方法。如果累没有明确的声明任何构造方法，编译器会默认产生一个无参数的构造方法，它仅仅调用父类的无参构造方法。</p>
+<p>一个<code>&lt;init&gt;()</code>中可能包含三种代码：调用另一个<code>&lt;init&gt;()</code>、实现对任何实例变量的初始化、构造方法体的代码。</p>
+<p>如果构造方法明确的调用了同一个类中的另一个构造方法(<code>this()</code>)，那么它对应的<code>&lt;init&gt;()</code>由两部分组成：</p>
+<ul>
+<li>一个同类的<code>&lt;init&gt;()</code>的调用。</li>
+<li>实现了对应构造方法的方法体的字节码。</li>
+</ul>
+<blockquote>
+<p>在它对应的<code>&lt;init&gt;()</code>方法中不会有父类的<code>&lt;init&gt;()</code>，但不代表不会调用父类的<code>&lt;init&gt;()</code>，因为<code>this()</code>中也会调用父类<code>&lt;init&gt;()</code></p>
+</blockquote>
+<p>如果构造方法不是通过一个<code>this()</code>调用开始的，而且这个对象不是<code>Object</code>，<code>&lt;init&gt;()</code>则有三部分组成：</p>
+<ul>
+<li>一个父类的<code>&lt;init&gt;()</code>调用。<em>如果这个类是<code>Object</code>,则没有这个部分</em></li>
+<li>任意实例变量初始化方法的字节码。</li>
+<li>实现了对应构造方法的方法体的字节码。</li>
+</ul>
+<p>如果构造方法明确的调用父类的构造方法<code>super()</code>开始，它的<code>&lt;init&gt;()</code>会调用对应父类的<code>&lt;init&gt;()</code>。比如，如果一个构造方法明确的调用<code>super(int,String)</code>开始，对应的<code>&lt;init&gt;()</code>会从调用父类的<code>&lt;init&gt;(int,String)</code>方法开始。<strong>如果构造方法没有明确地从<code>this()</code>或<code>super()</code>开始，对应的<code>&lt;init&gt;()</code>默认会调用父类的无参<code>&lt;init&gt;()</code>。</strong></p>
+<h3 id="垃圾收集和对象的终结">垃圾收集和对象的终结</h3>
+<p>程序可以明确或隐含的为对象分配内存，但不能明确的释放内存。一个对象不再为程序引用，虚拟机必须回事那部分内存。</p>
+<h3 id="卸载类">卸载类</h3>
+<p>在很多方面，Java虚拟机中类的生命周期和对象的生命周期很相似。当程序不再使用某个类的时候，可以选择卸载它们。</p>
+<blockquote>
+<p>类的垃圾收集和卸载值所以在Java虚拟机中很重要，是因为Java程序可以在运行时通过用户自定义的类装载器装载类型来动态的扩展程序。所有被装载的类型都在方法区占据内存空间。</p>
+</blockquote>
+<p>Java虚拟机通过判断类是否在被引用来进行垃圾收集。判断动态装载的类的<code>Class</code>实例在正常的垃圾收集过程中是否可触及有两种方式：</p>
+<ul>
+<li>如果程序保持非<code>Class</code>实例的明确引用。</li>
+<li>如果在堆中还存在一个可触及的对象，在方法区中它的类型数据指向一个<code>Class</code>实例。</li>
+</ul>
+<p><img src="touch-class-instance.png" alt=""></p>
+    </div>
+
+    
+<footer class="post-footer">
+      <div class="post-tags">
+          <a href="/tags/%E8%99%9A%E6%8B%9F%E6%9C%BA/">虚拟机</a>
+          <a href="/tags/%E7%AC%94%E8%AE%B0/">笔记</a>
+          </div>
+      <nav class="post-nav">
+        <a class="prev" href="/2016/05/jvm-class-load-init/">
+            <i class="iconfont icon-left"></i>
+            <span class="prev-text nav-default">深入Java虚拟机读书笔记——类装载、连接和初始化</span>
+            <span class="prev-text nav-mobile">上一篇</span>
+          </a>
+        <a class="next" href="/2016/04/jvm-class-loader/">
+            <span class="next-text nav-default">深入Java虚拟机读书笔记——类加载器</span>
+            <span class="next-text nav-mobile">下一篇</span>
+            <i class="iconfont icon-right"></i>
+          </a>
+      </nav>
+    </footer>
+  </article>
+        </div>
+        <div id="gitalk-container"></div>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js" crossorigin="anonymous"></script>
+    <script type="text/javascript">
+      var gitalk = new Gitalk({
+        id: '\/2016\/04\/jvm-object-life-cycle\/',
+        title: '深入Java虚拟机读书笔记——对象的生命周期',
+        clientID: '64b9f11ba0a3291ee49e',
+        clientSecret: '8632b99db733cc33fd8f6fe85680f63f0db9d872',
+        repo: 'hadyang.github.io',
+        owner: 'hadyang',
+        admin: ['hadyang'],
+        body: decodeURI(location.href)
+      });
+      gitalk.render('gitalk-container');
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://github.com/gitalk/gitalk">comments powered by gitalk.</a></noscript>
+
+  
+
+  
+
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="social-links">
+  <a href="" type="application/rss+xml" class="iconfont icon-rss" title="rss"></a>
+</div>
+
+<div class="copyright">
+  <span class="power-by">
+    由 <a class="hexo-link" href="https://gohugo.io">Hugo</a> 强力驱动
+  </span>
+  <span class="division">|</span>
+  <span class="theme-info">
+    主题 -
+    <a class="theme-link" href="https://github.com/olOwOlo/hugo-theme-even">Even</a>
+  </span>
+
+  
+
+  <span class="copyright-year">
+    &copy; 
+    2017 - 
+    2021<span class="heart"><i class="iconfont icon-heart"></i></span><span>HadYang</span>
+  </span>
+</div>
+
+    </footer>
+
+    <div class="back-to-top" id="back-to-top">
+      <i class="iconfont icon-up"></i>
+    </div>
+  </div>
+  
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/slideout@1.0.1/dist/slideout.min.js" integrity="sha256-t+zJ/g8/KXIJMjSVQdnibt4dlaDxc9zXr/9oNPeWqdg=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.js" integrity="sha256-XVLffZaxoWfGUEbdzuLi7pwaUJv1cecsQJQqGLe7axY=" crossorigin="anonymous"></script>
+
+
+
+<script type="text/javascript" src="/js/main.min.c12618f9a600c40bd024996677e951e64d3487006775aeb22e200c990006c5c7.js"></script>
+  <script type="text/javascript">
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$','$'], ['\\(','\\)']],
+        }
+    };
+  </script>
+  <script async src="https://cdn.jsdelivr.net/npm/mathjax@3.0.5/es5/tex-mml-chtml.js" integrity="sha256-HGLuEfFcsUJGhvB8cQ8nr0gai9EucOOaIxFw7qxmd+w=" crossorigin="anonymous"></script>
+
+
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+	ga('create', 'UA-157595781-2', 'auto');
+	ga('set', 'anonymizeIp', true);
+	ga('send', 'pageview');
+}
+</script>
+<script async src='https://www.google-analytics.com/analytics.js'></script>
+
+
+
+
+
+
+
+</body>
+</html>

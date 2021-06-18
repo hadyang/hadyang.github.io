@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>【ETCD】初探 - HadYang</title>
+  <meta name="renderer" content="webkit" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<meta name="theme-color" content="#f8f5ec" />
+<meta name="msapplication-navbutton-color" content="#f8f5ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
+
+
+<meta name="author" content="HadYang" /><meta name="description" content="ETCD ETCD 提供强一致性的分布式 K-V 存储，客户端通过 HTTP/HTTPS 协议与其进行交互。同时还可以对 Key 进行 TTL 设置、用户级别的 权限管理 以及 事务。ETCD 的整体架构如下图" /><meta name="keywords" content="Java" />
+
+
+
+
+
+
+<meta name="generator" content="Hugo 0.73.0 with theme even" />
+
+
+<link rel="canonical" href="https://hadyang.github.io/2020/07/etcd-overview/" />
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="manifest" href="/manifest.json">
+<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
+
+
+
+<link href="/sass/main.min.75c01efdcbc2767fdfe1f22f5a6fccc8c390d3cda325742f698bd0c6344144be.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.css" integrity="sha256-7TyXnr2YU040zfSP+rEcz29ggW4j56/ujTPwjMzyqFY=" crossorigin="anonymous">
+
+
+<meta property="og:title" content="【ETCD】初探" />
+<meta property="og:description" content="ETCD ETCD 提供强一致性的分布式 K-V 存储，客户端通过 HTTP/HTTPS 协议与其进行交互。同时还可以对 Key 进行 TTL 设置、用户级别的 权限管理 以及 事务。ETCD 的整体架构如下图" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://hadyang.github.io/2020/07/etcd-overview/" />
+<meta property="article:published_time" content="2020-07-05T00:00:00+00:00" />
+<meta property="article:modified_time" content="2020-07-05T00:00:00+00:00" />
+<meta itemprop="name" content="【ETCD】初探">
+<meta itemprop="description" content="ETCD ETCD 提供强一致性的分布式 K-V 存储，客户端通过 HTTP/HTTPS 协议与其进行交互。同时还可以对 Key 进行 TTL 设置、用户级别的 权限管理 以及 事务。ETCD 的整体架构如下图">
+<meta itemprop="datePublished" content="2020-07-05T00:00:00&#43;00:00" />
+<meta itemprop="dateModified" content="2020-07-05T00:00:00&#43;00:00" />
+<meta itemprop="wordCount" content="2509">
+
+
+
+<meta itemprop="keywords" content="" /><meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="【ETCD】初探"/>
+<meta name="twitter:description" content="ETCD ETCD 提供强一致性的分布式 K-V 存储，客户端通过 HTTP/HTTPS 协议与其进行交互。同时还可以对 Key 进行 TTL 设置、用户级别的 权限管理 以及 事务。ETCD 的整体架构如下图"/>
+
+<!--[if lte IE 9]>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js"></script>
+<![endif]-->
+
+<!--[if lt IE 9]>
+  <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+<![endif]-->
+
+</head>
+<body>
+  <div id="mobile-navbar" class="mobile-navbar">
+  <div class="mobile-header-logo">
+    <a href="/" class="logo">HadYang</a>
+  </div>
+  <div class="mobile-navbar-icon">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
+<nav id="mobile-menu" class="mobile-menu slideout-menu">
+  <ul class="mobile-menu-list">
+    <a href="https://hadyang.github.io/interview/">
+        <li class="mobile-menu-item">Interview</li>
+      </a><a href="/categories/">
+        <li class="mobile-menu-item">分类</li>
+      </a>
+  </ul>
+
+  
+
+
+</nav>
+
+  <div class="container" id="mobile-panel">
+    <header id="header" class="header">
+        <div class="logo-wrapper">
+  <a href="/" class="logo">HadYang</a>
+</div>
+
+
+
+
+
+<nav class="site-navbar">
+  <ul id="menu" class="menu">
+    <li class="menu-item">
+        <a class="menu-item-link" href="https://hadyang.github.io/interview/">Interview</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/categories/">分类</a>
+      </li>
+  </ul>
+</nav>
+
+    </header>
+
+    <main id="main" class="main">
+      <div class="content-wrapper">
+        <div id="content" class="content">
+          <article class="post">
+    
+    <header class="post-header">
+      <h1 class="post-title">【ETCD】初探</h1>
+
+      <div class="post-meta">
+        <span class="post-time"> 2020-07-05 </span>
+        <div class="post-category">
+            <a href="/categories/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3etcd/"> 深入理解ETCD </a>
+            </div>
+          <span class="more-meta"> 约 2509 字 </span>
+          <span class="more-meta"> 预计阅读 6 分钟 </span>
+        
+      </div>
+    </header>
+
+    <div class="post-toc" id="post-toc">
+  <h2 class="post-toc-title">文章目录</h2>
+  <div class="post-toc-content always-active">
+    <nav id="TableOfContents">
+  <ul>
+    <li><a href="#etcd">ETCD</a></li>
+    <li><a href="#使用场景">使用场景</a></li>
+    <li><a href="#存储结构">存储结构</a>
+      <ul>
+        <li><a href="#修订与key">修订与Key</a></li>
+      </ul>
+    </li>
+    <li><a href="#过期">过期</a></li>
+    <li><a href="#基本操作">基本操作</a>
+      <ul>
+        <li><a href="#kv">KV</a></li>
+        <li><a href="#watch">Watch</a></li>
+        <li><a href="#lease">Lease</a></li>
+      </ul>
+    </li>
+    <li><a href="#参考文档">参考文档</a></li>
+  </ul>
+</nav>
+  </div>
+</div>
+    <div class="post-content">
+      <h2 id="etcd">ETCD</h2>
+<p>ETCD 提供强一致性的分布式 K-V 存储，客户端通过 HTTP/HTTPS 协议与其进行交互。同时还可以对 Key 进行 <strong>TTL</strong> 设置、用户级别的 <strong>权限管理</strong> 以及 <strong>事务</strong>。ETCD 的整体架构如下图所示，在后续的文章中，也会详细介绍各个部分。</p>
+<p><img src="assists/architecture.png" alt=""></p>
+<p>ETCD 中主要有四个组成部分，raft 负责整个 Raft 协议内容（包括状态机）；transport 是集群中节点的通信模块；lessor 负责整个键空间的过期；backend 负责底层存储。在实现上，ETCD 采用有强大的跨平台能力和高性能的 Go 语言编写，底层节点采用 Raft 共识算法进行通信。由于 Raft 算法的特性，ETCD 中主节点的吞吐量是很重要的指标。同时，由于 Raft 算法需要与集群中大部分节点进行通信，集群节点之间的网络延迟会极大的影响 ETCD 的整体性能。</p>
+<h2 id="使用场景">使用场景</h2>
+<p>ETCD 名称的起源，一种是 Unix 系统上的 <code>/etc</code> 文件夹和 <code>d</code> 分布式系统。在单机上 <code>/etc</code> 文件夹是用来存放配置信息的，而 ETCD 是分布式环境下存放配置信息的。</p>
+<p>ETCD 被设计为大规模分布式系统的通用基础，这些系统永远不会容忍裂脑操作，并且愿意牺牲可用性来实现此目的。ETCD 中存储的数据有一致性和可容错保证。ETCD 集群旨在提供具有最稳定性，可靠性，可伸缩性和性能的键值存储。</p>
+<p>分布式系统将配置信息存储在 ETCD 的一致性 kv 存储中，来实现 <strong>服务发现</strong>、<strong>分布式任务协调</strong>。常见的还会使用 ETCD 进行 <strong>选举</strong>、<strong>分布式锁</strong> 以及 <strong>服务健康监控</strong>。</p>
+<h2 id="存储结构">存储结构</h2>
+<p>ETCD 是被设计用来存储低频更新的数据，并且提供可靠的查询。ETCD 通过暴露老版本的 KV 数据，来支持 <strong>快照读取</strong> 以及 <strong>监听历史事件</strong>。</p>
+<p>ectd 提供了一个持久化、多版本、并发控制的数据模型，当 Key 写入新值时，ETCD 会同时保留旧值。 KV 存储是不可变的，更新操作都不会进行替换更新，而是生成新版本的数据。所有老版本的 Key 依然是能可访问和监听的。为了防止数据无限制的增长，ETCD 会压缩老版本的数据。</p>
+<h3 id="修订与key">修订与Key</h3>
+<p>从逻辑视图来看整个 ETCD 的存储是无层级结构的 Key 空间，Key 空间的字符串按 <strong>字典序</strong> 排序，所以可以高效的支持 <strong>范围查询</strong>。</p>
+<p>Key 空间保留多个修订，当存储被创建时，初始化修订为1。每次原子更新（事务可能包含多个操作）会在 Key 空间创建一个新的 <strong>修订</strong>，更新并不会改变之前的修订。在整个集群的生命周期中，修订是单调递增的。Key 的老版本数据可以通过之前的修订获取，也可以对之前的修订进行监听。如果数据被压缩，则在压缩修订之前的修订都会被移除。</p>
+<p>ETCD 持有一个 64bit 计数器，每次 Key 空间的修改都会产生一个 <strong>修订</strong>，这个计数器也就随之递增。修订的用途就是提供一个全局的逻辑时钟，使所有的更新能按顺序写入。修订代表的数据是增量的存储空间数据的改变，其内部就会将这些改变写入底层的 B+ 树中。</p>
+<p>修订在支持 ETCD 的 MVCC 功能上十分重要。由于历史 Key 空间的修订都保留着，所以 MVCC 模型可以看到过去的数据。对于历史修订的处理策略可以通过配置修改，通常来说 ETCD V3 版本是按时间进行压缩的，这个时间一般为几小时。同时也可以按修订的版本进行压缩，只保留最近 n 个版本的修订。</p>
+<p>从 Key 的创建到删除是一个生命周期，每个 Key 可能会有一个或多个生命周期。在创建 Key 时，如果当前修订中不存在该 Key，则其版本为 1 。当删除一个 Key 时，通过将的 Key 的版本置为 0 来逻辑删除。每次 Key 的修改都会增加其 <strong>版本号</strong>，版本号在 Key 的生命周期中是单调递增的。当进行压缩时，所有在压缩修订之前的生命周期已经结束的 Key 都会被移除，并且移除压缩修订之前设置的值。</p>
+<h2 id="过期">过期</h2>
+<p>Lease 机制是 ETCD 中实现过期的方式，Lease 最主要是 ETCD 的服务端用来对客户端探活的。每个客户端连接服务端时，都会被授予带超时时间一个 Lease，客户端可以通过定时的心跳包来维持 Lease 不过期。</p>
+<p>同时，客户端也可以通过命令让服务器创建一个 Lease，然后将 Key 绑定到 Lease 上，每个 Key 最多只能绑定一个 Lease。当 Lease <strong>过期</strong> 或 <strong>撤销</strong> 后，所有绑定在这个 Lease 上的 Key 都会被删除。所有 <strong>过期</strong> 的 Key 都会产生删除事件。</p>
+<h2 id="基本操作">基本操作</h2>
+<p>在 ETCD 针对 Key 空间的操作被分为三类： KV 、Watch 和 Lease</p>
+<h3 id="kv">KV</h3>
+<p>KV 接口是 ETCD 中最常用的接口，其分为 原子操作 和 事务操作两种。</p>
+<h4 id="原子操作">原子操作</h4>
+<p>PUT 是 ETCD 中修改和创建 KV 的方式，其用法比较简单：</p>
+<ul>
+<li><code>etcdctl put foo bar</code>：创建一个 key=foo，value=bar 的键值对</li>
+<li><code>etcdctl put foo1 bar1 --lease=1234abcd</code>：创建一个 key=foo，value=bar 的键值对，并将其绑定到 Lease <code>1234abcd</code> 上</li>
+</ul>
+<p>相比来说 GET 方法就复杂的多，这里只提几种比较有意思的用法，更多用法参考官方文档： <a href="https://ETCD.io/docs/v3.4.0/dev-guide/interacting_v3/">Interacting with ETCD</a></p>
+<ul>
+<li><code>etcdctl get foo -w=json</code>： 简单的 KV 查询，并返回 Key 相关的详细信息</li>
+<li><code>etcdctl get foo foo3</code>： 查询 &ldquo;foo&rdquo; 到 &ldquo;foo3&rdquo; 范围内的所有 KV</li>
+<li><code>etcdctl get --prefix --order=&quot;ASCEND&quot; --limit=2 foo</code>： 查询前缀为 &ldquo;foo&rdquo; 的所有 Key，同时按 Key 顺序排序，取前 2 个 KV（ETCD 的锁就是这样实现的）</li>
+<li><code>etcdctl get --prefix --rev=4 foo</code>： 查询前缀为 &ldquo;foo&rdquo; 并且修订版本为 4 的所有 Key</li>
+<li><code>etcdctl get --from-key b</code>： 查询 value 小于 key=b 的所有 Key</li>
+</ul>
+<h4 id="事务操作">事务操作</h4>
+<p>在 ETCD 中的事务操作都是 CAS 形式的，比如：</p>
+<div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash"><span class="c1">#compares:</span>
+mod<span class="o">(</span><span class="s2">&#34;foo1&#34;</span><span class="o">)</span> &gt; <span class="s2">&#34;0&#34;</span>
+
+<span class="c1">#success requests (get, put, del):</span>
+put foo1 <span class="s2">&#34;bar11&#34;</span>
+<span class="c1">#failure requests (get, put, del):</span>
+put foo1 <span class="s2">&#34;&#34;</span>
+
+SUCCESS
+
+OK
+</code></pre></div><p>这段事务就是首先比较 Key &ldquo;foo1&rdquo; 的最近一次修改 Key 的修订版本，如果大于 0 ，则执行 <code>put foo1 &quot;bar11&quot;</code>，否则执行 <code>put foo1 &quot;&quot;</code>。</p>
+<p>ETCD 支持的可比较字段有：</p>
+<ul>
+<li><strong>MOD</strong>：最近一次修改 Key 的修订版本</li>
+<li><strong>VERSION</strong>：Key 的版本</li>
+<li><strong>CREATE</strong>：创建 Key 的修订版本</li>
+<li><strong>VALUE</strong>：Key 的值</li>
+</ul>
+<p>同时，ETCD 还支持以下四种判断方式：</p>
+<ul>
+<li><strong>EQUAL</strong>： 等于</li>
+<li><strong>GREATER</strong>：大于</li>
+<li><strong>LESS</strong>：小于</li>
+<li><strong>NOT_EQUAL</strong>：不等于</li>
+</ul>
+<h3 id="watch">Watch</h3>
+<p>Watch 提供 Key 变更的异步事件监听，在 ETCD V3 中会持续对 Key 进行监听，不论是历史的还是当前的修订。</p>
+<p>Watch 是一个长请求，通过 gPRC 的流式通道进行数据交换，客户端通过流式通道开启一个监听，并从流式通道中获取监听事件。一个 Watch 流可以同时操作多个 Watch，这种多路复用能有效减少内存占用和连接数。</p>
+<ul>
+<li><code>etcdctl watch foo1</code>： 监听单个 Key</li>
+<li><code>etcdctl watch --prefix foo</code>： 按前缀监听多个 Key</li>
+<li><code>etcdctl watch --rev=2 foo</code>： 从某个版本的修订开始监听</li>
+</ul>
+<p>Watch 对事件提供以下保证：</p>
+<ul>
+<li><strong>顺序性</strong>： 事件顺序是按照修订的顺序，如果一个事件被发布，则先于其的事件都不会再次发布</li>
+<li><strong>可靠性</strong>： 事件序列不会丢弃任何事件，有事件序列 <code>a &lt; b &lt; c</code>，如果接收到事件 c，那么其一定会接收到事件 b</li>
+<li><strong>原子性</strong>： 事件序列中的每个事件，一定是包含整个修订。当在同一个修订中修改多个 Key 时，不会出现多个事件。</li>
+</ul>
+<h3 id="lease">Lease</h3>
+<p>Lease 的相关接口就比较简单。</p>
+<ul>
+<li><code>etcdctl lease grant 60</code>： 生成一个 60s 的新 Lease</li>
+<li><code>etcdctl lease revoke 32695410dcc0ca06</code>： 释放 Lease</li>
+</ul>
+<h2 id="参考文档">参考文档</h2>
+<ul>
+<li><a href="https://ETCD.io/docs/v3.4.0/">ETCD doc</a></li>
+</ul>
+
+    </div>
+
+    
+<footer class="post-footer">
+      
+      <nav class="post-nav">
+        <a class="prev" href="/2020/07/etcd-data-model/">
+            <i class="iconfont icon-left"></i>
+            <span class="prev-text nav-default">【ETCD】存储模型</span>
+            <span class="prev-text nav-mobile">上一篇</span>
+          </a>
+        <a class="next" href="/2020/06/raft-log-replication/">
+            <span class="next-text nav-default">【Raft】日志复制</span>
+            <span class="next-text nav-mobile">下一篇</span>
+            <i class="iconfont icon-right"></i>
+          </a>
+      </nav>
+    </footer>
+  </article>
+        </div>
+        <div id="gitalk-container"></div>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js" crossorigin="anonymous"></script>
+    <script type="text/javascript">
+      var gitalk = new Gitalk({
+        id: '\/2020\/07\/etcd-overview\/',
+        title: '【ETCD】初探',
+        clientID: '64b9f11ba0a3291ee49e',
+        clientSecret: '8632b99db733cc33fd8f6fe85680f63f0db9d872',
+        repo: 'hadyang.github.io',
+        owner: 'hadyang',
+        admin: ['hadyang'],
+        body: decodeURI(location.href)
+      });
+      gitalk.render('gitalk-container');
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://github.com/gitalk/gitalk">comments powered by gitalk.</a></noscript>
+
+  
+
+  
+
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="social-links">
+  <a href="" type="application/rss+xml" class="iconfont icon-rss" title="rss"></a>
+</div>
+
+<div class="copyright">
+  <span class="power-by">
+    由 <a class="hexo-link" href="https://gohugo.io">Hugo</a> 强力驱动
+  </span>
+  <span class="division">|</span>
+  <span class="theme-info">
+    主题 -
+    <a class="theme-link" href="https://github.com/olOwOlo/hugo-theme-even">Even</a>
+  </span>
+
+  
+
+  <span class="copyright-year">
+    &copy; 
+    2017 - 
+    2021<span class="heart"><i class="iconfont icon-heart"></i></span><span>HadYang</span>
+  </span>
+</div>
+
+    </footer>
+
+    <div class="back-to-top" id="back-to-top">
+      <i class="iconfont icon-up"></i>
+    </div>
+  </div>
+  
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/slideout@1.0.1/dist/slideout.min.js" integrity="sha256-t+zJ/g8/KXIJMjSVQdnibt4dlaDxc9zXr/9oNPeWqdg=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.js" integrity="sha256-XVLffZaxoWfGUEbdzuLi7pwaUJv1cecsQJQqGLe7axY=" crossorigin="anonymous"></script>
+
+
+
+<script type="text/javascript" src="/js/main.min.c12618f9a600c40bd024996677e951e64d3487006775aeb22e200c990006c5c7.js"></script>
+  <script type="text/javascript">
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$','$'], ['\\(','\\)']],
+        }
+    };
+  </script>
+  <script async src="https://cdn.jsdelivr.net/npm/mathjax@3.0.5/es5/tex-mml-chtml.js" integrity="sha256-HGLuEfFcsUJGhvB8cQ8nr0gai9EucOOaIxFw7qxmd+w=" crossorigin="anonymous"></script>
+
+
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+	ga('create', 'UA-157595781-2', 'auto');
+	ga('set', 'anonymizeIp', true);
+	ga('send', 'pageview');
+}
+</script>
+<script async src='https://www.google-analytics.com/analytics.js'></script>
+
+
+
+
+
+
+
+</body>
+</html>

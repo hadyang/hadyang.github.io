@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>Android Studio NDK 入门教程 - HadYang</title>
+  <meta name="renderer" content="webkit" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<meta name="theme-color" content="#f8f5ec" />
+<meta name="msapplication-navbutton-color" content="#f8f5ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
+
+
+<meta name="author" content="HadYang" /><meta name="description" content="通常我们使用Java来编写Android App，但是在一些特殊场景，比如图像处理方面，Java的效率太低。这时候我们就可以考虑使用C进行开发。NDK是Google为我们提供的一个在Android上使用C开发的工具集合。
+" /><meta name="keywords" content="Java" />
+
+
+
+
+
+
+<meta name="generator" content="Hugo 0.73.0 with theme even" />
+
+
+<link rel="canonical" href="https://hadyang.github.io/2016/03/android-studio-ndk/" />
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="manifest" href="/manifest.json">
+<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
+
+
+
+<link href="/sass/main.min.75c01efdcbc2767fdfe1f22f5a6fccc8c390d3cda325742f698bd0c6344144be.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.css" integrity="sha256-7TyXnr2YU040zfSP+rEcz29ggW4j56/ujTPwjMzyqFY=" crossorigin="anonymous">
+
+
+<meta property="og:title" content="Android Studio NDK 入门教程" />
+<meta property="og:description" content="通常我们使用Java来编写Android App，但是在一些特殊场景，比如图像处理方面，Java的效率太低。这时候我们就可以考虑使用C进行开发。NDK是Google为我们提供的一个在Android上使用C开发的工具集合。" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://hadyang.github.io/2016/03/android-studio-ndk/" />
+<meta property="article:published_time" content="2016-03-07T00:00:00+00:00" />
+<meta property="article:modified_time" content="2016-03-07T00:00:00+00:00" />
+<meta itemprop="name" content="Android Studio NDK 入门教程">
+<meta itemprop="description" content="通常我们使用Java来编写Android App，但是在一些特殊场景，比如图像处理方面，Java的效率太低。这时候我们就可以考虑使用C进行开发。NDK是Google为我们提供的一个在Android上使用C开发的工具集合。">
+<meta itemprop="datePublished" content="2016-03-07T00:00:00&#43;00:00" />
+<meta itemprop="dateModified" content="2016-03-07T00:00:00&#43;00:00" />
+<meta itemprop="wordCount" content="820">
+
+
+
+<meta itemprop="keywords" content="NDK,C," /><meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Android Studio NDK 入门教程"/>
+<meta name="twitter:description" content="通常我们使用Java来编写Android App，但是在一些特殊场景，比如图像处理方面，Java的效率太低。这时候我们就可以考虑使用C进行开发。NDK是Google为我们提供的一个在Android上使用C开发的工具集合。"/>
+
+<!--[if lte IE 9]>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js"></script>
+<![endif]-->
+
+<!--[if lt IE 9]>
+  <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+<![endif]-->
+
+</head>
+<body>
+  <div id="mobile-navbar" class="mobile-navbar">
+  <div class="mobile-header-logo">
+    <a href="/" class="logo">HadYang</a>
+  </div>
+  <div class="mobile-navbar-icon">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
+<nav id="mobile-menu" class="mobile-menu slideout-menu">
+  <ul class="mobile-menu-list">
+    <a href="https://hadyang.github.io/interview/">
+        <li class="mobile-menu-item">Interview</li>
+      </a><a href="/categories/">
+        <li class="mobile-menu-item">分类</li>
+      </a>
+  </ul>
+
+  
+
+
+</nav>
+
+  <div class="container" id="mobile-panel">
+    <header id="header" class="header">
+        <div class="logo-wrapper">
+  <a href="/" class="logo">HadYang</a>
+</div>
+
+
+
+
+
+<nav class="site-navbar">
+  <ul id="menu" class="menu">
+    <li class="menu-item">
+        <a class="menu-item-link" href="https://hadyang.github.io/interview/">Interview</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/categories/">分类</a>
+      </li>
+  </ul>
+</nav>
+
+    </header>
+
+    <main id="main" class="main">
+      <div class="content-wrapper">
+        <div id="content" class="content">
+          <article class="post">
+    
+    <header class="post-header">
+      <h1 class="post-title">Android Studio NDK 入门教程</h1>
+
+      <div class="post-meta">
+        <span class="post-time"> 2016-03-07 </span>
+        <div class="post-category">
+            <a href="/categories/android/"> Android </a>
+            </div>
+          <span class="more-meta"> 约 820 字 </span>
+          <span class="more-meta"> 预计阅读 2 分钟 </span>
+        
+      </div>
+    </header>
+
+    <div class="post-toc" id="post-toc">
+  <h2 class="post-toc-title">文章目录</h2>
+  <div class="post-toc-content always-active">
+    <nav id="TableOfContents"></nav>
+  </div>
+</div>
+    <div class="post-content">
+      <p>通常我们使用Java来编写Android App，但是在一些特殊场景，比如图像处理方面，Java的效率太低。这时候我们就可以考虑使用C进行开发。NDK是Google为我们提供的一个在Android上使用C开发的工具集合。</p>
+<ol>
+<li>下载NDK，有两种方法：</li>
+</ol>
+<ul>
+<li>
+<p>在Android Studio 中打开 Module Setting，选择DownLoad
+<img src="20160307_ndk_1.jpg" alt="AA"></p>
+</li>
+<li>
+<p>在Android 官网下载，下载链接（可以直接复制到迅雷中下载）：
+<em><a href="https://dl.google.com/android/ndk/android-ndk-r10e-windows-x86_64.exe">https://dl.google.com/android/ndk/android-ndk-r10e-windows-x86_64.exe</a></em>
+下载完成后双击.exe文件，将会把NDK解压到当前文件夹。</p>
+</li>
+</ul>
+<ol start="2">
+<li>
+<p>配置NDK到Android Studio工程中：打开Module Setting，在NDK Location里选择NDK的位置。</p>
+</li>
+<li>
+<p>修改Gradle 插件版本，这里使用的是 <em>experimental</em> 版本，这个版本可以直接在build.gradle对ndk进行操作，不需要使用命令行生成.so。关于这个版本插件的使用，详见  <em><a href="http://tools.android.com/tech-docs/new-build-system/gradle-experimental">http://tools.android.com/tech-docs/new-build-system/gradle-experimental</a></em></p>
+</li>
+</ol>
+<div class="highlight"><pre class="chroma"><code class="language-fallback" data-lang="fallback">classpath &#39;com.android.tools.build:gradle-experimental:0.6.0-alpha5&#39;
+</code></pre></div><ol start="4">
+<li>修改<em>app/build.gradle</em>配置，这里把我的代码贴出来。</li>
+</ol>
+<div class="highlight"><pre class="chroma"><code class="language-fallback" data-lang="fallback">apply plugin: &#39;com.android.model.application&#39;
+
+model {
+   android {
+       compileSdkVersion = 23
+       buildToolsVersion = &#34;23.0.2&#34;
+
+       defaultConfig.with {
+           applicationId = &#34;org.scheming.jnidemo&#34;
+           minSdkVersion.apiLevel = 15
+           targetSdkVersion.apiLevel = 23
+           versionCode = 1
+           versionName = &#34;1.0&#34;
+       }
+   }
+
+   android.ndk {
+       moduleName = &#34;native&#34;//这个名称会在调用JNI的时候使用
+       ldLibs.addAll([&#34;android&#34;, &#34;log&#34;]) //添加JNI打印log的相关库
+       stl = &#34;stlport_static&#34; //添加C++ stl容器支持
+       /*
+        * Other ndk flags configurable here are
+        * cppFlags.add(&#34;-fno-rtti&#34;)
+        * cppFlags.add(&#34;-fno-exceptions&#34;)
+        * ldLibs.addAll([&#34;android&#34;, &#34;log&#34;])
+        * stl       = &#34;system&#34;
+        */
+   }
+
+   android.buildTypes {
+       release {
+           minifyEnabled = false
+           proguardFiles.add(file(&#39;proguard-android.txt&#39;))
+       }
+   }
+
+   android.productFlavors {
+       // for detailed abiFilter descriptions, refer to &#34;Supported ABIs&#34; @
+       // https://developer.android.com/ndk/guides/abis.html#sa
+       create(&#34;arm&#34;) {
+           ndk.abiFilters.add(&#34;armeabi&#34;)
+       }
+       create(&#34;arm7&#34;) {
+           ndk.abiFilters.add(&#34;armeabi-v7a&#34;)
+       }
+       create(&#34;arm8&#34;) {
+           ndk.abiFilters.add(&#34;arm64-v8a&#34;)
+       }
+       create(&#34;x86&#34;) {
+           ndk.abiFilters.add(&#34;x86&#34;)
+       }
+       create(&#34;x86-64&#34;) {
+           ndk.abiFilters.add(&#34;x86_64&#34;)
+       }
+       create(&#34;mips&#34;) {
+           ndk.abiFilters.add(&#34;mips&#34;)
+       }
+       create(&#34;mips-64&#34;) {
+           ndk.abiFilters.add(&#34;mips64&#34;)
+       }
+       // To include all cpu architectures, leaves abiFilters empty
+       create(&#34;all&#34;)
+   }
+
+}
+dependencies {
+   compile fileTree(dir: &#39;libs&#39;, include: [&#39;*.jar&#39;])
+   testCompile &#39;junit:junit:4.12&#39;
+   compile &#39;com.android.support:appcompat-v7:23.2.0&#39;
+}
+
+</code></pre></div><blockquote>
+<p>以上代码有几点注意的：</p>
+</blockquote>
+<blockquote>
+<ul>
+<li>apply plugin: &lsquo;com.android.model.application&rsquo;</li>
+<li>属性值使用“=”号赋值</li>
+<li>添加了modle块</li>
+</ul>
+</blockquote>
+<ol start="5">
+<li>
+<p>在activity中写native方法。
+<img src="20160307_ndk_2.jpg" alt=""></p>
+</li>
+<li>
+<p>生成.c文件。选择方法名按alt+enter，选择create function。
+<img src="20160307_ndk_3.jpg" alt=""></p>
+</li>
+<li>
+<p>这时便在jni文件夹生成c文件，现在就可以在c代码里写相关的逻辑。下面贴出我的代码。</p>
+</li>
+</ol>
+<div class="highlight"><pre class="chroma"><code class="language-C" data-lang="C"><span class="cp">#include</span> <span class="cpf">&lt;jni.h&gt;</span><span class="cp">
+</span><span class="cp">#include</span> <span class="cpf">&lt;string.h&gt;</span><span class="cp">
+</span><span class="cp"></span>
+<span class="n">JNIEXPORT</span> <span class="n">jstring</span> <span class="n">JNICALL</span>
+<span class="nf">Java_org_scheming_jnidemo_MainActivity_sayHello</span><span class="p">(</span><span class="n">JNIEnv</span> <span class="o">*</span><span class="n">env</span><span class="p">,</span> <span class="n">jobject</span> <span class="n">instance</span><span class="p">,</span> <span class="n">jstring</span> <span class="n">name_</span><span class="p">)</span> <span class="p">{</span>
+   <span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">name</span> <span class="o">=</span> <span class="p">(</span><span class="o">*</span><span class="n">env</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">GetStringUTFChars</span><span class="p">(</span><span class="n">env</span><span class="p">,</span> <span class="n">name_</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
+
+   <span class="c1">// TODO
+</span><span class="c1"></span>   <span class="kt">char</span> <span class="n">s</span><span class="p">[</span><span class="mi">20</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#34;Hello &#34;</span><span class="p">;</span>
+   <span class="n">strcat</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">name</span><span class="p">);</span>
+   <span class="p">(</span><span class="o">*</span><span class="n">env</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">ReleaseStringUTFChars</span><span class="p">(</span><span class="n">env</span><span class="p">,</span> <span class="n">name_</span><span class="p">,</span> <span class="n">name</span><span class="p">);</span>
+
+   <span class="k">return</span> <span class="p">(</span><span class="o">*</span><span class="n">env</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">NewStringUTF</span><span class="p">(</span><span class="n">env</span><span class="p">,</span> <span class="n">s</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div><p>源码下载：http://download.csdn.net/detail/scheming13/9455283</p>
+    </div>
+
+    
+<footer class="post-footer">
+      <div class="post-tags">
+          <a href="/tags/ndk/">NDK</a>
+          <a href="/tags/c/">C</a>
+          </div>
+      <nav class="post-nav">
+        <a class="prev" href="/2016/04/jvm-architecture/">
+            <i class="iconfont icon-left"></i>
+            <span class="prev-text nav-default">深入Java虚拟机读书笔记——虚拟机体系结构</span>
+            <span class="prev-text nav-mobile">上一篇</span>
+          </a>
+        <a class="next" href="/2016/02/git-proxy/">
+            <span class="next-text nav-default">Git代理设置，加速clone</span>
+            <span class="next-text nav-mobile">下一篇</span>
+            <i class="iconfont icon-right"></i>
+          </a>
+      </nav>
+    </footer>
+  </article>
+        </div>
+        <div id="gitalk-container"></div>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js" crossorigin="anonymous"></script>
+    <script type="text/javascript">
+      var gitalk = new Gitalk({
+        id: '\/2016\/03\/android-studio-ndk\/',
+        title: 'Android Studio NDK 入门教程',
+        clientID: '64b9f11ba0a3291ee49e',
+        clientSecret: '8632b99db733cc33fd8f6fe85680f63f0db9d872',
+        repo: 'hadyang.github.io',
+        owner: 'hadyang',
+        admin: ['hadyang'],
+        body: decodeURI(location.href)
+      });
+      gitalk.render('gitalk-container');
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://github.com/gitalk/gitalk">comments powered by gitalk.</a></noscript>
+
+  
+
+  
+
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="social-links">
+  <a href="" type="application/rss+xml" class="iconfont icon-rss" title="rss"></a>
+</div>
+
+<div class="copyright">
+  <span class="power-by">
+    由 <a class="hexo-link" href="https://gohugo.io">Hugo</a> 强力驱动
+  </span>
+  <span class="division">|</span>
+  <span class="theme-info">
+    主题 -
+    <a class="theme-link" href="https://github.com/olOwOlo/hugo-theme-even">Even</a>
+  </span>
+
+  
+
+  <span class="copyright-year">
+    &copy; 
+    2017 - 
+    2021<span class="heart"><i class="iconfont icon-heart"></i></span><span>HadYang</span>
+  </span>
+</div>
+
+    </footer>
+
+    <div class="back-to-top" id="back-to-top">
+      <i class="iconfont icon-up"></i>
+    </div>
+  </div>
+  
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/slideout@1.0.1/dist/slideout.min.js" integrity="sha256-t+zJ/g8/KXIJMjSVQdnibt4dlaDxc9zXr/9oNPeWqdg=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.js" integrity="sha256-XVLffZaxoWfGUEbdzuLi7pwaUJv1cecsQJQqGLe7axY=" crossorigin="anonymous"></script>
+
+
+
+<script type="text/javascript" src="/js/main.min.c12618f9a600c40bd024996677e951e64d3487006775aeb22e200c990006c5c7.js"></script>
+  <script type="text/javascript">
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$','$'], ['\\(','\\)']],
+        }
+    };
+  </script>
+  <script async src="https://cdn.jsdelivr.net/npm/mathjax@3.0.5/es5/tex-mml-chtml.js" integrity="sha256-HGLuEfFcsUJGhvB8cQ8nr0gai9EucOOaIxFw7qxmd+w=" crossorigin="anonymous"></script>
+
+
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+	ga('create', 'UA-157595781-2', 'auto');
+	ga('set', 'anonymizeIp', true);
+	ga('send', 'pageview');
+}
+</script>
+<script async src='https://www.google-analytics.com/analytics.js'></script>
+
+
+
+
+
+
+
+</body>
+</html>

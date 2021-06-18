@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>【Golang进阶】函数与栈 - HadYang</title>
+  <meta name="renderer" content="webkit" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<meta name="theme-color" content="#f8f5ec" />
+<meta name="msapplication-navbutton-color" content="#f8f5ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
+
+
+<meta name="author" content="HadYang" /><meta name="description" content="Go 的汇编代码基于 Plan 9 进行改造的，提供一种半抽象的语义。其中有两个很大的不同，一个是操作符的优先级不同，Go 汇编会使用 Go 语言的优先级；第二个是" /><meta name="keywords" content="Java" />
+
+
+
+
+
+
+<meta name="generator" content="Hugo 0.73.0 with theme even" />
+
+
+<link rel="canonical" href="https://hadyang.github.io/2021/04/golang-func-stack/" />
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="manifest" href="/manifest.json">
+<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
+
+
+
+<link href="/sass/main.min.75c01efdcbc2767fdfe1f22f5a6fccc8c390d3cda325742f698bd0c6344144be.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.css" integrity="sha256-7TyXnr2YU040zfSP+rEcz29ggW4j56/ujTPwjMzyqFY=" crossorigin="anonymous">
+
+
+<meta property="og:title" content="【Golang进阶】函数与栈" />
+<meta property="og:description" content="Go 的汇编代码基于 Plan 9 进行改造的，提供一种半抽象的语义。其中有两个很大的不同，一个是操作符的优先级不同，Go 汇编会使用 Go 语言的优先级；第二个是" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://hadyang.github.io/2021/04/golang-func-stack/" />
+<meta property="article:published_time" content="2021-04-01T00:00:00+00:00" />
+<meta property="article:modified_time" content="2021-04-01T00:00:00+00:00" />
+<meta itemprop="name" content="【Golang进阶】函数与栈">
+<meta itemprop="description" content="Go 的汇编代码基于 Plan 9 进行改造的，提供一种半抽象的语义。其中有两个很大的不同，一个是操作符的优先级不同，Go 汇编会使用 Go 语言的优先级；第二个是">
+<meta itemprop="datePublished" content="2021-04-01T00:00:00&#43;00:00" />
+<meta itemprop="dateModified" content="2021-04-01T00:00:00&#43;00:00" />
+<meta itemprop="wordCount" content="1324">
+
+
+
+<meta itemprop="keywords" content="" /><meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="【Golang进阶】函数与栈"/>
+<meta name="twitter:description" content="Go 的汇编代码基于 Plan 9 进行改造的，提供一种半抽象的语义。其中有两个很大的不同，一个是操作符的优先级不同，Go 汇编会使用 Go 语言的优先级；第二个是"/>
+
+<!--[if lte IE 9]>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js"></script>
+<![endif]-->
+
+<!--[if lt IE 9]>
+  <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+<![endif]-->
+
+</head>
+<body>
+  <div id="mobile-navbar" class="mobile-navbar">
+  <div class="mobile-header-logo">
+    <a href="/" class="logo">HadYang</a>
+  </div>
+  <div class="mobile-navbar-icon">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
+<nav id="mobile-menu" class="mobile-menu slideout-menu">
+  <ul class="mobile-menu-list">
+    <a href="https://hadyang.github.io/interview/">
+        <li class="mobile-menu-item">Interview</li>
+      </a><a href="/categories/">
+        <li class="mobile-menu-item">分类</li>
+      </a>
+  </ul>
+
+  
+
+
+</nav>
+
+  <div class="container" id="mobile-panel">
+    <header id="header" class="header">
+        <div class="logo-wrapper">
+  <a href="/" class="logo">HadYang</a>
+</div>
+
+
+
+
+
+<nav class="site-navbar">
+  <ul id="menu" class="menu">
+    <li class="menu-item">
+        <a class="menu-item-link" href="https://hadyang.github.io/interview/">Interview</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/categories/">分类</a>
+      </li>
+  </ul>
+</nav>
+
+    </header>
+
+    <main id="main" class="main">
+      <div class="content-wrapper">
+        <div id="content" class="content">
+          <article class="post">
+    
+    <header class="post-header">
+      <h1 class="post-title">【Golang进阶】函数与栈</h1>
+
+      <div class="post-meta">
+        <span class="post-time"> 2021-04-01 </span>
+        <div class="post-category">
+            <a href="/categories/go/"> Go </a>
+            </div>
+          <span class="more-meta"> 约 1324 字 </span>
+          <span class="more-meta"> 预计阅读 3 分钟 </span>
+        
+      </div>
+    </header>
+
+    <div class="post-toc" id="post-toc">
+  <h2 class="post-toc-title">文章目录</h2>
+  <div class="post-toc-content always-active">
+    <nav id="TableOfContents">
+  <ul>
+    <li><a href="#寄存器">寄存器</a></li>
+    <li><a href="#函数的定义">函数的定义</a></li>
+    <li><a href="#go-栈布局">Go 栈布局</a></li>
+    <li><a href="#参考文档">参考文档</a></li>
+  </ul>
+</nav>
+  </div>
+</div>
+    <div class="post-content">
+      <p>Go 的汇编代码基于 <a href="https://9p.io/sys/doc/asm.html">Plan 9</a> 进行改造的，提供一种半抽象的语义。其中有两个很大的不同，一个是操作符的优先级不同，Go 汇编会使用 Go 语言的优先级；第二个是负数的表示，在 Go 汇编中数字都是无符号的 64bit 表示，所以负数在汇编中不会表达位 “负”，而是与负数位相同的无符号 64bit 数字。</p>
+<h2 id="寄存器">寄存器</h2>
+<p>某些符号是预定义寄存器符号，并且与特定的 CPU 架构有关，例如：<code>R1</code>、<code>LR</code>。在 Go 汇编中定义了四个 <strong>伪寄存器</strong> ，伪寄存器由 Go 维护不存在物理上的寄存器，伪寄存器在不同的 CPU 架构上含义均一致。</p>
+<ol>
+<li><code>FP</code>: 栈帧指针，用于函数参数和本地变量</li>
+<li><code>PC</code>: 指令计数器，用于分支和指令跳转</li>
+<li><code>SB</code>: 静态基地址，指向全局变量</li>
+<li><code>SP</code>: 栈指针，指向当前栈顶</li>
+</ol>
+<p><code>SB</code> 伪寄存器可以用来获取符号的内存地址，比如 <code>foo(SB)</code> 表示符号 <code>foo</code> 的内存地址，通常使用这种方式来访问全局函数和数据。通过在符号后增加偏移量可以访问特定位置的数据，<code>foo+4(SB)</code> 访问 <code>foo</code> 后 4byte 的数据。</p>
+<blockquote>
+<p><code>foo</code> 在这里只是一个标记，没有任何的语义</p>
+</blockquote>
+<p>在官方的文档中<a href="https://golang.org/doc/asm">A Quick Guide to Go&rsquo;s Assembler</a>，<code>FP</code> 伪寄存器用于访问函数参数；</p>
+<p>在 Linux/amd64 go 14 版本下，Go 编译器生成的代码中，没有出现 <code>FP</code> 寄存器。在多方考证下，发现这个疑问也困惑者其他开发人员 <a href="https://github.com/teh-cmc/go-internals/issues/2">chapter1: Frame pointer</a>。在 issues 的最后给出的结论是，该官方文档是针对手写 ASM 的介绍，Go 编译器的行为 <strong>不一定遵守</strong> 文档中的规则。</p>
+<blockquote>
+<p>And I&rsquo;ve yet to see any assembly generated by the Go compiler that relies on the frame-pointer to reference anything. Have you?</p>
+</blockquote>
+<h2 id="函数的定义">函数的定义</h2>
+<p><code>TEXT</code> 指令将符号 <code>&quot;&quot;.foo</code> 声明为函数，在之后是 TEXT 指令的参数（<code>NOSPLIT</code>，<code>ABIInternal</code>）。最后的一组数组 <code>$32-24</code> 分别表示 32 byte 的 <strong>栈帧大小</strong> 和 24 byte 的 <strong>参数长度</strong>，参数长度包含请求参数和返回值。参数数据保存在 <strong>调用函数</strong> 的栈帧中，栈帧数据保存在 <strong>被调用函数</strong> 的栈帧中。</p>
+<div class="highlight"><pre class="chroma"><code class="language-text" data-lang="text">TEXT	&#34;&#34;.foo(SB), NOSPLIT|ABIInternal, $32-24
+</code></pre></div><p><code>SRODATA</code> 指令将符号 <code>go.string.&quot;SDD&quot;</code> 声明为只读数据，<code>DUPOK</code> 表示单个二进制文件中可以有多个定义，但在 Link 阶段该符号会唯一对应一个地址，size 表示其二进制数据的大小（byte单位）</p>
+<div class="highlight"><pre class="chroma"><code class="language-text" data-lang="text">go.string.&#34;SDD&#34; SRODATA dupok size=3
+    0x0000 53 44 44                                         SDD
+</code></pre></div><h2 id="go-栈布局">Go 栈布局</h2>
+<p>接下来，我们再通过汇编代码和 delve 工具研究下栈的布局。Go 中的栈是 <strong>向下生长</strong> 的，即向地址低位增长。栈空间上会存储本地变量、方法参数以及返回值，栈的布局也主要是考虑这些数据的存放。</p>
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">swap</span><span class="p">(</span><span class="nx">x</span><span class="p">,</span> <span class="nx">y</span> <span class="kt">int</span><span class="p">)</span> <span class="p">(</span><span class="kt">int</span><span class="p">,</span> <span class="kt">int</span><span class="p">)</span> <span class="p">{</span>
+	<span class="nx">x</span> <span class="p">=</span> <span class="nx">x</span> <span class="o">+</span> <span class="mi">1</span>
+	<span class="nx">y</span> <span class="p">=</span> <span class="nx">y</span> <span class="o">+</span> <span class="mi">1</span>
+	<span class="k">return</span> <span class="nx">y</span><span class="p">,</span> <span class="nx">x</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+	<span class="nx">a</span><span class="p">,</span> <span class="nx">b</span> <span class="o">:=</span> <span class="nf">swap</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
+
+	<span class="nx">_</span><span class="p">,</span> <span class="nx">_</span> <span class="p">=</span> <span class="nx">a</span><span class="p">,</span> <span class="nx">b</span>
+<span class="p">}</span>
+</code></pre></div><p>上面的代码包含多参数、多返回值的情况，可以让我们更好的了解栈布局，通过 <code>go tool compile -S -l -N main.go &gt; main.s</code> 查看汇编。</p>
+<div class="highlight"><pre class="chroma"><code class="language-text" data-lang="text">MOVQ	$1, (SP)        ;
+MOVQ	$5, 8(SP)      ;
+...                     ; 本文中的汇编代码都删除了 PCDATA 和 FUNCDATA 指令，这两个指令均与 GC 有关，与本文关系不大
+CALL	&#34;&#34;.add1(SB)     ;
+</code></pre></div><p>在调用 <code>add1</code> 之前，栈的布局如下</p>
+<p><img src="assists/asm_before_call_add1.png" alt=""></p>
+<p>当执行 CALL 指令时，会将 SP 寄存器自动减少一个 byte ，并填充调用的返回地址。然后就执行具体的代码逻辑，其汇编代码如下</p>
+<div class="highlight"><pre class="chroma"><code class="language-fallback" data-lang="fallback">MOVQ	&#34;&#34;.x+32(SP), AX     ;AX=x       计算a
+INCQ	AX                  ;AX=AX+1
+MOVQ	AX, &#34;&#34;.a+8(SP)      ;a=AX
+MOVQ	&#34;&#34;.y+40(SP), AX     ;AX=y       计算b
+INCQ	AX                  ;AX=AX+1
+MOVQ	AX, &#34;&#34;.b(SP)        ;b=AX
+MOVQ	&#34;&#34;.a+8(SP), AX      ;AX=a       填充返回值
+MOVQ	AX, &#34;&#34;.~r2+48(SP)   ;SP+48=AX
+MOVQ	&#34;&#34;.b(SP), AX        ;
+MOVQ	AX, &#34;&#34;.~r3+56(SP)   ;
+</code></pre></div><p>通过 <code>add1</code> 的汇编代码我们能看出，<code>SP</code> 指针向下移动了 24byte，与栈帧的大小一致。在 <code>16(SP)</code> 的位置放入 <code>BP</code> 寄存器（栈基址寄存器），并将 <code>BP</code> 移动到 <code>16(SP)</code> 的位置。同时，我们可以发现 <strong><code>add1</code> 函数的参数是从 <code>main</code> 函数的栈帧中获取的</strong>，并且返回值是紧跟在参数之上由 <code>add1</code> 直接写入。</p>
+<p><img src="assists/asm_call_add1.png" alt=""></p>
+<p>Go 的汇编语言在结构上与 NASM 等有相似的地方，但语法上更多了一些提示信息。通过反编译代码，能更好的认识 Go 的底层实现。文中出现的各种指令、寄存器可以查看参考文档的链接。</p>
+<h2 id="参考文档">参考文档</h2>
+<ul>
+<li><a href="https://github.com/teh-cmc/go-internals/issues/21">A Quick Guide to Go&rsquo;s Assembler</a></li>
+<li><a href="https://www.felixcloutier.com/x86/">x86 and amd64 instruction reference</a></li>
+<li><a href="https://en.wikibooks.org/wiki/X86_Assembly/X86_Architecture">x86 Assembly/X86 Architecture</a></li>
+</ul>
+
+    </div>
+
+    
+<footer class="post-footer">
+      
+      <nav class="post-nav">
+        <a class="prev" href="/2021/04/golang-struct-interface/">
+            <i class="iconfont icon-left"></i>
+            <span class="prev-text nav-default">【Golang进阶】结构体与接口</span>
+            <span class="prev-text nav-mobile">上一篇</span>
+          </a>
+        <a class="next" href="/2021/03/golang-types-identity/">
+            <span class="next-text nav-default">【Golang基础】类型和值</span>
+            <span class="next-text nav-mobile">下一篇</span>
+            <i class="iconfont icon-right"></i>
+          </a>
+      </nav>
+    </footer>
+  </article>
+        </div>
+        <div id="gitalk-container"></div>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js" crossorigin="anonymous"></script>
+    <script type="text/javascript">
+      var gitalk = new Gitalk({
+        id: '\/2021\/04\/golang-func-stack\/',
+        title: '【Golang进阶】函数与栈',
+        clientID: '64b9f11ba0a3291ee49e',
+        clientSecret: '8632b99db733cc33fd8f6fe85680f63f0db9d872',
+        repo: 'hadyang.github.io',
+        owner: 'hadyang',
+        admin: ['hadyang'],
+        body: decodeURI(location.href)
+      });
+      gitalk.render('gitalk-container');
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://github.com/gitalk/gitalk">comments powered by gitalk.</a></noscript>
+
+  
+
+  
+
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="social-links">
+  <a href="" type="application/rss+xml" class="iconfont icon-rss" title="rss"></a>
+</div>
+
+<div class="copyright">
+  <span class="power-by">
+    由 <a class="hexo-link" href="https://gohugo.io">Hugo</a> 强力驱动
+  </span>
+  <span class="division">|</span>
+  <span class="theme-info">
+    主题 -
+    <a class="theme-link" href="https://github.com/olOwOlo/hugo-theme-even">Even</a>
+  </span>
+
+  
+
+  <span class="copyright-year">
+    &copy; 
+    2017 - 
+    2021<span class="heart"><i class="iconfont icon-heart"></i></span><span>HadYang</span>
+  </span>
+</div>
+
+    </footer>
+
+    <div class="back-to-top" id="back-to-top">
+      <i class="iconfont icon-up"></i>
+    </div>
+  </div>
+  
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/slideout@1.0.1/dist/slideout.min.js" integrity="sha256-t+zJ/g8/KXIJMjSVQdnibt4dlaDxc9zXr/9oNPeWqdg=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.js" integrity="sha256-XVLffZaxoWfGUEbdzuLi7pwaUJv1cecsQJQqGLe7axY=" crossorigin="anonymous"></script>
+
+
+
+<script type="text/javascript" src="/js/main.min.c12618f9a600c40bd024996677e951e64d3487006775aeb22e200c990006c5c7.js"></script>
+  <script type="text/javascript">
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$','$'], ['\\(','\\)']],
+        }
+    };
+  </script>
+  <script async src="https://cdn.jsdelivr.net/npm/mathjax@3.0.5/es5/tex-mml-chtml.js" integrity="sha256-HGLuEfFcsUJGhvB8cQ8nr0gai9EucOOaIxFw7qxmd+w=" crossorigin="anonymous"></script>
+
+
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+	ga('create', 'UA-157595781-2', 'auto');
+	ga('set', 'anonymizeIp', true);
+	ga('send', 'pageview');
+}
+</script>
+<script async src='https://www.google-analytics.com/analytics.js'></script>
+
+
+
+
+
+
+
+</body>
+</html>

@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>【Raft】选举过程 - HadYang</title>
+  <meta name="renderer" content="webkit" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<meta name="theme-color" content="#f8f5ec" />
+<meta name="msapplication-navbutton-color" content="#f8f5ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
+
+
+<meta name="author" content="HadYang" /><meta name="description" content="Raft 简介 Raft 是一种共识算法，与 Paxos 有等效的容错能力和性能，同时又比 Paxos 更加容易理解。Raft 将共识问题拆分为几个独立的子问题，并且简单高效的解决了这" /><meta name="keywords" content="Java" />
+
+
+
+
+
+
+<meta name="generator" content="Hugo 0.73.0 with theme even" />
+
+
+<link rel="canonical" href="https://hadyang.github.io/2020/06/raft-leader-election/" />
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="manifest" href="/manifest.json">
+<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
+
+
+
+<link href="/sass/main.min.75c01efdcbc2767fdfe1f22f5a6fccc8c390d3cda325742f698bd0c6344144be.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.css" integrity="sha256-7TyXnr2YU040zfSP+rEcz29ggW4j56/ujTPwjMzyqFY=" crossorigin="anonymous">
+
+
+<meta property="og:title" content="【Raft】选举过程" />
+<meta property="og:description" content="Raft 简介 Raft 是一种共识算法，与 Paxos 有等效的容错能力和性能，同时又比 Paxos 更加容易理解。Raft 将共识问题拆分为几个独立的子问题，并且简单高效的解决了这" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://hadyang.github.io/2020/06/raft-leader-election/" />
+<meta property="article:published_time" content="2020-06-26T00:00:00+00:00" />
+<meta property="article:modified_time" content="2020-06-26T00:00:00+00:00" />
+<meta itemprop="name" content="【Raft】选举过程">
+<meta itemprop="description" content="Raft 简介 Raft 是一种共识算法，与 Paxos 有等效的容错能力和性能，同时又比 Paxos 更加容易理解。Raft 将共识问题拆分为几个独立的子问题，并且简单高效的解决了这">
+<meta itemprop="datePublished" content="2020-06-26T00:00:00&#43;00:00" />
+<meta itemprop="dateModified" content="2020-06-26T00:00:00&#43;00:00" />
+<meta itemprop="wordCount" content="2650">
+
+
+
+<meta itemprop="keywords" content="" /><meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="【Raft】选举过程"/>
+<meta name="twitter:description" content="Raft 简介 Raft 是一种共识算法，与 Paxos 有等效的容错能力和性能，同时又比 Paxos 更加容易理解。Raft 将共识问题拆分为几个独立的子问题，并且简单高效的解决了这"/>
+
+<!--[if lte IE 9]>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js"></script>
+<![endif]-->
+
+<!--[if lt IE 9]>
+  <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+<![endif]-->
+
+</head>
+<body>
+  <div id="mobile-navbar" class="mobile-navbar">
+  <div class="mobile-header-logo">
+    <a href="/" class="logo">HadYang</a>
+  </div>
+  <div class="mobile-navbar-icon">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
+<nav id="mobile-menu" class="mobile-menu slideout-menu">
+  <ul class="mobile-menu-list">
+    <a href="https://hadyang.github.io/interview/">
+        <li class="mobile-menu-item">Interview</li>
+      </a><a href="/categories/">
+        <li class="mobile-menu-item">分类</li>
+      </a>
+  </ul>
+
+  
+
+
+</nav>
+
+  <div class="container" id="mobile-panel">
+    <header id="header" class="header">
+        <div class="logo-wrapper">
+  <a href="/" class="logo">HadYang</a>
+</div>
+
+
+
+
+
+<nav class="site-navbar">
+  <ul id="menu" class="menu">
+    <li class="menu-item">
+        <a class="menu-item-link" href="https://hadyang.github.io/interview/">Interview</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/categories/">分类</a>
+      </li>
+  </ul>
+</nav>
+
+    </header>
+
+    <main id="main" class="main">
+      <div class="content-wrapper">
+        <div id="content" class="content">
+          <article class="post">
+    
+    <header class="post-header">
+      <h1 class="post-title">【Raft】选举过程</h1>
+
+      <div class="post-meta">
+        <span class="post-time"> 2020-06-26 </span>
+        <div class="post-category">
+            <a href="/categories/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3etcd/"> 深入理解ETCD </a>
+            </div>
+          <span class="more-meta"> 约 2650 字 </span>
+          <span class="more-meta"> 预计阅读 6 分钟 </span>
+        
+      </div>
+    </header>
+
+    <div class="post-toc" id="post-toc">
+  <h2 class="post-toc-title">文章目录</h2>
+  <div class="post-toc-content always-active">
+    <nav id="TableOfContents">
+  <ul>
+    <li><a href="#raft-简介">Raft 简介</a></li>
+    <li><a href="#raft-共识算法">Raft 共识算法</a></li>
+    <li><a href="#节点状态">节点状态</a></li>
+    <li><a href="#任期">任期</a></li>
+    <li><a href="#选举">选举</a>
+      <ul>
+        <li><a href="#超时时间的选择">超时时间的选择</a></li>
+        <li><a href="#leader-合法性">Leader 合法性</a></li>
+      </ul>
+    </li>
+    <li><a href="#参考文档">参考文档</a></li>
+  </ul>
+</nav>
+  </div>
+</div>
+    <div class="post-content">
+      <h2 id="raft-简介">Raft 简介</h2>
+<p>Raft 是一种共识算法，与 Paxos 有等效的容错能力和性能，同时又比 Paxos 更加容易理解。Raft 将共识问题拆分为几个独立的子问题，并且简单高效的解决了这些问题。</p>
+<p>在之前的文章<a href="https://hadyang.github.io/2020/05/consensus/">《什么是共识算法？》</a>中有详细介绍共识算法。共识通常出现在状态机复制的背景下，状态机复制是构建容错系统的通用方法。在状态机复制集群中，每个服务器都有一个 <strong>状态机</strong> 和一组 <strong>日志</strong>，这个状态机就是我们需要容错，比如一个 KV 存储。</p>
+<p>对客户端来说，即使其中小部分的服务器故障，整个集群的表现和单个可靠的状态机一致。每个状态机从日志中获取输入，共识算法就是要协调多个服务器在日志的顺序上达成共识。共识算法保证如果任意一个状态机将输入 $input_i$ 作为 $command_i$ 执行，那么所有状态机中一定存在 $command_i=input_i$。每个状态机都会以相同的顺序执行相同的命令，因此会产生一系列相同的输出并且到达相同的状态。</p>
+<h2 id="raft-共识算法">Raft 共识算法</h2>
+<p>Raft 通过选举产生的 Leader，并让 Leader 管理日志复制来实现共识。Leader 从客户端接受日志，把日志复制到其他服务器，并当 “安全” 时将日志应用到自己的状态机。选举 Leader 可以简化日志复制的复杂度，比如，Leader 可以决定放置新日志的位置，而不需要与其他服务器交互，并且日志的复制模型也很简单。当 Leader 故障或与其他服务器断开连接后，就会开启新一轮的选举过程。</p>
+<p>Raft 在始终保证以下五个属性：</p>
+<ul>
+<li><strong>选举安全</strong>：在一个任期内最多只会选举出一个 Leader</li>
+<li><strong>Leader 不覆盖日志</strong>：Leader 不会对自己的日志进行覆盖，只会追加日志条目</li>
+<li><strong>日志一致性</strong>：如果两个日志序列包含具有相同索引和任期的日志条目，则直到这个日志条目的所有日志条目都是相同的</li>
+<li><strong>Leader 日志完整性</strong>：日志条目在某个任期被提交，则在之后的任期中，该条目都不会消失</li>
+<li><strong>状态机安全</strong>：如果一个日志在某节点的状态机上被应用，则不会存在相同索引的不同日志条目被应用到状态机</li>
+</ul>
+<p>Raft 将整个共识问题分为了三个子问题：<strong>选举</strong>、<strong>日志复制</strong>、<strong>安全性保证</strong>。这三个子问题，会分为三个文章进行介绍。</p>
+<h2 id="节点状态">节点状态</h2>
+<p>在任意时刻，Raft 集群中的节点均处于以下三种状态之一：<strong>Leader</strong>、<strong>Follower</strong> 和 <strong>Candidate</strong>。通常情况下，集群中只有一个 Leader，其他节点均为 Follower。</p>
+<p>Follower 是被动的，它们本身不发出请求，只是响应 Leader 或 Candidate 发出的请求。 Leader 会处理所有的客户端请求，如果客户端请求到 Follower ，Follower 会把请求转发到 Leader。Candidate 是集群选举过程中的一个中间状态。</p>
+<p><img src="assists/state_transition.png" alt=""></p>
+<p>如果 Follower 在选举超时时间内没有收到请求，则其状态会变更为 Candidate，并且开始选举过程。当 Candidate 获取到集群中大多数节点的选票后，其状态变更为 Leader。通常来说， Leader 状态会持续到 Leader 节点故障。</p>
+<h2 id="任期">任期</h2>
+<p>Raft 协议将现实中的时间划分为任意长度的 <strong>Term（任期）</strong>，Term 是连续增长的整数。每个新的 Term 都伴随一次选举，当 Candidate 获取到大多数节点的选票后，Candidate 就作为集群中这个 Term 的 Leader。在某些情况下，会出现多个 Candidate 选票数一样的情况，这种情况下，当前的 Term 就会直接结束，并开启下一轮选举。</p>
+<p><img src="assists/term.png" alt=""></p>
+<p>不同的节点可能会在不同的时间观察到 Term 的变化，甚至节点可能对选举过程完全无感知（节点已失效）。 Term 在集群中作为 <strong>逻辑时钟</strong>，每个节点都会保存一个 “当前任期” 的变量，这个变量是单调递增的，这样就可以让节点检测到集群的 Leader 是否已经变化。</p>
+<p>节点每次请求的时候，都会携带当前节点 “当前任期”，如果一个节点接受到比自己 “当前任期” 大的请求，则更新自己的 “当前任期”。如果 Candidate 或者 Leader 发现有比自己大的 “当前任期”，则会将自己的状态转变为 Follower。如果节点接收到比自己小的 “当前任期” 的请求，则会拒绝该请求。</p>
+<h2 id="选举">选举</h2>
+<p>在 Raft 协议中，节点之间通过 RPC 进行通信。一般情况下有两种请求： <code>RqeustVote</code> 和 <code>AppendEntries</code>，第一个请求用作获取选票，第二个请求用作日志复制和心跳包（当 Entries 为空时）。下面是 <code>RequstVote</code> 的请求和响应：</p>
+<div class="highlight"><pre class="chroma"><code class="language-protobuf" data-lang="protobuf"><span class="kd">message</span> <span class="nc">RequestVoteRequest</span> <span class="p">{</span><span class="err">
+</span><span class="err"></span>    <span class="kt">uint64</span> <span class="n">term</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span> <span class="c1">// 候选人的任期号
+</span><span class="c1"></span>    <span class="kt">uint64</span> <span class="n">candidate_id</span> <span class="o">=</span> <span class="mi">2</span><span class="p">;</span> <span class="c1">//	请求投票的候选人 id
+</span><span class="c1"></span>    <span class="kt">uint64</span> <span class="n">last_log_index</span> <span class="o">=</span> <span class="mi">3</span><span class="p">;</span><span class="c1">// 候选人最新日志条目的索引值
+</span><span class="c1"></span>    <span class="kt">uint64</span> <span class="n">last_log_term</span> <span class="o">=</span> <span class="mi">4</span><span class="p">;</span><span class="c1">//	候选人最新日志条目对应的任期号
+</span><span class="c1"></span><span class="p">}</span><span class="err">
+</span><span class="err">
+</span><span class="err"></span><span class="kd">message</span> <span class="nc">RequestVoteResponse</span> <span class="p">{</span><span class="err">
+</span><span class="err"></span>    <span class="kt">uint64</span> <span class="n">term</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span> <span class="c1">//目前的任期号，用于候选人更新自己
+</span><span class="c1"></span>    <span class="kt">bool</span> <span class="n">vote_granted</span> <span class="o">=</span> <span class="mi">2</span><span class="p">;</span><span class="c1">//如果候选人收到选票为 true
+</span><span class="c1"></span><span class="p">}</span><span class="err">
+</span></code></pre></div><p>Raft 协议中，所有节点初始均为 Follower 状态，初始化本地数据后，就会启动一个 <strong>随机</strong> 的选举超时器。在选举超时器过期前，如果收到来自 Leader 的 <code>AppendEntries</code> 请求，则会对请求信息与本地信息进行比对，如果满足条件则当前集群有合法 Leader。</p>
+<p>如果在 <strong>选举超时</strong> 时间内 Follower 没有收到心跳包，则 Follower 会认为当前集群无合法 Leader ，并发起新一轮的选举。如下图所示：</p>
+<p><img src="assists/election.png" alt=""></p>
+<p>在将本节点变更为 Candidate 后，递增本节点的 Term。向本节点投票，并且向其他节点并发的发起 <code>RequstVote</code> 请求。 Candidate 只有在以下两种情况才会迁移状态：</p>
+<ol>
+<li>Candidate 获得超过半数的投票</li>
+<li>Candidate 收到合法 Leader 的 <code>AppendEntries</code> 请求</li>
+</ol>
+<p>当出现选票分裂（多个 Candidate 均未拿到合法选票个数）时，Raft 会再次启动随机的选举超时器，用于进行下一次选举。通常，随机的时间范围在 <code>150ms ~ 300ms</code> 之间，通过随机打散各个节点的超时时间，在大多数情况下只会有一个节点超时，发起下一次选举。这种随机超时的方式，示 Raft 能有效减小再次出现选票分裂的概率。</p>
+<h3 id="超时时间的选择">超时时间的选择</h3>
+<p>这里借用 Raft 论文中的一个测试结果，这里测试是在 5 个节点的环境中，并且心跳间隔在 15ms 左右。两幅图中，上面的图是改变了超时时间的随机性，下面的图是改变了超时时间的最小值。可见，<strong>随机性越大，最小超时时间越小，整个集群无 Leader 的时间就越短</strong>。</p>
+<p><img src="assists/election_timeout_random.png" alt=""></p>
+<p>这里解释下上面的结果，横坐标代表集群中没有 Leader 的时间，纵坐标代表实验次数的占比。比如 100~200ms 这条线，表示集群中的 “选举超时时间” 在100~200ms，并且在多次实验中，超过90%的实验无 Leader 的状态少于 200ms。</p>
+<h3 id="leader-合法性">Leader 合法性</h3>
+<p>在处理 Candidate 的 <code>RequstVote</code> 请求时，不止要比较 Term，还需要比较 Log 的信息。这里校验时需要保证 Leader 的合法性， Leader 的合法性就体现在其日志是否是 <strong>最新</strong> 的。</p>
+<p>在所有 <strong>Leader-Base</strong> 的共识算法中，<strong>Leader 必须保存所有已提交（包含前任 Leader 提交的）的日志</strong>，同时 Leader <strong>不能覆盖</strong> 已提交的日志。这就意味着，整个集群中日志数据的流向是 <strong>单一</strong> 的 —— 从 Leader 到 Follower，大大简化了集群交互机制。</p>
+<p>Raft 通过一个简单的方法来保证 <strong>Leader 保存所有已提交的日志</strong>：在选举过程中 Candidate 必须与 <strong>超过半数</strong> 的节点进行交互，这就意味着每个已提交的日志，至少存在于这些节点中的一个节点上（日志提交要求至少半数以上的节点确认）。如果 Candidate 的日志对于大多数节点来说都是 “最新” 的，那么可以认为 Candidate 包含所有已提交的日志，则这个选举出来的 Leader 是合法的。</p>
+<blockquote>
+<p>“最新”：如果 <code>RequstVote</code> 请求中的 <code>last_log_term</code> 于本节点 <code>last_log_term</code> 相同，则更大的 <code>last_log_index</code> 为最新；如果 <code>last_log_term</code> 与本节点 <code>last_log_term</code> 不同，则 Term 大的为最新。</p>
+</blockquote>
+<h2 id="参考文档">参考文档</h2>
+<ul>
+<li><a href="https://raft.github.io/">The Raft Consensus Algorithm</a></li>
+<li><a href="https://raft.github.io/raft.pdf">In Search of an Understandable Consensus Algorithm</a></li>
+</ul>
+
+    </div>
+
+    
+<footer class="post-footer">
+      
+      <nav class="post-nav">
+        <a class="prev" href="/2020/06/raft-log-replication/">
+            <i class="iconfont icon-left"></i>
+            <span class="prev-text nav-default">【Raft】日志复制</span>
+            <span class="prev-text nav-mobile">上一篇</span>
+          </a>
+        <a class="next" href="/2020/06/replication/">
+            <span class="next-text nav-default">【What is this】什么是复制？</span>
+            <span class="next-text nav-mobile">下一篇</span>
+            <i class="iconfont icon-right"></i>
+          </a>
+      </nav>
+    </footer>
+  </article>
+        </div>
+        <div id="gitalk-container"></div>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js" crossorigin="anonymous"></script>
+    <script type="text/javascript">
+      var gitalk = new Gitalk({
+        id: '\/2020\/06\/raft-leader-election\/',
+        title: '【Raft】选举过程',
+        clientID: '64b9f11ba0a3291ee49e',
+        clientSecret: '8632b99db733cc33fd8f6fe85680f63f0db9d872',
+        repo: 'hadyang.github.io',
+        owner: 'hadyang',
+        admin: ['hadyang'],
+        body: decodeURI(location.href)
+      });
+      gitalk.render('gitalk-container');
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://github.com/gitalk/gitalk">comments powered by gitalk.</a></noscript>
+
+  
+
+  
+
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="social-links">
+  <a href="" type="application/rss+xml" class="iconfont icon-rss" title="rss"></a>
+</div>
+
+<div class="copyright">
+  <span class="power-by">
+    由 <a class="hexo-link" href="https://gohugo.io">Hugo</a> 强力驱动
+  </span>
+  <span class="division">|</span>
+  <span class="theme-info">
+    主题 -
+    <a class="theme-link" href="https://github.com/olOwOlo/hugo-theme-even">Even</a>
+  </span>
+
+  
+
+  <span class="copyright-year">
+    &copy; 
+    2017 - 
+    2021<span class="heart"><i class="iconfont icon-heart"></i></span><span>HadYang</span>
+  </span>
+</div>
+
+    </footer>
+
+    <div class="back-to-top" id="back-to-top">
+      <i class="iconfont icon-up"></i>
+    </div>
+  </div>
+  
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/slideout@1.0.1/dist/slideout.min.js" integrity="sha256-t+zJ/g8/KXIJMjSVQdnibt4dlaDxc9zXr/9oNPeWqdg=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.js" integrity="sha256-XVLffZaxoWfGUEbdzuLi7pwaUJv1cecsQJQqGLe7axY=" crossorigin="anonymous"></script>
+
+
+
+<script type="text/javascript" src="/js/main.min.c12618f9a600c40bd024996677e951e64d3487006775aeb22e200c990006c5c7.js"></script>
+  <script type="text/javascript">
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$','$'], ['\\(','\\)']],
+        }
+    };
+  </script>
+  <script async src="https://cdn.jsdelivr.net/npm/mathjax@3.0.5/es5/tex-mml-chtml.js" integrity="sha256-HGLuEfFcsUJGhvB8cQ8nr0gai9EucOOaIxFw7qxmd+w=" crossorigin="anonymous"></script>
+
+
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+	ga('create', 'UA-157595781-2', 'auto');
+	ga('set', 'anonymizeIp', true);
+	ga('send', 'pageview');
+}
+</script>
+<script async src='https://www.google-analytics.com/analytics.js'></script>
+
+
+
+
+
+
+
+</body>
+</html>

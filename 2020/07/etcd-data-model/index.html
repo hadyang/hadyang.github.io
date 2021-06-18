@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>【ETCD】存储模型 - HadYang</title>
+  <meta name="renderer" content="webkit" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<meta name="theme-color" content="#f8f5ec" />
+<meta name="msapplication-navbutton-color" content="#f8f5ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
+
+
+<meta name="author" content="HadYang" /><meta name="description" content="ETCD 服务端提供强一致性的 KV 存储，其整体结构在《初识ETCD》 中介绍过其组成部分，这里再详细的介绍其底层物理存储结构。ETCD 中底层存储就是 Backend 这" /><meta name="keywords" content="Java" />
+
+
+
+
+
+
+<meta name="generator" content="Hugo 0.73.0 with theme even" />
+
+
+<link rel="canonical" href="https://hadyang.github.io/2020/07/etcd-data-model/" />
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="manifest" href="/manifest.json">
+<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
+
+
+
+<link href="/sass/main.min.75c01efdcbc2767fdfe1f22f5a6fccc8c390d3cda325742f698bd0c6344144be.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.css" integrity="sha256-7TyXnr2YU040zfSP+rEcz29ggW4j56/ujTPwjMzyqFY=" crossorigin="anonymous">
+
+
+<meta property="og:title" content="【ETCD】存储模型" />
+<meta property="og:description" content="ETCD 服务端提供强一致性的 KV 存储，其整体结构在《初识ETCD》 中介绍过其组成部分，这里再详细的介绍其底层物理存储结构。ETCD 中底层存储就是 Backend 这" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://hadyang.github.io/2020/07/etcd-data-model/" />
+<meta property="article:published_time" content="2020-07-11T00:00:00+00:00" />
+<meta property="article:modified_time" content="2020-07-11T00:00:00+00:00" />
+<meta itemprop="name" content="【ETCD】存储模型">
+<meta itemprop="description" content="ETCD 服务端提供强一致性的 KV 存储，其整体结构在《初识ETCD》 中介绍过其组成部分，这里再详细的介绍其底层物理存储结构。ETCD 中底层存储就是 Backend 这">
+<meta itemprop="datePublished" content="2020-07-11T00:00:00&#43;00:00" />
+<meta itemprop="dateModified" content="2020-07-11T00:00:00&#43;00:00" />
+<meta itemprop="wordCount" content="1060">
+
+
+
+<meta itemprop="keywords" content="" /><meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="【ETCD】存储模型"/>
+<meta name="twitter:description" content="ETCD 服务端提供强一致性的 KV 存储，其整体结构在《初识ETCD》 中介绍过其组成部分，这里再详细的介绍其底层物理存储结构。ETCD 中底层存储就是 Backend 这"/>
+
+<!--[if lte IE 9]>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js"></script>
+<![endif]-->
+
+<!--[if lt IE 9]>
+  <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+<![endif]-->
+
+</head>
+<body>
+  <div id="mobile-navbar" class="mobile-navbar">
+  <div class="mobile-header-logo">
+    <a href="/" class="logo">HadYang</a>
+  </div>
+  <div class="mobile-navbar-icon">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
+<nav id="mobile-menu" class="mobile-menu slideout-menu">
+  <ul class="mobile-menu-list">
+    <a href="https://hadyang.github.io/interview/">
+        <li class="mobile-menu-item">Interview</li>
+      </a><a href="/categories/">
+        <li class="mobile-menu-item">分类</li>
+      </a>
+  </ul>
+
+  
+
+
+</nav>
+
+  <div class="container" id="mobile-panel">
+    <header id="header" class="header">
+        <div class="logo-wrapper">
+  <a href="/" class="logo">HadYang</a>
+</div>
+
+
+
+
+
+<nav class="site-navbar">
+  <ul id="menu" class="menu">
+    <li class="menu-item">
+        <a class="menu-item-link" href="https://hadyang.github.io/interview/">Interview</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/categories/">分类</a>
+      </li>
+  </ul>
+</nav>
+
+    </header>
+
+    <main id="main" class="main">
+      <div class="content-wrapper">
+        <div id="content" class="content">
+          <article class="post">
+    
+    <header class="post-header">
+      <h1 class="post-title">【ETCD】存储模型</h1>
+
+      <div class="post-meta">
+        <span class="post-time"> 2020-07-11 </span>
+        <div class="post-category">
+            <a href="/categories/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3etcd/"> 深入理解ETCD </a>
+            </div>
+          <span class="more-meta"> 约 1060 字 </span>
+          <span class="more-meta"> 预计阅读 3 分钟 </span>
+        
+      </div>
+    </header>
+
+    <div class="post-toc" id="post-toc">
+  <h2 class="post-toc-title">文章目录</h2>
+  <div class="post-toc-content always-active">
+    <nav id="TableOfContents">
+  <ul>
+    <li><a href="#bblot">bblot</a></li>
+    <li><a href="#treeindex">TreeIndex</a></li>
+  </ul>
+</nav>
+  </div>
+</div>
+    <div class="post-content">
+      <p>ETCD 服务端提供强一致性的 KV 存储，其整体结构在<a href="https://hadyang.github.io/2020/07/etcd-overview/">《初识ETCD》</a> 中介绍过其组成部分，这里再详细的介绍其底层物理存储结构。ETCD 中底层存储就是 <code>Backend</code> 这个接口，其主要提供读写事务的能力。Backend 的组成如下图所示，包含 bblot 和 treeIndex 两个部分。</p>
+<p><img src="assists/etcd-data-model.png" alt=""></p>
+<h2 id="bblot">bblot</h2>
+<p>实现上，ETCD 目前（v3.4.9）是采用 <a href="https://github.com/etcd-io/bbolt">bbolt</a> 数据库，这个数据库是一种内置的数据库，和 sqlite 有些相似。bbolt 是纯 go 语言编写的 KV 数据库，其提供简单、高效并且可靠数据存储，但不能提供类似 MySQL 这种数据库的全部功能。</p>
+<p>bblot 可以提供有效的数据一致性和线程安全保证，但是其在处理并发上有些欠缺。 bblot 允许多个读事务并行，但只允许 <strong>同时存在一个写事务</strong>，当同时开启多个写事务时，事务会被阻塞直到上一个写事务完成。</p>
+<p>bblot 的数据存放在单独的文件中，一个数据库文件也就对应一个 <strong>DB</strong>。在 DB 内对存储按 <strong>Bucket</strong> 组织，每个 DB 有都有一个 <strong>rootBucket</strong>，其在 DB 创建时就会初始化。然后，每个 rootBucket 下可以拥有多个 <strong>subBucket</strong> 如下图所示，是一个树型结构。Bucket 可以理解为命名空间， Bucket 内部是一颗 <a href="https://hadyang.github.io/interview/docs/basic/algo/tree/#b%E6%A0%91-1">B+ 树</a>。</p>
+<p><img src="assists/bblot-buckets.png" alt=""></p>
+<p>ECTD 提供 MVCC 的能力，看起来 bblot 本身并不提供这种支持。所以 ETCD 在 bblot 中存储的不是用户提交的 KV 数据，而是将 <strong>revision</strong> 作为键，将 KV 数据以及一些其他辅助信息存储为值。</p>
+<p><code>revision</code> 表示键空间的修改，其拥有两个属性： <code>main</code> 表示一次键空间的原子操作（事务提交）， <code>sub</code> 表示单个事务内部的多次修改。每次事务（单Key的写入也会开启事务）提交后 <code>main</code> 都会递增。</p>
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">revision</span> <span class="kd">struct</span> <span class="p">{</span>
+	<span class="nx">main</span> <span class="kt">int64</span>
+	<span class="nx">sub</span> <span class="kt">int64</span>
+<span class="p">}</span>
+</code></pre></div><p>bblot 中存储的值包含用户提交的 KV 、版本信息以及 Lease。</p>
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">KeyValue</span> <span class="kd">struct</span> <span class="p">{</span>
+	<span class="nx">Key</span> <span class="p">[]</span><span class="kt">byte</span> 
+	<span class="nx">CreateRevision</span> <span class="kt">int64</span>
+	<span class="nx">ModRevision</span> <span class="kt">int64</span>
+	<span class="nx">Version</span> <span class="kt">int64</span> 
+	<span class="nx">Value</span> <span class="p">[]</span><span class="kt">byte</span>
+	<span class="nx">Lease</span> <span class="kt">int64</span>
+<span class="p">}</span>
+</code></pre></div><h2 id="treeindex">TreeIndex</h2>
+<p>为了加速用户 Key 的查找，ETCD 还将 KV 数据中的 Key 单独存放。使用一个 <code>treeIndex</code> 数据结构存放 Key，其内部是一个 <a href="https://hadyang.github.io/interview/docs/basic/algo/tree/#b%E6%A0%91">B 树</a>。 <code>treeIndex</code> 是存储在 <strong>内存</strong> 中的，用于加速 Key 的查找，并且在每次服务启动的时候进行初始化，<strong>加载 DB 中的数据进行构建</strong>。<code>treeIndex</code> 中键存储的是 <code>keyIndex</code> 结构，包含 Key 以及 <code>generation</code> 信息。</p>
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">keyIndex</span> <span class="kd">struct</span> <span class="p">{</span>
+	<span class="nx">key</span>         <span class="p">[]</span><span class="kt">byte</span>
+	<span class="nx">modified</span>    <span class="nx">revision</span>
+	<span class="nx">generations</span> <span class="p">[]</span><span class="nx">generation</span>
+<span class="p">}</span>
+</code></pre></div><p>每个 <code>keyIndex</code> 都至少包含一个 <code>generation</code>，每个 <code>generation</code> 都表示 Key 的一个生命周期。当 Key 被删除时，会将当前的 <code>generation</code> 标记为删除，并生成新的空 <code>generation</code>。</p>
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">generation</span> <span class="kd">struct</span> <span class="p">{</span>
+	<span class="nx">ver</span>     <span class="kt">int64</span>
+	<span class="nx">created</span> <span class="nx">revision</span>
+	<span class="nx">revs</span>    <span class="p">[]</span><span class="nx">revision</span>
+<span class="p">}</span>
+</code></pre></div><p>对某一个 Key 进行一系列操作：<code>put(1.0);put(2.0);tombstone(3.0);put(4.0);tombstone(5.0)</code>，会生成如下数据：</p>
+<div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash">rev: <span class="m">5</span>
+generations:
+   <span class="o">{</span>empty<span class="o">}</span>
+   <span class="o">{</span>4.0, 5.0<span class="o">(</span>t<span class="o">)}</span>
+   <span class="o">{</span>1.0, 2.0, 3.0<span class="o">(</span>t<span class="o">)}</span>
+</code></pre></div><p>当进行数据压缩时，如果 <code>generation</code> 中包含的 revision 小于被压缩的 revision，则 <code>generation</code> 中的 revision 会被移除：</p>
+<div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash">compact<span class="o">(</span>2<span class="o">)</span> on the previous example
+generations:
+   <span class="o">{</span>empty<span class="o">}</span>
+   <span class="o">{</span>4.0, 5.0<span class="o">(</span>t<span class="o">)}</span>
+   <span class="o">{</span>2.0, 3.0<span class="o">(</span>t<span class="o">)}</span>
+</code></pre></div><p>如果 <code>generation</code> 中所有的 revision 都被压缩了，则 <code>generation</code> 会被移除：</p>
+<div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash">compact<span class="o">(</span>4<span class="o">)</span>
+generations:
+   <span class="o">{</span>empty<span class="o">}</span>
+   <span class="o">{</span>4.0, 5.0<span class="o">(</span>t<span class="o">)}</span>
+</code></pre></div><p>如果 <code>keyIndex</code> 中所有的 <code>generation</code> 都被移除，则 <code>keyIndex</code> 会被移除：</p>
+<div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash">compact<span class="o">(</span>5<span class="o">)</span>:
+generations:
+   <span class="o">{</span>empty<span class="o">}</span> -&gt; key SHOULD be removed.
+
+compact<span class="o">(</span>6<span class="o">)</span>:
+generations:
+   <span class="o">{</span>empty<span class="o">}</span> -&gt; key SHOULD be removed.
+</code></pre></div>
+    </div>
+
+    
+<footer class="post-footer">
+      
+      <nav class="post-nav">
+        <a class="prev" href="/2020/11/innodb-row-format/">
+            <i class="iconfont icon-left"></i>
+            <span class="prev-text nav-default">【Inoodb】行格式</span>
+            <span class="prev-text nav-mobile">上一篇</span>
+          </a>
+        <a class="next" href="/2020/07/etcd-overview/">
+            <span class="next-text nav-default">【ETCD】初探</span>
+            <span class="next-text nav-mobile">下一篇</span>
+            <i class="iconfont icon-right"></i>
+          </a>
+      </nav>
+    </footer>
+  </article>
+        </div>
+        <div id="gitalk-container"></div>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js" crossorigin="anonymous"></script>
+    <script type="text/javascript">
+      var gitalk = new Gitalk({
+        id: '\/2020\/07\/etcd-data-model\/',
+        title: '【ETCD】存储模型',
+        clientID: '64b9f11ba0a3291ee49e',
+        clientSecret: '8632b99db733cc33fd8f6fe85680f63f0db9d872',
+        repo: 'hadyang.github.io',
+        owner: 'hadyang',
+        admin: ['hadyang'],
+        body: decodeURI(location.href)
+      });
+      gitalk.render('gitalk-container');
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://github.com/gitalk/gitalk">comments powered by gitalk.</a></noscript>
+
+  
+
+  
+
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="social-links">
+  <a href="" type="application/rss+xml" class="iconfont icon-rss" title="rss"></a>
+</div>
+
+<div class="copyright">
+  <span class="power-by">
+    由 <a class="hexo-link" href="https://gohugo.io">Hugo</a> 强力驱动
+  </span>
+  <span class="division">|</span>
+  <span class="theme-info">
+    主题 -
+    <a class="theme-link" href="https://github.com/olOwOlo/hugo-theme-even">Even</a>
+  </span>
+
+  
+
+  <span class="copyright-year">
+    &copy; 
+    2017 - 
+    2021<span class="heart"><i class="iconfont icon-heart"></i></span><span>HadYang</span>
+  </span>
+</div>
+
+    </footer>
+
+    <div class="back-to-top" id="back-to-top">
+      <i class="iconfont icon-up"></i>
+    </div>
+  </div>
+  
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/slideout@1.0.1/dist/slideout.min.js" integrity="sha256-t+zJ/g8/KXIJMjSVQdnibt4dlaDxc9zXr/9oNPeWqdg=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.js" integrity="sha256-XVLffZaxoWfGUEbdzuLi7pwaUJv1cecsQJQqGLe7axY=" crossorigin="anonymous"></script>
+
+
+
+<script type="text/javascript" src="/js/main.min.c12618f9a600c40bd024996677e951e64d3487006775aeb22e200c990006c5c7.js"></script>
+  <script type="text/javascript">
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$','$'], ['\\(','\\)']],
+        }
+    };
+  </script>
+  <script async src="https://cdn.jsdelivr.net/npm/mathjax@3.0.5/es5/tex-mml-chtml.js" integrity="sha256-HGLuEfFcsUJGhvB8cQ8nr0gai9EucOOaIxFw7qxmd+w=" crossorigin="anonymous"></script>
+
+
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+	ga('create', 'UA-157595781-2', 'auto');
+	ga('set', 'anonymizeIp', true);
+	ga('send', 'pageview');
+}
+</script>
+<script async src='https://www.google-analytics.com/analytics.js'></script>
+
+
+
+
+
+
+
+</body>
+</html>

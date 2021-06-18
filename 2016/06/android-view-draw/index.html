@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>View的绘制过程 - HadYang</title>
+  <meta name="renderer" content="webkit" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<meta name="theme-color" content="#f8f5ec" />
+<meta name="msapplication-navbutton-color" content="#f8f5ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
+
+
+<meta name="author" content="HadYang" /><meta name="description" content="上次我们分析了Activity的启动过程，我们已经分析到ActivityThread.main函数，接下来两篇文章我们分析Activity的绘制、时间分发过程。以前，Activity的绘制在我的印象中就measure、lyaout、draw三个过程，对于这三个过程具体的调用过程和细节知之甚少，下面我们就来分析一下Activity的绘制过程。
+" /><meta name="keywords" content="Java" />
+
+
+
+
+
+
+<meta name="generator" content="Hugo 0.73.0 with theme even" />
+
+
+<link rel="canonical" href="https://hadyang.github.io/2016/06/android-view-draw/" />
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="manifest" href="/manifest.json">
+<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
+
+
+
+<link href="/sass/main.min.75c01efdcbc2767fdfe1f22f5a6fccc8c390d3cda325742f698bd0c6344144be.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.css" integrity="sha256-7TyXnr2YU040zfSP+rEcz29ggW4j56/ujTPwjMzyqFY=" crossorigin="anonymous">
+
+
+<meta property="og:title" content="View的绘制过程" />
+<meta property="og:description" content="上次我们分析了Activity的启动过程，我们已经分析到ActivityThread.main函数，接下来两篇文章我们分析Activity的绘制、时间分发过程。以前，Activity的绘制在我的印象中就measure、lyaout、draw三个过程，对于这三个过程具体的调用过程和细节知之甚少，下面我们就来分析一下Activity的绘制过程。" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://hadyang.github.io/2016/06/android-view-draw/" />
+<meta property="article:published_time" content="2016-06-01T00:00:00+00:00" />
+<meta property="article:modified_time" content="2016-06-01T00:00:00+00:00" />
+<meta itemprop="name" content="View的绘制过程">
+<meta itemprop="description" content="上次我们分析了Activity的启动过程，我们已经分析到ActivityThread.main函数，接下来两篇文章我们分析Activity的绘制、时间分发过程。以前，Activity的绘制在我的印象中就measure、lyaout、draw三个过程，对于这三个过程具体的调用过程和细节知之甚少，下面我们就来分析一下Activity的绘制过程。">
+<meta itemprop="datePublished" content="2016-06-01T00:00:00&#43;00:00" />
+<meta itemprop="dateModified" content="2016-06-01T00:00:00&#43;00:00" />
+<meta itemprop="wordCount" content="1957">
+
+
+
+<meta itemprop="keywords" content="源码," /><meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="View的绘制过程"/>
+<meta name="twitter:description" content="上次我们分析了Activity的启动过程，我们已经分析到ActivityThread.main函数，接下来两篇文章我们分析Activity的绘制、时间分发过程。以前，Activity的绘制在我的印象中就measure、lyaout、draw三个过程，对于这三个过程具体的调用过程和细节知之甚少，下面我们就来分析一下Activity的绘制过程。"/>
+
+<!--[if lte IE 9]>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js"></script>
+<![endif]-->
+
+<!--[if lt IE 9]>
+  <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+<![endif]-->
+
+</head>
+<body>
+  <div id="mobile-navbar" class="mobile-navbar">
+  <div class="mobile-header-logo">
+    <a href="/" class="logo">HadYang</a>
+  </div>
+  <div class="mobile-navbar-icon">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
+<nav id="mobile-menu" class="mobile-menu slideout-menu">
+  <ul class="mobile-menu-list">
+    <a href="https://hadyang.github.io/interview/">
+        <li class="mobile-menu-item">Interview</li>
+      </a><a href="/categories/">
+        <li class="mobile-menu-item">分类</li>
+      </a>
+  </ul>
+
+  
+
+
+</nav>
+
+  <div class="container" id="mobile-panel">
+    <header id="header" class="header">
+        <div class="logo-wrapper">
+  <a href="/" class="logo">HadYang</a>
+</div>
+
+
+
+
+
+<nav class="site-navbar">
+  <ul id="menu" class="menu">
+    <li class="menu-item">
+        <a class="menu-item-link" href="https://hadyang.github.io/interview/">Interview</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/categories/">分类</a>
+      </li>
+  </ul>
+</nav>
+
+    </header>
+
+    <main id="main" class="main">
+      <div class="content-wrapper">
+        <div id="content" class="content">
+          <article class="post">
+    
+    <header class="post-header">
+      <h1 class="post-title">View的绘制过程</h1>
+
+      <div class="post-meta">
+        <span class="post-time"> 2016-06-01 </span>
+        <div class="post-category">
+            <a href="/categories/android/"> Android </a>
+            </div>
+          <span class="more-meta"> 约 1957 字 </span>
+          <span class="more-meta"> 预计阅读 4 分钟 </span>
+        
+      </div>
+    </header>
+
+    <div class="post-toc" id="post-toc">
+  <h2 class="post-toc-title">文章目录</h2>
+  <div class="post-toc-content always-active">
+    <nav id="TableOfContents"></nav>
+  </div>
+</div>
+    <div class="post-content">
+      <p>上次我们分析了Activity的启动过程，我们已经分析到ActivityThread.main函数，接下来两篇文章我们分析Activity的绘制、时间分发过程。以前，Activity的绘制在我的印象中就measure、lyaout、draw三个过程，对于这三个过程具体的调用过程和细节知之甚少，下面我们就来分析一下Activity的绘制过程。</p>
+<ul>
+<li>Step1 &ndash; ActivityThread.main()</li>
+</ul>
+<div class="highlight"><pre class="chroma"><code class="language-Java" data-lang="Java"><span class="c1">//android.app.ActivityThread.java
+</span><span class="c1"></span> <span class="kd">public</span> <span class="kd">static</span> <span class="kd">final</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="n">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+        <span class="o">...</span>
+        <span class="c1">//初始化主线程消息循环
+</span><span class="c1"></span>        <span class="n">Looper</span><span class="o">.</span><span class="na">prepareMainLooper</span><span class="o">();</span>
+
+        <span class="c1">//由于ApplicationThread是ActivityThread的成员变量，所以同时也new ApplicationThread
+</span><span class="c1"></span>        <span class="n">ActivityThread</span> <span class="n">thread</span> <span class="o">=</span> <span class="k">new</span> <span class="n">ActivityThread</span><span class="o">();</span>
+
+        <span class="c1">//step2
+</span><span class="c1"></span>        <span class="n">thread</span><span class="o">.</span><span class="na">attach</span><span class="o">(</span><span class="kc">false</span><span class="o">);</span>
+
+        <span class="n">Looper</span><span class="o">.</span><span class="na">loop</span><span class="o">();</span>
+
+        <span class="o">...</span>
+        <span class="n">thread</span><span class="o">.</span><span class="na">detach</span><span class="o">();</span>
+        <span class="o">...</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div><ul>
+<li>Step2 &ndash; attach(false)</li>
+</ul>
+<div class="highlight"><pre class="chroma"><code class="language-Java" data-lang="Java"><span class="c1">//android.app.ActivityThread.java
+</span><span class="c1"></span><span class="kd">private</span> <span class="kd">final</span> <span class="kt">void</span> <span class="nf">attach</span><span class="o">(</span><span class="kt">boolean</span> <span class="n">system</span><span class="o">)</span> <span class="o">{</span>
+        <span class="n">sThreadLocal</span><span class="o">.</span><span class="na">set</span><span class="o">(</span><span class="k">this</span><span class="o">);</span>
+        <span class="n">mSystemThread</span> <span class="o">=</span> <span class="n">system</span><span class="o">;</span>
+        <span class="c1">//非系统应用
+</span><span class="c1"></span>        <span class="k">if</span> <span class="o">(!</span><span class="n">system</span><span class="o">)</span> <span class="o">{</span>
+            <span class="n">ViewRoot</span><span class="o">.</span><span class="na">addFirstDrawHandler</span><span class="o">(</span><span class="k">new</span> <span class="n">Runnable</span><span class="o">()</span> <span class="o">{</span>
+                <span class="kd">public</span> <span class="kt">void</span> <span class="nf">run</span><span class="o">()</span> <span class="o">{</span>
+                    <span class="n">ensureJitEnabled</span><span class="o">();</span><span class="c1">//确保开启JNI
+</span><span class="c1"></span>                <span class="o">}</span>
+            <span class="o">});</span>
+           <span class="o">...</span>
+            <span class="n">RuntimeInit</span><span class="o">.</span><span class="na">setApplicationObject</span><span class="o">(</span><span class="n">mAppThread</span><span class="o">.</span><span class="na">asBinder</span><span class="o">());</span>
+            <span class="n">IActivityManager</span> <span class="n">mgr</span> <span class="o">=</span> <span class="n">ActivityManagerNative</span><span class="o">.</span><span class="na">getDefault</span><span class="o">();</span><span class="c1">//获取ActivityManagerService的Binder代理
+</span><span class="c1"></span>            <span class="k">try</span> <span class="o">{</span>
+                <span class="c1">//Step3
+</span><span class="c1"></span>                <span class="n">mgr</span><span class="o">.</span><span class="na">attachApplication</span><span class="o">(</span><span class="n">mAppThread</span><span class="o">);</span>
+            <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="n">RemoteException</span> <span class="n">ex</span><span class="o">)</span> <span class="o">{</span>
+            <span class="o">}</span>
+        <span class="o">}</span>
+        <span class="c1">//系统应用
+</span><span class="c1"></span>        <span class="o">...</span>
+
+        <span class="c1">//添加OnLowMemory等事件回调
+</span><span class="c1"></span>        <span class="n">ViewRoot</span><span class="o">.</span><span class="na">addConfigCallback</span><span class="o">(...);</span>
+</code></pre></div><ul>
+<li>Step3 &ndash; attachApplication(mAppThread)</li>
+</ul>
+<div class="highlight"><pre class="chroma"><code class="language-Java" data-lang="Java"><span class="c1">//com.android.server.am.ActivityManagerService.java
+</span><span class="c1"></span><span class="kd">public</span> <span class="kd">final</span> <span class="kt">void</span> <span class="nf">attachApplication</span><span class="o">(</span><span class="n">IApplicationThread</span> <span class="n">thread</span><span class="o">)</span> <span class="o">{</span>
+        <span class="kd">synchronized</span> <span class="o">(</span><span class="k">this</span><span class="o">)</span> <span class="o">{</span>
+            <span class="kt">int</span> <span class="n">callingPid</span> <span class="o">=</span> <span class="n">Binder</span><span class="o">.</span><span class="na">getCallingPid</span><span class="o">();</span><span class="c1">//获取调用进程PID
+</span><span class="c1"></span>            <span class="kd">final</span> <span class="kt">long</span> <span class="n">origId</span> <span class="o">=</span> <span class="n">Binder</span><span class="o">.</span><span class="na">clearCallingIdentity</span><span class="o">();</span>
+            <span class="c1">//Step4
+</span><span class="c1"></span>            <span class="n">attachApplicationLocked</span><span class="o">(</span><span class="n">thread</span><span class="o">,</span> <span class="n">callingPid</span><span class="o">);</span>
+            <span class="n">Binder</span><span class="o">.</span><span class="na">restoreCallingIdentity</span><span class="o">(</span><span class="n">origId</span><span class="o">);</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+</code></pre></div><ul>
+<li>Step4 &ndash; attachApplicationLocked()</li>
+</ul>
+<div class="highlight"><pre class="chroma"><code class="language-Java" data-lang="Java"><span class="c1">//com.android.server.am.ActivityManagerService.java
+</span><span class="c1"></span><span class="kd">private</span> <span class="kd">final</span> <span class="kt">boolean</span> <span class="nf">attachApplicationLocked</span><span class="o">(</span><span class="n">IApplicationThread</span> <span class="n">thread</span><span class="o">,</span><span class="kt">int</span> <span class="n">pid</span><span class="o">)</span> <span class="o">{</span>
+
+        <span class="c1">// Find the application record that is being attached...  either via
+</span><span class="c1"></span>        <span class="c1">// the pid if we are running in multiple processes, or just pull the
+</span><span class="c1"></span>        <span class="c1">// next app record if we are emulating process with anonymous threads.
+</span><span class="c1"></span>        <span class="n">ProcessRecord</span> <span class="n">app</span><span class="o">;</span>
+        <span class="k">if</span> <span class="o">(</span><span class="n">pid</span> <span class="o">!=</span> <span class="n">MY_PID</span> <span class="o">&amp;&amp;</span> <span class="n">pid</span> <span class="o">&gt;=</span> <span class="n">0</span><span class="o">)</span> <span class="o">{</span>
+            <span class="kd">synchronized</span> <span class="o">(</span><span class="n">mPidsSelfLocked</span><span class="o">)</span> <span class="o">{</span>
+                <span class="n">app</span> <span class="o">=</span> <span class="n">mPidsSelfLocked</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="n">pid</span><span class="o">);</span>
+            <span class="o">}</span>
+
+        <span class="o">...</span>
+        <span class="c1">// 初始化ProcessRecord，这个变量是存储在AMS中的
+</span><span class="c1"></span>        <span class="n">app</span><span class="o">.</span><span class="na">thread</span> <span class="o">=</span> <span class="n">thread</span><span class="o">;</span>
+        <span class="n">app</span><span class="o">.</span><span class="na">curAdj</span> <span class="o">=</span> <span class="n">app</span><span class="o">.</span><span class="na">setAdj</span> <span class="o">=</span> <span class="o">-</span><span class="n">100</span><span class="o">;</span>
+        <span class="n">app</span><span class="o">.</span><span class="na">curSchedGroup</span> <span class="o">=</span> <span class="n">Process</span><span class="o">.</span><span class="na">THREAD_GROUP_DEFAULT</span><span class="o">;</span>
+        <span class="n">app</span><span class="o">.</span><span class="na">setSchedGroup</span> <span class="o">=</span> <span class="n">Process</span><span class="o">.</span><span class="na">THREAD_GROUP_BG_NONINTERACTIVE</span><span class="o">;</span>
+        <span class="n">app</span><span class="o">.</span><span class="na">forcingToForeground</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
+        <span class="n">app</span><span class="o">.</span><span class="na">foregroundServices</span> <span class="o">=</span> <span class="kc">false</span><span class="o">;</span>
+        <span class="n">app</span><span class="o">.</span><span class="na">debugging</span> <span class="o">=</span> <span class="kc">false</span><span class="o">;</span>
+
+        <span class="o">...</span>
+          <span class="c1">//命令客户进程运行指定的Activity所在的APK文件，这个函数最终会调用ActivityThread.handleBindApplication
+</span><span class="c1"></span>          <span class="c1">//Step5
+</span><span class="c1"></span>          <span class="n">thread</span><span class="o">.</span><span class="na">bindApplication</span><span class="o">(...)</span>
+        <span class="o">...</span>
+
+        <span class="c1">//Step6
+</span><span class="c1"></span>        <span class="k">if</span> <span class="o">(</span><span class="n">realStartActivityLocked</span><span class="o">(</span><span class="n">hr</span><span class="o">,</span> <span class="n">app</span><span class="o">,</span> <span class="kc">true</span><span class="o">,</span> <span class="kc">true</span><span class="o">))</span> <span class="o">{</span>
+                        <span class="n">didSomething</span> <span class="o">=</span> <span class="kc">true</span><span class="o">;</span>
+         <span class="o">}</span>
+
+        <span class="c1">// Find any services that should be running in this process...
+</span><span class="c1"></span>        <span class="o">...</span>
+
+        <span class="c1">// Check if the next broadcast receiver is in this process...
+</span><span class="c1"></span>        <span class="o">...</span>
+
+        <span class="c1">// Check whether the next backup agent is in this process...
+</span><span class="c1"></span>        <span class="o">...</span>
+</code></pre></div><ul>
+<li>Step5 &ndash; handleBindApplication(AppBindData)</li>
+</ul>
+<div class="highlight"><pre class="chroma"><code class="language-Java" data-lang="Java"><span class="c1">//android.os.ActivityThread.java
+</span><span class="c1"></span><span class="kd">private</span> <span class="kd">final</span> <span class="kt">void</span> <span class="nf">handleBindApplication</span><span class="o">(</span><span class="n">AppBindData</span> <span class="n">data</span><span class="o">)</span> <span class="o">{</span>
+        <span class="o">...</span>
+
+        <span class="c1">// 新建Application，Step5.1
+</span><span class="c1"></span>        <span class="n">Application</span> <span class="n">app</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="na">info</span><span class="o">.</span><span class="na">makeApplication</span><span class="o">(</span><span class="n">data</span><span class="o">.</span><span class="na">restrictedBackupMode</span><span class="o">,</span> <span class="kc">null</span><span class="o">);</span>
+        <span class="n">mInitialApplication</span> <span class="o">=</span> <span class="n">app</span><span class="o">;</span>
+</code></pre></div><ul>
+<li>Step5.1 &ndash; makeApplication(boolean forceDefaultAppClass,Instrumentation instrumentation)</li>
+</ul>
+<div class="highlight"><pre class="chroma"><code class="language-Java" data-lang="Java"><span class="c1">//android.os.ActivityThread.java
+</span><span class="c1"></span><span class="kd">public</span> <span class="n">Application</span> <span class="nf">makeApplication</span><span class="o">(</span><span class="kt">boolean</span> <span class="n">forceDefaultAppClass</span><span class="o">,</span> <span class="n">Instrumentation</span> <span class="n">instrumentation</span><span class="o">)</span> <span class="o">{</span>
+            <span class="k">if</span> <span class="o">(</span><span class="n">mApplication</span> <span class="o">!=</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+                <span class="k">return</span> <span class="n">mApplication</span><span class="o">;</span>
+            <span class="o">}</span>
+
+            <span class="n">Application</span> <span class="n">app</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
+
+            <span class="n">String</span> <span class="n">appClass</span> <span class="o">=</span> <span class="n">mApplicationInfo</span><span class="o">.</span><span class="na">className</span><span class="o">;</span>
+
+            <span class="k">try</span> <span class="o">{</span>
+                <span class="n">java</span><span class="o">.</span><span class="na">lang</span><span class="o">.</span><span class="na">ClassLoader</span> <span class="n">cl</span> <span class="o">=</span> <span class="n">getClassLoader</span><span class="o">();</span>
+                <span class="n">ContextImpl</span> <span class="n">appContext</span> <span class="o">=</span> <span class="k">new</span> <span class="n">ContextImpl</span><span class="o">();</span>
+                <span class="n">appContext</span><span class="o">.</span><span class="na">init</span><span class="o">(</span><span class="k">this</span><span class="o">,</span> <span class="kc">null</span><span class="o">,</span> <span class="n">mActivityThread</span><span class="o">);</span>
+                <span class="c1">//创建Application对象，并将appContext attach到Application对象上
+</span><span class="c1"></span>                <span class="n">app</span> <span class="o">=</span> <span class="n">mActivityThread</span><span class="o">.</span><span class="na">mInstrumentation</span><span class="o">.</span><span class="na">newApplication</span><span class="o">(</span><span class="n">cl</span><span class="o">,</span> <span class="n">appClass</span><span class="o">,</span> <span class="n">appContext</span><span class="o">);</span>
+                <span class="n">appContext</span><span class="o">.</span><span class="na">setOuterContext</span><span class="o">(</span><span class="n">app</span><span class="o">);</span>
+            <span class="o">}</span>
+            <span class="n">mActivityThread</span><span class="o">.</span><span class="na">mAllApplications</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="n">app</span><span class="o">);</span>
+            <span class="n">mApplication</span> <span class="o">=</span> <span class="n">app</span><span class="o">;</span>
+
+            <span class="k">return</span> <span class="n">app</span><span class="o">;</span>
+        <span class="o">}</span>
+
+</code></pre></div><ul>
+<li>Step6 &ndash; realStartActivityLocked()</li>
+</ul>
+<div class="highlight"><pre class="chroma"><code class="language-Java" data-lang="Java"><span class="c1">//com.android.server.am.ActivityManagerService.java
+</span><span class="c1"></span><span class="kd">private</span> <span class="kd">final</span> <span class="kt">boolean</span> <span class="nf">realStartActivityLocked</span><span class="o">(</span><span class="n">HistoryRecord</span> <span class="n">r</span><span class="o">,</span><span class="n">ProcessRecord</span> <span class="n">app</span><span class="o">,</span> <span class="kt">boolean</span> <span class="n">andResume</span><span class="o">,</span> <span class="kt">boolean</span> <span class="n">checkConfig</span><span class="o">)</span>
+            <span class="kd">throws</span> <span class="n">RemoteException</span> <span class="o">{</span>
+        <span class="o">...</span>
+        <span class="n">r</span><span class="o">.</span><span class="na">app</span> <span class="o">=</span> <span class="n">app</span><span class="o">;</span>
+        <span class="o">...</span>
+        <span class="c1">//Step7
+</span><span class="c1"></span>        <span class="n">app</span><span class="o">.</span><span class="na">thread</span><span class="o">.</span><span class="na">scheduleLaunchActivity</span><span class="o">(</span><span class="k">new</span> <span class="n">Intent</span><span class="o">(</span><span class="n">r</span><span class="o">.</span><span class="na">intent</span><span class="o">),</span> <span class="n">r</span><span class="o">,</span>
+                    <span class="n">System</span><span class="o">.</span><span class="na">identityHashCode</span><span class="o">(</span><span class="n">r</span><span class="o">),</span>
+                    <span class="n">r</span><span class="o">.</span><span class="na">info</span><span class="o">,</span> <span class="n">r</span><span class="o">.</span><span class="na">icicle</span><span class="o">,</span> <span class="n">results</span><span class="o">,</span> <span class="n">newIntents</span><span class="o">,</span> <span class="o">!</span><span class="n">andResume</span><span class="o">,</span>
+                    <span class="n">isNextTransitionForward</span><span class="o">());</span>
+        <span class="o">...</span>
+</code></pre></div><ul>
+<li>Step7 &ndash; scheduleLaunchActivity</li>
+</ul>
+<p>通过消息循环最终会调用handleLaunchActivity</p>
+<div class="highlight"><pre class="chroma"><code class="language-Java" data-lang="Java"><span class="c1">//android.os.ActivityThread.java
+</span><span class="c1"></span><span class="kd">private</span> <span class="kd">final</span> <span class="kt">void</span> <span class="nf">handleLaunchActivity</span><span class="o">(</span><span class="n">ActivityRecord</span> <span class="n">r</span><span class="o">,</span> <span class="n">Intent</span> <span class="n">customIntent</span><span class="o">)</span> <span class="o">{</span>
+        <span class="o">...</span>
+        <span class="c1">//Step8
+</span><span class="c1"></span>        <span class="n">Activity</span> <span class="n">a</span> <span class="o">=</span> <span class="n">performLaunchActivity</span><span class="o">(</span><span class="n">r</span><span class="o">,</span> <span class="n">customIntent</span><span class="o">);</span>
+        <span class="o">...</span>
+
+        <span class="k">if</span> <span class="o">(</span><span class="n">a</span> <span class="o">!=</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+            <span class="n">r</span><span class="o">.</span><span class="na">createdConfig</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Configuration</span><span class="o">(</span><span class="n">mConfiguration</span><span class="o">);</span>
+            <span class="n">Bundle</span> <span class="n">oldState</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="na">state</span><span class="o">;</span>
+            <span class="c1">//Step9
+</span><span class="c1"></span>            <span class="n">handleResumeActivity</span><span class="o">(</span><span class="n">r</span><span class="o">.</span><span class="na">token</span><span class="o">,</span> <span class="kc">false</span><span class="o">,</span> <span class="n">r</span><span class="o">.</span><span class="na">isForward</span><span class="o">);</span>
+         <span class="o">}</span>
+        <span class="o">...</span>
+<span class="o">}</span>
+</code></pre></div><ul>
+<li>Step8 &ndash; performLaunchActivity</li>
+</ul>
+<div class="highlight"><pre class="chroma"><code class="language-Java" data-lang="Java"><span class="kd">private</span> <span class="kd">final</span> <span class="n">Activity</span> <span class="nf">performLaunchActivity</span><span class="o">(</span><span class="n">ActivityRecord</span> <span class="n">r</span><span class="o">,</span> <span class="n">Intent</span> <span class="n">customIntent</span><span class="o">)</span> <span class="o">{</span>
+        <span class="n">ActivityInfo</span> <span class="n">aInfo</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="na">activityInfo</span><span class="o">;</span>
+        <span class="o">...</span>
+        <span class="c1">//设置启动Activity信息
+</span><span class="c1"></span>        <span class="n">ComponentName</span> <span class="n">component</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="na">intent</span><span class="o">.</span><span class="na">getComponent</span><span class="o">();</span>
+        <span class="k">if</span> <span class="o">(</span><span class="n">component</span> <span class="o">==</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+            <span class="n">component</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="na">intent</span><span class="o">.</span><span class="na">resolveActivity</span><span class="o">(</span>
+                <span class="n">mInitialApplication</span><span class="o">.</span><span class="na">getPackageManager</span><span class="o">());</span>
+            <span class="n">r</span><span class="o">.</span><span class="na">intent</span><span class="o">.</span><span class="na">setComponent</span><span class="o">(</span><span class="n">component</span><span class="o">);</span>
+        <span class="o">}</span>
+
+        <span class="k">if</span> <span class="o">(</span><span class="n">r</span><span class="o">.</span><span class="na">activityInfo</span><span class="o">.</span><span class="na">targetActivity</span> <span class="o">!=</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+            <span class="n">component</span> <span class="o">=</span> <span class="k">new</span> <span class="n">ComponentName</span><span class="o">(</span><span class="n">r</span><span class="o">.</span><span class="na">activityInfo</span><span class="o">.</span><span class="na">packageName</span><span class="o">,</span>
+                    <span class="n">r</span><span class="o">.</span><span class="na">activityInfo</span><span class="o">.</span><span class="na">targetActivity</span><span class="o">);</span>
+        <span class="o">}</span>
+
+        <span class="n">Activity</span> <span class="n">activity</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
+       <span class="o">...</span>
+        <span class="c1">//通过反射生成Activity
+</span><span class="c1"></span>        <span class="n">java</span><span class="o">.</span><span class="na">lang</span><span class="o">.</span><span class="na">ClassLoader</span> <span class="n">cl</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="na">packageInfo</span><span class="o">.</span><span class="na">getClassLoader</span><span class="o">();</span>
+        <span class="n">activity</span> <span class="o">=</span> <span class="n">mInstrumentation</span><span class="o">.</span><span class="na">newActivity</span><span class="o">(</span><span class="n">cl</span><span class="o">,</span> <span class="n">component</span><span class="o">.</span><span class="na">getClassName</span><span class="o">(),</span> <span class="n">r</span><span class="o">.</span><span class="na">intent</span><span class="o">);</span>
+        <span class="n">r</span><span class="o">.</span><span class="na">intent</span><span class="o">.</span><span class="na">setExtrasClassLoader</span><span class="o">(</span><span class="n">cl</span><span class="o">);</span>
+        <span class="o">...</span>
+
+         <span class="n">Application</span> <span class="n">app</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="na">packageInfo</span><span class="o">.</span><span class="na">makeApplication</span><span class="o">(</span><span class="kc">false</span><span class="o">,</span> <span class="n">mInstrumentation</span><span class="o">);</span>
+
+            <span class="k">if</span> <span class="o">(</span><span class="n">activity</span> <span class="o">!=</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+                <span class="n">ContextImpl</span> <span class="n">appContext</span> <span class="o">=</span> <span class="k">new</span> <span class="n">ContextImpl</span><span class="o">();</span>
+                <span class="n">appContext</span><span class="o">.</span><span class="na">init</span><span class="o">(</span><span class="n">r</span><span class="o">.</span><span class="na">packageInfo</span><span class="o">,</span> <span class="n">r</span><span class="o">.</span><span class="na">token</span><span class="o">,</span> <span class="k">this</span><span class="o">);</span>
+                <span class="n">appContext</span><span class="o">.</span><span class="na">setOuterContext</span><span class="o">(</span><span class="n">activity</span><span class="o">);</span>
+                <span class="n">CharSequence</span> <span class="n">title</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="na">activityInfo</span><span class="o">.</span><span class="na">loadLabel</span><span class="o">(</span><span class="n">appContext</span><span class="o">.</span><span class="na">getPackageManager</span><span class="o">());</span>
+                <span class="n">Configuration</span> <span class="n">config</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Configuration</span><span class="o">(</span><span class="n">mConfiguration</span><span class="o">);</span>
+
+                <span class="c1">//Step8.1
+</span><span class="c1"></span>                <span class="n">activity</span><span class="o">.</span><span class="na">attach</span><span class="o">(</span><span class="n">appContext</span><span class="o">,</span> <span class="k">this</span><span class="o">,</span> <span class="n">getInstrumentation</span><span class="o">(),</span> <span class="n">r</span><span class="o">.</span><span class="na">token</span><span class="o">,</span>
+                        <span class="n">r</span><span class="o">.</span><span class="na">ident</span><span class="o">,</span> <span class="n">app</span><span class="o">,</span> <span class="n">r</span><span class="o">.</span><span class="na">intent</span><span class="o">,</span> <span class="n">r</span><span class="o">.</span><span class="na">activityInfo</span><span class="o">,</span> <span class="n">title</span><span class="o">,</span> <span class="n">r</span><span class="o">.</span><span class="na">parent</span><span class="o">,</span>
+                        <span class="n">r</span><span class="o">.</span><span class="na">embeddedID</span><span class="o">,</span> <span class="n">r</span><span class="o">.</span><span class="na">lastNonConfigurationInstance</span><span class="o">,</span>
+                        <span class="n">r</span><span class="o">.</span><span class="na">lastNonConfigurationChildInstances</span><span class="o">,</span> <span class="n">config</span><span class="o">);</span>
+
+               <span class="c1">//调用Activity.OnCreate函数
+</span><span class="c1"></span>                <span class="n">mInstrumentation</span><span class="o">.</span><span class="na">callActivityOnCreate</span><span class="o">(</span><span class="n">activity</span><span class="o">,</span> <span class="n">r</span><span class="o">.</span><span class="na">state</span><span class="o">);</span>
+
+                <span class="k">if</span> <span class="o">(!</span><span class="n">r</span><span class="o">.</span><span class="na">activity</span><span class="o">.</span><span class="na">mFinished</span><span class="o">)</span> <span class="o">{</span>
+                    <span class="c1">//调用Activity.OnStart函数
+</span><span class="c1"></span>                    <span class="n">activity</span><span class="o">.</span><span class="na">performStart</span><span class="o">();</span>
+                    <span class="n">r</span><span class="o">.</span><span class="na">stopped</span> <span class="o">=</span> <span class="kc">false</span><span class="o">;</span>
+                <span class="o">}</span>
+        <span class="k">return</span> <span class="n">activity</span><span class="o">;</span>
+    <span class="o">}</span>
+</code></pre></div><ul>
+<li>Step8.1 &ndash; attach</li>
+</ul>
+<div class="highlight"><pre class="chroma"><code class="language-Java" data-lang="Java"><span class="c1">//android.app.Activity.java
+</span><span class="c1"></span><span class="kd">final</span> <span class="kt">void</span> <span class="nf">attach</span><span class="o">(</span><span class="n">Context</span> <span class="n">context</span><span class="o">,</span> <span class="n">ActivityThread</span> <span class="n">aThread</span><span class="o">,</span>
+            <span class="n">Instrumentation</span> <span class="n">instr</span><span class="o">,</span> <span class="n">IBinder</span> <span class="n">token</span><span class="o">,</span> <span class="kt">int</span> <span class="n">ident</span><span class="o">,</span>
+            <span class="n">Application</span> <span class="n">application</span><span class="o">,</span> <span class="n">Intent</span> <span class="n">intent</span><span class="o">,</span> <span class="n">ActivityInfo</span> <span class="n">info</span><span class="o">,</span>
+            <span class="n">CharSequence</span> <span class="n">title</span><span class="o">,</span> <span class="n">Activity</span> <span class="n">parent</span><span class="o">,</span> <span class="n">String</span> <span class="n">id</span><span class="o">,</span>
+            <span class="n">Object</span> <span class="n">lastNonConfigurationInstance</span><span class="o">,</span>
+            <span class="n">HashMap</span><span class="o">&lt;</span><span class="n">String</span><span class="o">,</span><span class="n">Object</span><span class="o">&gt;</span> <span class="n">lastNonConfigurationChildInstances</span><span class="o">,</span>
+            <span class="n">Configuration</span> <span class="n">config</span><span class="o">)</span> <span class="o">{</span>
+
+        <span class="c1">//将Context attach到activity
+</span><span class="c1"></span>        <span class="n">attachBaseContext</span><span class="o">(</span><span class="n">context</span><span class="o">);</span>
+
+        <span class="c1">//新建PhoneWindow对象
+</span><span class="c1"></span>        <span class="n">mWindow</span> <span class="o">=</span> <span class="k">new</span> <span class="n">PhoneWindow</span><span class="o">(</span><span class="k">this</span><span class="o">);</span>
+        <span class="n">mWindow</span><span class="o">.</span><span class="na">setCallback</span><span class="o">(</span><span class="k">this</span><span class="o">);</span>
+        <span class="n">mWindow</span><span class="o">.</span><span class="na">setOnWindowDismissedCallback</span><span class="o">(</span><span class="k">this</span><span class="o">);</span>
+        <span class="n">mWindow</span><span class="o">.</span><span class="na">getLayoutInflater</span><span class="o">().</span><span class="na">setPrivateFactory</span><span class="o">(</span><span class="k">this</span><span class="o">);</span>
+
+       <span class="o">...</span>       
+       <span class="c1">//设置UI线程
+</span><span class="c1"></span>       <span class="n">mUiThread</span> <span class="o">=</span> <span class="n">Thread</span><span class="o">.</span><span class="na">currentThread</span><span class="o">();</span>
+
+        <span class="c1">//设置Activity相关属性
+</span><span class="c1"></span>        <span class="n">mMainThread</span> <span class="o">=</span> <span class="n">aThread</span><span class="o">;</span>
+        <span class="n">mInstrumentation</span> <span class="o">=</span> <span class="n">instr</span><span class="o">;</span>
+        <span class="n">mToken</span> <span class="o">=</span> <span class="n">token</span><span class="o">;</span>
+        <span class="n">mIdent</span> <span class="o">=</span> <span class="n">ident</span><span class="o">;</span>
+        <span class="n">mApplication</span> <span class="o">=</span> <span class="n">application</span><span class="o">;</span>
+        <span class="n">mIntent</span> <span class="o">=</span> <span class="n">intent</span><span class="o">;</span>
+        <span class="n">mComponent</span> <span class="o">=</span> <span class="n">intent</span><span class="o">.</span><span class="na">getComponent</span><span class="o">();</span>
+        <span class="n">mActivityInfo</span> <span class="o">=</span> <span class="n">info</span><span class="o">;</span>
+        <span class="n">mTitle</span> <span class="o">=</span> <span class="n">title</span><span class="o">;</span>
+        <span class="n">mParent</span> <span class="o">=</span> <span class="n">parent</span><span class="o">;</span>
+        <span class="n">mEmbeddedID</span> <span class="o">=</span> <span class="n">id</span><span class="o">;</span>
+        <span class="n">mLastNonConfigurationInstance</span> <span class="o">=</span> <span class="n">lastNonConfigurationInstance</span><span class="o">;</span>
+        <span class="n">mLastNonConfigurationChildInstances</span> <span class="o">=</span> <span class="n">lastNonConfigurationChildInstances</span><span class="o">;</span>
+
+       <span class="o">...</span>    
+<span class="o">}</span>
+
+</code></pre></div><ul>
+<li>Step9 &ndash; handleResumeActivity</li>
+</ul>
+<div class="highlight"><pre class="chroma"><code class="language-Java" data-lang="Java"><span class="c1">//android.os.ActivityThread.java
+</span><span class="c1"></span><span class="kd">final</span> <span class="kt">void</span> <span class="nf">handleResumeActivity</span><span class="o">(</span><span class="n">IBinder</span> <span class="n">token</span><span class="o">,</span> <span class="kt">boolean</span> <span class="n">clearHide</span><span class="o">,</span> <span class="kt">boolean</span> <span class="n">isForward</span><span class="o">)</span> <span class="o">{</span>
+
+        <span class="c1">//这里会调用performRestart，通过状态来判断是否回调Activity.OnRestart()
+</span><span class="c1"></span>        <span class="n">ActivityRecord</span> <span class="n">r</span> <span class="o">=</span> <span class="n">performResumeActivity</span><span class="o">(</span><span class="n">token</span><span class="o">,</span> <span class="n">clearHide</span><span class="o">);</span>
+
+        <span class="k">if</span> <span class="o">(</span><span class="n">r</span> <span class="o">!=</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+            <span class="kd">final</span> <span class="n">Activity</span> <span class="n">a</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="na">activity</span><span class="o">;</span>
+            <span class="o">...</span>
+
+            <span class="k">if</span> <span class="o">(</span><span class="n">r</span><span class="o">.</span><span class="na">window</span> <span class="o">==</span> <span class="kc">null</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">a</span><span class="o">.</span><span class="na">mFinished</span> <span class="o">&amp;&amp;</span> <span class="n">willBeVisible</span><span class="o">)</span> <span class="o">{</span>
+                <span class="n">r</span><span class="o">.</span><span class="na">window</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="na">activity</span><span class="o">.</span><span class="na">getWindow</span><span class="o">();</span>
+                <span class="n">View</span> <span class="n">decor</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="na">window</span><span class="o">.</span><span class="na">getDecorView</span><span class="o">();</span>
+                <span class="n">decor</span><span class="o">.</span><span class="na">setVisibility</span><span class="o">(</span><span class="n">View</span><span class="o">.</span><span class="na">INVISIBLE</span><span class="o">);</span>
+                <span class="n">ViewManager</span> <span class="n">wm</span> <span class="o">=</span> <span class="n">a</span><span class="o">.</span><span class="na">getWindowManager</span><span class="o">();</span>
+                <span class="n">WindowManager</span><span class="o">.</span><span class="na">LayoutParams</span> <span class="n">l</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="na">window</span><span class="o">.</span><span class="na">getAttributes</span><span class="o">();</span>
+                <span class="n">a</span><span class="o">.</span><span class="na">mDecor</span> <span class="o">=</span> <span class="n">decor</span><span class="o">;</span>
+                <span class="n">l</span><span class="o">.</span><span class="na">type</span> <span class="o">=</span> <span class="n">WindowManager</span><span class="o">.</span><span class="na">LayoutParams</span><span class="o">.</span><span class="na">TYPE_BASE_APPLICATION</span><span class="o">;</span>
+                <span class="n">l</span><span class="o">.</span><span class="na">softInputMode</span> <span class="o">|=</span> <span class="n">forwardBit</span><span class="o">;</span>
+                <span class="k">if</span> <span class="o">(</span><span class="n">a</span><span class="o">.</span><span class="na">mVisibleFromClient</span><span class="o">)</span> <span class="o">{</span>
+                    <span class="n">a</span><span class="o">.</span><span class="na">mWindowAdded</span> <span class="o">=</span> <span class="kc">true</span><span class="o">;</span>
+
+                    <span class="c1">//Step10
+</span><span class="c1"></span>                    <span class="n">wm</span><span class="o">.</span><span class="na">addView</span><span class="o">(</span><span class="n">decor</span><span class="o">,</span> <span class="n">l</span><span class="o">);</span>
+                <span class="o">}</span>
+                <span class="o">...</span>
+    <span class="o">}</span>
+</code></pre></div><ul>
+<li>Step10 &ndash; WindowManagerGlobal.addView</li>
+</ul>
+<p>WindowManagerImpl.addView最终调用WindowManagerGlobal.addView</p>
+<div class="highlight"><pre class="chroma"><code class="language-Java" data-lang="Java"><span class="c1">//android.view.WindowManagerGlobal.java
+</span><span class="c1"></span><span class="kd">public</span> <span class="kt">void</span> <span class="nf">addView</span><span class="o">(</span><span class="n">View</span> <span class="n">view</span><span class="o">,</span> <span class="n">ViewGroup</span><span class="o">.</span><span class="na">LayoutParams</span> <span class="n">params</span><span class="o">,</span>
+            <span class="n">Display</span> <span class="n">display</span><span class="o">,</span> <span class="n">Window</span> <span class="n">parentWindow</span><span class="o">)</span> <span class="o">{</span>
+        <span class="o">...</span>
+
+        <span class="n">ViewRootImpl</span> <span class="n">root</span><span class="o">;</span>
+
+        <span class="n">获取ViewRootImpl</span>
+        <span class="o">...</span>
+
+         <span class="n">root</span> <span class="o">=</span> <span class="k">new</span> <span class="n">ViewRootImpl</span><span class="o">(</span><span class="n">view</span><span class="o">.</span><span class="na">getContext</span><span class="o">(),</span> <span class="n">display</span><span class="o">);</span>
+          <span class="n">view</span><span class="o">.</span><span class="na">setLayoutParams</span><span class="o">(</span><span class="n">wparams</span><span class="o">);</span>
+          <span class="n">mViews</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="n">view</span><span class="o">);</span>
+          <span class="n">mRoots</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="n">root</span><span class="o">);</span>
+          <span class="n">mParams</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="n">wparams</span><span class="o">);</span>
+
+        <span class="c1">// do this last because it fires off messages to start doing things
+</span><span class="c1"></span>         <span class="n">root</span><span class="o">.</span><span class="na">setView</span><span class="o">(</span><span class="n">view</span><span class="o">,</span> <span class="n">wparams</span><span class="o">,</span> <span class="n">panelParentView</span><span class="o">);</span>
+
+    <span class="o">}</span>
+</code></pre></div><ul>
+<li>Step11 &ndash; ViewRootImpl .setView</li>
+</ul>
+<div class="highlight"><pre class="chroma"><code class="language-Java" data-lang="Java"><span class="c1">//android.view.ViewRootImpl .java
+</span><span class="c1"></span><span class="kd">public</span> <span class="kt">void</span> <span class="nf">setView</span><span class="o">(</span><span class="n">View</span> <span class="n">view</span><span class="o">,</span> <span class="n">WindowManager</span><span class="o">.</span><span class="na">LayoutParams</span> <span class="n">attrs</span><span class="o">,</span> <span class="n">View</span> <span class="n">panelParentView</span><span class="o">)</span> <span class="o">{</span>
+
+            <span class="o">...</span>
+           <span class="c1">// Schedule the first layout -before- adding to the window
+</span><span class="c1"></span>           <span class="c1">// manager, to make sure we do the relayout before receiving
+</span><span class="c1"></span>           <span class="c1">// any other events from the system.
+</span><span class="c1"></span>           <span class="c1">//Step12
+</span><span class="c1"></span>            <span class="n">requestLayout</span><span class="o">();</span>
+            <span class="o">...</span>
+    <span class="o">}</span>
+
+</code></pre></div><ul>
+<li>Step12 &ndash; requestLayout</li>
+</ul>
+<div class="highlight"><pre class="chroma"><code class="language-Java" data-lang="Java"><span class="c1">//android.view.ViewRootImpl .java
+</span><span class="c1"></span><span class="kd">public</span> <span class="kt">void</span> <span class="nf">requestLayout</span><span class="o">()</span> <span class="o">{</span>
+        <span class="k">if</span> <span class="o">(!</span><span class="n">mHandlingLayoutInLayoutRequest</span><span class="o">)</span> <span class="o">{</span>
+            <span class="c1">//检查当前线程是否是UI线程
+</span><span class="c1"></span>            <span class="n">checkThread</span><span class="o">();</span>
+            <span class="n">mLayoutRequested</span> <span class="o">=</span> <span class="kc">true</span><span class="o">;</span>
+            <span class="c1">//Step 13
+</span><span class="c1"></span>            <span class="n">scheduleTraversals</span><span class="o">();</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+</code></pre></div><ul>
+<li>Step13 &ndash; ViewRootImpl.scheduleTraversals</li>
+</ul>
+<div class="highlight"><pre class="chroma"><code class="language-Java" data-lang="Java"><span class="kt">void</span> <span class="nf">scheduleTraversals</span><span class="o">()</span> <span class="o">{</span>
+        <span class="k">if</span> <span class="o">(!</span><span class="n">mTraversalScheduled</span><span class="o">)</span> <span class="o">{</span>
+            <span class="o">...</span>
+
+            <span class="c1">//这里通过Runable调用ViewRootImpl.doTraversal Step14
+</span><span class="c1"></span>            <span class="n">mChoreographer</span><span class="o">.</span><span class="na">postCallback</span><span class="o">(</span>
+                    <span class="n">Choreographer</span><span class="o">.</span><span class="na">CALLBACK_TRAVERSAL</span><span class="o">,</span> <span class="n">mTraversalRunnable</span><span class="o">,</span> <span class="kc">null</span><span class="o">);</span>
+           <span class="o">...</span>    
+<span class="o">}</span>
+</code></pre></div><ul>
+<li>Step14 &ndash; ViewRootImpl.doTraversal</li>
+</ul>
+<div class="highlight"><pre class="chroma"><code class="language-Java" data-lang="Java"><span class="kt">void</span> <span class="nf">doTraversal</span><span class="o">()</span> <span class="o">{</span>
+        <span class="k">if</span> <span class="o">(</span><span class="n">mTraversalScheduled</span><span class="o">)</span> <span class="o">{</span>
+            <span class="c1">//Step15
+</span><span class="c1"></span>            <span class="n">performTraversals</span><span class="o">();</span>
+    <span class="o">}</span>
+</code></pre></div><ul>
+<li>Step15 &ndash; ViewRootImpl.performTraversals</li>
+</ul>
+<div class="highlight"><pre class="chroma"><code class="language-Java" data-lang="Java"><span class="kd">private</span> <span class="kt">void</span> <span class="nf">performTraversals</span><span class="o">()</span> <span class="o">{</span>
+        <span class="o">...</span>
+         <span class="c1">// Ask host how big it wants to be
+</span><span class="c1"></span>         <span class="c1">//开始measure过程
+</span><span class="c1"></span>         <span class="n">windowSizeMayChange</span> <span class="o">|=</span> <span class="n">measureHierarchy</span><span class="o">(</span><span class="n">host</span><span class="o">,</span> <span class="n">lp</span><span class="o">,</span> <span class="n">res</span><span class="o">,</span><span class="n">desiredWindowWidth</span><span class="o">,</span> <span class="n">desiredWindowHeight</span><span class="o">);</span>
+
+        <span class="o">...</span>   
+
+        <span class="k">if</span> <span class="o">(</span><span class="n">didLayout</span><span class="o">)</span> <span class="o">{</span>
+            <span class="c1">//开始Layout过程
+</span><span class="c1"></span>            <span class="n">performLayout</span><span class="o">(</span><span class="n">lp</span><span class="o">,</span> <span class="n">desiredWindowWidth</span><span class="o">,</span> <span class="n">desiredWindowHeight</span><span class="o">);</span>
+         <span class="o">}</span>
+          <span class="o">...</span>
+        <span class="c1">//开始Draw过程
+</span><span class="c1"></span>        <span class="c1">//Step16
+</span><span class="c1"></span>         <span class="n">performDraw</span><span class="o">();</span>
+         <span class="o">...</span>
+    <span class="o">}</span>
+</code></pre></div><ul>
+<li>Step16 &ndash; ViewRootImpl.drawSoftware</li>
+</ul>
+<p>performDraw会调用ViewRootImpl.draw然后会调用ViewRootImpl.drawSoftware。</p>
+<div class="highlight"><pre class="chroma"><code class="language-Java" data-lang="Java"><span class="kd">private</span> <span class="kt">boolean</span> <span class="nf">drawSoftware</span><span class="o">(</span><span class="n">Surface</span> <span class="n">surface</span><span class="o">,</span> <span class="n">AttachInfo</span> <span class="n">attachInfo</span><span class="o">,</span> <span class="kt">int</span> <span class="n">xoff</span><span class="o">,</span> <span class="kt">int</span> <span class="n">yoff</span><span class="o">,</span>
+            <span class="kt">boolean</span> <span class="n">scalingRequired</span><span class="o">,</span> <span class="n">Rect</span> <span class="n">dirty</span><span class="o">)</span> <span class="o">{</span>
+
+        <span class="c1">// Draw with software renderer.
+</span><span class="c1"></span>        <span class="o">...</span>
+
+        <span class="kd">final</span> <span class="n">Canvas</span> <span class="n">canvas</span><span class="o">;</span>
+        <span class="k">try</span> <span class="o">{</span>
+                <span class="n">canvas</span><span class="o">.</span><span class="na">translate</span><span class="o">(-</span><span class="n">xoff</span><span class="o">,</span> <span class="o">-</span><span class="n">yoff</span><span class="o">);</span>
+                <span class="k">if</span> <span class="o">(</span><span class="n">mTranslator</span> <span class="o">!=</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+                    <span class="n">mTranslator</span><span class="o">.</span><span class="na">translateCanvas</span><span class="o">(</span><span class="n">canvas</span><span class="o">);</span>
+                <span class="o">}</span>
+                <span class="n">canvas</span><span class="o">.</span><span class="na">setScreenDensity</span><span class="o">(</span><span class="n">scalingRequired</span> <span class="o">?</span> <span class="n">mNoncompatDensity</span> <span class="o">:</span> <span class="n">0</span><span class="o">);</span>
+                <span class="n">attachInfo</span><span class="o">.</span><span class="na">mSetIgnoreDirtyState</span> <span class="o">=</span> <span class="kc">false</span><span class="o">;</span>
+               <span class="c1">//进入Draw过程
+</span><span class="c1"></span>                <span class="n">mView</span><span class="o">.</span><span class="na">draw</span><span class="o">(</span><span class="n">canvas</span><span class="o">);</span>
+
+                <span class="n">drawAccessibilityFocusedDrawableIfNeeded</span><span class="o">(</span><span class="n">canvas</span><span class="o">);</span>
+            <span class="o">}</span> <span class="k">finally</span> <span class="o">{</span>
+                <span class="k">if</span> <span class="o">(!</span><span class="n">attachInfo</span><span class="o">.</span><span class="na">mSetIgnoreDirtyState</span><span class="o">)</span> <span class="o">{</span>
+                    <span class="c1">// Only clear the flag if it was not set during the mView.draw() call
+</span><span class="c1"></span>                    <span class="n">attachInfo</span><span class="o">.</span><span class="na">mIgnoreDirtyState</span> <span class="o">=</span> <span class="kc">false</span><span class="o">;</span>
+                <span class="o">}</span>
+            <span class="o">}</span>
+         <span class="o">....</span>
+        <span class="k">return</span> <span class="kc">true</span><span class="o">;</span>
+    <span class="o">}</span>
+</code></pre></div>
+    </div>
+
+    
+<footer class="post-footer">
+      <div class="post-tags">
+          <a href="/tags/%E6%BA%90%E7%A0%81/">源码</a>
+          </div>
+      <nav class="post-nav">
+        <a class="prev" href="/2016/06/andorid-touch-event/">
+            <i class="iconfont icon-left"></i>
+            <span class="prev-text nav-default">事件分发过程</span>
+            <span class="prev-text nav-mobile">上一篇</span>
+          </a>
+        <a class="next" href="/2016/05/activity-startup/">
+            <span class="next-text nav-default">Activity启动过程</span>
+            <span class="next-text nav-mobile">下一篇</span>
+            <i class="iconfont icon-right"></i>
+          </a>
+      </nav>
+    </footer>
+  </article>
+        </div>
+        <div id="gitalk-container"></div>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js" crossorigin="anonymous"></script>
+    <script type="text/javascript">
+      var gitalk = new Gitalk({
+        id: '\/2016\/06\/android-view-draw\/',
+        title: 'View的绘制过程',
+        clientID: '64b9f11ba0a3291ee49e',
+        clientSecret: '8632b99db733cc33fd8f6fe85680f63f0db9d872',
+        repo: 'hadyang.github.io',
+        owner: 'hadyang',
+        admin: ['hadyang'],
+        body: decodeURI(location.href)
+      });
+      gitalk.render('gitalk-container');
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://github.com/gitalk/gitalk">comments powered by gitalk.</a></noscript>
+
+  
+
+  
+
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="social-links">
+  <a href="" type="application/rss+xml" class="iconfont icon-rss" title="rss"></a>
+</div>
+
+<div class="copyright">
+  <span class="power-by">
+    由 <a class="hexo-link" href="https://gohugo.io">Hugo</a> 强力驱动
+  </span>
+  <span class="division">|</span>
+  <span class="theme-info">
+    主题 -
+    <a class="theme-link" href="https://github.com/olOwOlo/hugo-theme-even">Even</a>
+  </span>
+
+  
+
+  <span class="copyright-year">
+    &copy; 
+    2017 - 
+    2021<span class="heart"><i class="iconfont icon-heart"></i></span><span>HadYang</span>
+  </span>
+</div>
+
+    </footer>
+
+    <div class="back-to-top" id="back-to-top">
+      <i class="iconfont icon-up"></i>
+    </div>
+  </div>
+  
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/slideout@1.0.1/dist/slideout.min.js" integrity="sha256-t+zJ/g8/KXIJMjSVQdnibt4dlaDxc9zXr/9oNPeWqdg=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.js" integrity="sha256-XVLffZaxoWfGUEbdzuLi7pwaUJv1cecsQJQqGLe7axY=" crossorigin="anonymous"></script>
+
+
+
+<script type="text/javascript" src="/js/main.min.c12618f9a600c40bd024996677e951e64d3487006775aeb22e200c990006c5c7.js"></script>
+  <script type="text/javascript">
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$','$'], ['\\(','\\)']],
+        }
+    };
+  </script>
+  <script async src="https://cdn.jsdelivr.net/npm/mathjax@3.0.5/es5/tex-mml-chtml.js" integrity="sha256-HGLuEfFcsUJGhvB8cQ8nr0gai9EucOOaIxFw7qxmd+w=" crossorigin="anonymous"></script>
+
+
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+	ga('create', 'UA-157595781-2', 'auto');
+	ga('set', 'anonymizeIp', true);
+	ga('send', 'pageview');
+}
+</script>
+<script async src='https://www.google-analytics.com/analytics.js'></script>
+
+
+
+
+
+
+
+</body>
+</html>

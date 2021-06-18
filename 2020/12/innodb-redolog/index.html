@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>【Innodb】Redo Log - HadYang</title>
+  <meta name="renderer" content="webkit" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<meta name="theme-color" content="#f8f5ec" />
+<meta name="msapplication-navbutton-color" content="#f8f5ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
+
+
+<meta name="author" content="HadYang" /><meta name="description" content="Redo Log Redo Log 是 Innodb 的事务日志之一，并且为 Innodb 提供 ACID 中一致性的保证。 在很多数据库设计中，都存在日志先行（WAL）的概念，Redo Log 就是 WAL 先行写入的日志" /><meta name="keywords" content="Java" />
+
+
+
+
+
+
+<meta name="generator" content="Hugo 0.73.0 with theme even" />
+
+
+<link rel="canonical" href="https://hadyang.github.io/2020/12/innodb-redolog/" />
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="manifest" href="/manifest.json">
+<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
+
+
+
+<link href="/sass/main.min.75c01efdcbc2767fdfe1f22f5a6fccc8c390d3cda325742f698bd0c6344144be.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.css" integrity="sha256-7TyXnr2YU040zfSP+rEcz29ggW4j56/ujTPwjMzyqFY=" crossorigin="anonymous">
+
+
+<meta property="og:title" content="【Innodb】Redo Log" />
+<meta property="og:description" content="Redo Log Redo Log 是 Innodb 的事务日志之一，并且为 Innodb 提供 ACID 中一致性的保证。 在很多数据库设计中，都存在日志先行（WAL）的概念，Redo Log 就是 WAL 先行写入的日志" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://hadyang.github.io/2020/12/innodb-redolog/" />
+<meta property="article:published_time" content="2020-12-05T00:00:00+00:00" />
+<meta property="article:modified_time" content="2020-12-05T00:00:00+00:00" />
+<meta itemprop="name" content="【Innodb】Redo Log">
+<meta itemprop="description" content="Redo Log Redo Log 是 Innodb 的事务日志之一，并且为 Innodb 提供 ACID 中一致性的保证。 在很多数据库设计中，都存在日志先行（WAL）的概念，Redo Log 就是 WAL 先行写入的日志">
+<meta itemprop="datePublished" content="2020-12-05T00:00:00&#43;00:00" />
+<meta itemprop="dateModified" content="2020-12-05T00:00:00&#43;00:00" />
+<meta itemprop="wordCount" content="2398">
+
+
+
+<meta itemprop="keywords" content="" /><meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="【Innodb】Redo Log"/>
+<meta name="twitter:description" content="Redo Log Redo Log 是 Innodb 的事务日志之一，并且为 Innodb 提供 ACID 中一致性的保证。 在很多数据库设计中，都存在日志先行（WAL）的概念，Redo Log 就是 WAL 先行写入的日志"/>
+
+<!--[if lte IE 9]>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js"></script>
+<![endif]-->
+
+<!--[if lt IE 9]>
+  <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+<![endif]-->
+
+</head>
+<body>
+  <div id="mobile-navbar" class="mobile-navbar">
+  <div class="mobile-header-logo">
+    <a href="/" class="logo">HadYang</a>
+  </div>
+  <div class="mobile-navbar-icon">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
+<nav id="mobile-menu" class="mobile-menu slideout-menu">
+  <ul class="mobile-menu-list">
+    <a href="https://hadyang.github.io/interview/">
+        <li class="mobile-menu-item">Interview</li>
+      </a><a href="/categories/">
+        <li class="mobile-menu-item">分类</li>
+      </a>
+  </ul>
+
+  
+
+
+</nav>
+
+  <div class="container" id="mobile-panel">
+    <header id="header" class="header">
+        <div class="logo-wrapper">
+  <a href="/" class="logo">HadYang</a>
+</div>
+
+
+
+
+
+<nav class="site-navbar">
+  <ul id="menu" class="menu">
+    <li class="menu-item">
+        <a class="menu-item-link" href="https://hadyang.github.io/interview/">Interview</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/categories/">分类</a>
+      </li>
+  </ul>
+</nav>
+
+    </header>
+
+    <main id="main" class="main">
+      <div class="content-wrapper">
+        <div id="content" class="content">
+          <article class="post">
+    
+    <header class="post-header">
+      <h1 class="post-title">【Innodb】Redo Log</h1>
+
+      <div class="post-meta">
+        <span class="post-time"> 2020-12-05 </span>
+        <div class="post-category">
+            <a href="/categories/database/"> Database </a>
+            </div>
+          <span class="more-meta"> 约 2398 字 </span>
+          <span class="more-meta"> 预计阅读 5 分钟 </span>
+        
+      </div>
+    </header>
+
+    <div class="post-toc" id="post-toc">
+  <h2 class="post-toc-title">文章目录</h2>
+  <div class="post-toc-content always-active">
+    <nav id="TableOfContents">
+  <ul>
+    <li><a href="#redo-log">Redo Log</a>
+      <ul>
+        <li><a href="#redo-log-file">Redo Log File</a></li>
+        <li><a href="#log-write-ahead">Log Write Ahead</a></li>
+        <li><a href="#checkpoint">Checkpoint</a></li>
+        <li><a href="#内部xa协议">内部XA协议</a></li>
+        <li><a href="#blgc">BLGC</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+  </div>
+</div>
+    <div class="post-content">
+      <h2 id="redo-log">Redo Log</h2>
+<p>Redo Log 是 Innodb 的事务日志之一，并且为 Innodb <strong>提供 ACID 中一致性的保证</strong>。 在很多数据库设计中，都存在日志先行（WAL）的概念，Redo Log 就是 WAL 先行写入的日志。 Redo Log 记录了数据库文件的物理层面的修改记录，包括 <strong>用户触发的修改以及 Innodb 内部触发的修改行为</strong>。</p>
+<p><strong>LSN（Log Sequence Number）</strong> 表示 Redo 日志序列号，Innodb 保证其单调递增。LSN 无处不在，通过 LSN 可以找到对应的 Redo Log，因此其在故障恢复机制中发挥重要作用。</p>
+<p>在 Innodb 内部 Redo Log 分为两个部分，分别是位于内存的 Redo Log Buffer，以及位于磁盘的 Redo Log File。Redo Log Buffer 和 Redo Log File 都是由 <strong>Redo Log Block</strong> 组成的数据结构，Redo Log Block 在内存和磁盘中均具有相同的数据结构。</p>
+<p>Redo Log Block 以 512Byte 对齐，各类型的 Redo Log Block 都有统一的头部，包括 <code>LOG_BLOCK_HDR_NO</code> 、 <code>LOG_BLOCK_HDR_DATA_LEN</code> 、 <code>LOG_BLOCK_FIRST_REC_GROUP</code> 和 <code>LOG_BLOCK_CHECKPOINT_NO</code>，而 Redo Log Block 的内容根据不同类型有不同的结构。</p>
+<p><img src="assists/redo_log_block.png" alt=""></p>
+<ul>
+<li><code>LOG_BLOCK_HDR_NO</code>：根据该块的 LSN 以及当前 Redo Log File 的起始 LSN 转换的块序列号</li>
+<li><code>LOG_BLOCK_HDR_DATA_LEN</code>：写入该块的日志长度</li>
+<li><code>LOG_BLOCK_FIRST_REC_GROUP</code>：块中第一个 Redo Log 在块中的长度</li>
+<li><code>LOG_BLOCK_CHECKPOINT_NO</code>：记录当前块的 CheckPoint 序号</li>
+</ul>
+<p>一个事务可以使用多个 Redo Log Block，这种情况下，可能导致最后一个 Block 剩余部分空间，为提高存储效率和性能，可以将下个 Redo Log 分配到最后一个 Block 中。</p>
+<h3 id="redo-log-file">Redo Log File</h3>
+<p>Innodb  据参数 <code>innodb_log_files_in_group</code> 使用多个 Redo Log File 来持久化 Redo Log，多个 Redo Log File 作为一个 Log Group，采用 <strong>round-robin</strong> 方式循环写入 Redo Log File。当 Redo Log File 被覆盖时，要保证对应的脏页已刷新到磁盘，否则会暂停 Redo Log 的写入，并进行一次 Checkpoint 操作。</p>
+<p>每个 Log Group 的第一个 Redo Log File 都会有 2K 的空间存储 <code>Log File Header</code>（包含当前 Log Group 中起始 LSN） 以及两个交替写入的 Checkpoint 信息（防止存储介质损坏而导致 Checkpoint 无法读取）。对 Redo Log File 的写入也 <strong>不完全</strong> 是顺序的，因为每次都会更新 Checkpoint 信息。在崩溃恢复的过程中，直接从 Log Group 的第一个 Redo Log File 获取 Checkpoint 信息即可。</p>
+<p><img src="assists/redo_log_file.png" alt=""></p>
+<p>Redo Log 的写入时机受参数 <code>innodb_flush_log_at_trx_commit</code> 控制，其有 0，1，2 三种取值。</p>
+<ul>
+<li><code>1</code> 是默认策略，在每次事务提交时都持久化（执行 fsync） Redo Log</li>
+<li><code>0</code> 表示事务提交时不持久化 Redo Log，而是每秒定时刷新（执行 fsync） Redo Log 到磁盘上</li>
+<li><code>2</code> 表示事务提交时将 Redo Log 刷新到系统文件缓存中（不执行 fsync）</li>
+</ul>
+<p><img src="assists/redo_log_flush.png" alt=""></p>
+<p>Redo Log 的每个 Block 大小与磁盘大小一致，因此 Redo Log 的写入也不需要 DoubleWrite 机制。</p>
+<h3 id="log-write-ahead">Log Write Ahead</h3>
+<p>InnoDB 以 512 字节一个 Block 的方式对齐写入 <code>ib_logfile</code> 文件，但现代文件系统一般以 4096 字节为一个 Block 单位。如果即将写入的日志文件块不在 OS Cache 时，就需要将对应的 4096 字节的 Block 读入内存，修改其中的 512 字节，然后再把该 Block 写回磁盘。</p>
+<p>为解决这个问题，MySQL 5.7 引入了一个新参数： <code>innodb_log_write_ahead_size</code> ，当前写入文件的偏移量不能整除该值时，则补 0 ，多写一部分数据。这样当写入的数据是以磁盘 Block size 对齐时，就可以直接 <code>write</code> 磁盘，而无需 <code>read-modify-write</code> 这三步了。</p>
+<h3 id="checkpoint">Checkpoint</h3>
+<p>Checkpoint 是 Innodb 崩溃恢复中的重要的一个环节，在 Checkpoint 中用 LSN 表示系统写入磁盘的进度。Checkpoint 表示一个 <strong>安全点</strong>，在 Checkpoint 之前的所有数据库数据都是安全可靠的，在系统崩溃中不会丢失。</p>
+<p>Checkpoint 的目的有三个：缩短数据库的恢复时间、保证 Buffer Pool 可用容量 以及 确保 Redo Log 可用存储容量。因此，系统会在四种情况下进行 Checkpoint：</p>
+<ol>
+<li>Master Thread CheckPoint （定时刷新）</li>
+<li>FLUSH_LRU_LIST CheckPoint （LRU 空闲页不足）</li>
+<li>Async/Sync Flush CheckPoint （Redo Log 不可用，即 Redo Log 空间不足）</li>
+<li>Dirty Page too much CheckPoint （Buffer Pool 脏页过多）</li>
+</ol>
+<h3 id="内部xa协议">内部XA协议</h3>
+<p>Bin Log 是 MySQL 服务层的数据变更日志，记录了表数据中变更事件。当 MySQL 开启 Bin Log 后，为保证存储引擎层的事务日志和 Bin Log 一致，在 MySQL 内部使用了 XA 协议，并使用了一个全局的 <code>prepare_commit_mutex</code> 锁。</p>
+<ol>
+<li>当事务提交时 Innodb 进行 Prepare 操作：持有 <code>prepare_commit_mutex</code>，写入 Redo Log 并 fsync</li>
+<li>MySQL 服务层写入 Bin Log 并 fsync</li>
+<li>Innodb 存储引擎进行 Commit 操作：写入 Commit 标记，并释放 <code>prepare_commit_mutex</code></li>
+</ol>
+<p><img src="assists/redo_log_xa_lock.png" alt=""></p>
+<p>内部的XA协议保证了事务在多个引擎和 Bin Log 之间的原子性，以 Bin Log 写入成功作为事务提交的标志，而 InnoDB 的 Commit 标志并不是事务成功与否的标志。</p>
+<p>在崩溃恢复中，是以 Bin Log 中的 <code>xid</code> 和 Redo Log 中的 <code>xid</code> 进行比较，<code>xid</code> 在 Bin Log 里存在则提交，不存在则回滚。</p>
+<ul>
+<li>已写入 Redo Log，未写入 Bin Log，则会回滚</li>
+<li>已写入 Redo Log，写入 Bin Log，未写入 Commit 标记，则重新写入 Commit 标志，完成提交</li>
+</ul>
+<p>通过 <code>prepare_commit_mutex</code> 对整个 2PC 过程进行加锁的方式，只有当上一个事务 commit 后释放锁，下个事务才可以进行 prepare 操作，这样完全串行化的执行保证了顺序一致。</p>
+<p>存在的问题是 <code>prepare_commit_mutex</code> 的锁机制会严重影响高并发时的性能，在每个事务执行过程中， 都会至少调用 3 次刷盘操作，多个小 IO 是非常低效的方式。</p>
+<h3 id="blgc">BLGC</h3>
+<p>为了提高并发性能，肯定要细化锁粒度。MySQL 5.6 引入了 Bin Log 的组提交（BLGC）功能：prepare 阶段不变，只针对 commit 阶段，将 commit 阶段拆分为三个过程：</p>
+<ol>
+<li><strong>flush stage</strong> 多个线程按进入的顺序将 Bin Log 从 cache 写入文件（不刷盘）</li>
+<li><strong>sync stage</strong> 对 Bin Log 文件做 fsync 操作（多个线程的 Bin Log 合并一次刷盘）</li>
+<li><strong>commit stage</strong> 各个线程按顺序做 InnoDB commit 操作</li>
+</ol>
+<p>其中，每个阶段有 Lock 进行保护，因此保证了事务写入的顺序。</p>
+<p>实现方法是，在每个 stage 设置一个队列，第一个进入该队列的线程会成为 Leader，后续进入的线程会阻塞直至完成提交。Leader 线程会领导队列中的所有线程执行该 stage 的任务，并带领所有 Follower 进入到下一个 stage 去执行，当遇到下一个 stage 为非空队列时，Leader 会变成 Follower 注册到此队列中。</p>
+<p>这种组提交的优势在于锁的粒度减小，三个阶段可以并发执行，从而提升效率。</p>
+<h4 id="blgc-优化">BLGC 优化</h4>
+<p>MySQL 5.6 的组提交逻辑中，每个事务各自做 prepare 并写 Redo Log，只有到了 commit 阶段才进入组提交，因此每个事务的 Redo Log fsync 操作成为性能瓶颈。</p>
+<p>在 5.7 版本中，修改了组提交的 Flush 阶段，在 prepare 阶段不再让线程各自执行 Flush Redo Log 操作，而是推迟到组提交的 Flush 阶段，Flush stage 修改成如下逻辑：</p>
+<ol>
+<li>收集组提交队列，得到 Leader 线程，其余 Follower 线程进入阻塞</li>
+<li>Leader 调用 <code>ha_flush_logs</code> 做一次 Redo <code>write/fsync</code>，即一次将所有线程的 Redo Log 刷盘</li>
+<li>将队列中 thd 的所有 Bin Log cache 写到 Bin Log 文件中</li>
+</ol>
+<p>这个优化是将 Redo Log 的刷盘延迟到了 BLGC 的 Flush stage 之中，Sync stage 之前。通过延迟写 Redo Log 的方式，为 Redo Log 做了一次组写入，这样 Bin Log 和 Redo Log 都进行了优化。</p>
+
+    </div>
+
+    
+<footer class="post-footer">
+      
+      <nav class="post-nav">
+        <a class="prev" href="/2020/12/innodb-memory/">
+            <i class="iconfont icon-left"></i>
+            <span class="prev-text nav-default">【Innodb】内存使用</span>
+            <span class="prev-text nav-mobile">上一篇</span>
+          </a>
+        <a class="next" href="/2020/11/innodb-row-format/">
+            <span class="next-text nav-default">【Inoodb】行格式</span>
+            <span class="next-text nav-mobile">下一篇</span>
+            <i class="iconfont icon-right"></i>
+          </a>
+      </nav>
+    </footer>
+  </article>
+        </div>
+        <div id="gitalk-container"></div>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js" crossorigin="anonymous"></script>
+    <script type="text/javascript">
+      var gitalk = new Gitalk({
+        id: '\/2020\/12\/innodb-redolog\/',
+        title: '【Innodb】Redo Log',
+        clientID: '64b9f11ba0a3291ee49e',
+        clientSecret: '8632b99db733cc33fd8f6fe85680f63f0db9d872',
+        repo: 'hadyang.github.io',
+        owner: 'hadyang',
+        admin: ['hadyang'],
+        body: decodeURI(location.href)
+      });
+      gitalk.render('gitalk-container');
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://github.com/gitalk/gitalk">comments powered by gitalk.</a></noscript>
+
+  
+
+  
+
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="social-links">
+  <a href="" type="application/rss+xml" class="iconfont icon-rss" title="rss"></a>
+</div>
+
+<div class="copyright">
+  <span class="power-by">
+    由 <a class="hexo-link" href="https://gohugo.io">Hugo</a> 强力驱动
+  </span>
+  <span class="division">|</span>
+  <span class="theme-info">
+    主题 -
+    <a class="theme-link" href="https://github.com/olOwOlo/hugo-theme-even">Even</a>
+  </span>
+
+  
+
+  <span class="copyright-year">
+    &copy; 
+    2017 - 
+    2021<span class="heart"><i class="iconfont icon-heart"></i></span><span>HadYang</span>
+  </span>
+</div>
+
+    </footer>
+
+    <div class="back-to-top" id="back-to-top">
+      <i class="iconfont icon-up"></i>
+    </div>
+  </div>
+  
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/slideout@1.0.1/dist/slideout.min.js" integrity="sha256-t+zJ/g8/KXIJMjSVQdnibt4dlaDxc9zXr/9oNPeWqdg=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.js" integrity="sha256-XVLffZaxoWfGUEbdzuLi7pwaUJv1cecsQJQqGLe7axY=" crossorigin="anonymous"></script>
+
+
+
+<script type="text/javascript" src="/js/main.min.c12618f9a600c40bd024996677e951e64d3487006775aeb22e200c990006c5c7.js"></script>
+  <script type="text/javascript">
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$','$'], ['\\(','\\)']],
+        }
+    };
+  </script>
+  <script async src="https://cdn.jsdelivr.net/npm/mathjax@3.0.5/es5/tex-mml-chtml.js" integrity="sha256-HGLuEfFcsUJGhvB8cQ8nr0gai9EucOOaIxFw7qxmd+w=" crossorigin="anonymous"></script>
+
+
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+	ga('create', 'UA-157595781-2', 'auto');
+	ga('set', 'anonymizeIp', true);
+	ga('send', 'pageview');
+}
+</script>
+<script async src='https://www.google-analytics.com/analytics.js'></script>
+
+
+
+
+
+
+
+</body>
+</html>

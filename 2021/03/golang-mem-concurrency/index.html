@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>【Golang进阶】内存同步模型 - HadYang</title>
+  <meta name="renderer" content="webkit" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<meta name="theme-color" content="#f8f5ec" />
+<meta name="msapplication-navbutton-color" content="#f8f5ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
+
+
+<meta name="author" content="HadYang" /><meta name="description" content="CSP 模型 Go 中相比于 Java 采用了 CSP（Communicating Sequential Process）并发模型，在消息传递模型中，并行进程通过消息传递相互交换数据。这" /><meta name="keywords" content="Java" />
+
+
+
+
+
+
+<meta name="generator" content="Hugo 0.73.0 with theme even" />
+
+
+<link rel="canonical" href="https://hadyang.github.io/2021/03/golang-mem-concurrency/" />
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="manifest" href="/manifest.json">
+<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
+
+
+
+<link href="/sass/main.min.75c01efdcbc2767fdfe1f22f5a6fccc8c390d3cda325742f698bd0c6344144be.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.css" integrity="sha256-7TyXnr2YU040zfSP+rEcz29ggW4j56/ujTPwjMzyqFY=" crossorigin="anonymous">
+
+
+<meta property="og:title" content="【Golang进阶】内存同步模型" />
+<meta property="og:description" content="CSP 模型 Go 中相比于 Java 采用了 CSP（Communicating Sequential Process）并发模型，在消息传递模型中，并行进程通过消息传递相互交换数据。这" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://hadyang.github.io/2021/03/golang-mem-concurrency/" />
+<meta property="article:published_time" content="2021-03-24T00:00:00+00:00" />
+<meta property="article:modified_time" content="2021-03-24T00:00:00+00:00" />
+<meta itemprop="name" content="【Golang进阶】内存同步模型">
+<meta itemprop="description" content="CSP 模型 Go 中相比于 Java 采用了 CSP（Communicating Sequential Process）并发模型，在消息传递模型中，并行进程通过消息传递相互交换数据。这">
+<meta itemprop="datePublished" content="2021-03-24T00:00:00&#43;00:00" />
+<meta itemprop="dateModified" content="2021-03-24T00:00:00&#43;00:00" />
+<meta itemprop="wordCount" content="2021">
+
+
+
+<meta itemprop="keywords" content="" /><meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="【Golang进阶】内存同步模型"/>
+<meta name="twitter:description" content="CSP 模型 Go 中相比于 Java 采用了 CSP（Communicating Sequential Process）并发模型，在消息传递模型中，并行进程通过消息传递相互交换数据。这"/>
+
+<!--[if lte IE 9]>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js"></script>
+<![endif]-->
+
+<!--[if lt IE 9]>
+  <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+<![endif]-->
+
+</head>
+<body>
+  <div id="mobile-navbar" class="mobile-navbar">
+  <div class="mobile-header-logo">
+    <a href="/" class="logo">HadYang</a>
+  </div>
+  <div class="mobile-navbar-icon">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
+<nav id="mobile-menu" class="mobile-menu slideout-menu">
+  <ul class="mobile-menu-list">
+    <a href="https://hadyang.github.io/interview/">
+        <li class="mobile-menu-item">Interview</li>
+      </a><a href="/categories/">
+        <li class="mobile-menu-item">分类</li>
+      </a>
+  </ul>
+
+  
+
+
+</nav>
+
+  <div class="container" id="mobile-panel">
+    <header id="header" class="header">
+        <div class="logo-wrapper">
+  <a href="/" class="logo">HadYang</a>
+</div>
+
+
+
+
+
+<nav class="site-navbar">
+  <ul id="menu" class="menu">
+    <li class="menu-item">
+        <a class="menu-item-link" href="https://hadyang.github.io/interview/">Interview</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/categories/">分类</a>
+      </li>
+  </ul>
+</nav>
+
+    </header>
+
+    <main id="main" class="main">
+      <div class="content-wrapper">
+        <div id="content" class="content">
+          <article class="post">
+    
+    <header class="post-header">
+      <h1 class="post-title">【Golang进阶】内存同步模型</h1>
+
+      <div class="post-meta">
+        <span class="post-time"> 2021-03-24 </span>
+        <div class="post-category">
+            <a href="/categories/go/"> Go </a>
+            </div>
+          <span class="more-meta"> 约 2021 字 </span>
+          <span class="more-meta"> 预计阅读 5 分钟 </span>
+        
+      </div>
+    </header>
+
+    <div class="post-toc" id="post-toc">
+  <h2 class="post-toc-title">文章目录</h2>
+  <div class="post-toc-content always-active">
+    <nav id="TableOfContents">
+  <ul>
+    <li><a href="#csp-模型">CSP 模型</a></li>
+    <li><a href="#happens-before">Happens Before</a>
+      <ul>
+        <li><a href="#init">init</a></li>
+        <li><a href="#goroutine-创建">goroutine 创建</a></li>
+        <li><a href="#goroutine-销毁">goroutine 销毁</a></li>
+        <li><a href="#channel">channel</a></li>
+        <li><a href="#锁">锁</a></li>
+        <li><a href="#once">Once</a></li>
+      </ul>
+    </li>
+    <li><a href="#atomic包">atomic包</a></li>
+  </ul>
+</nav>
+  </div>
+</div>
+    <div class="post-content">
+      <h2 id="csp-模型">CSP 模型</h2>
+<p>Go 中相比于 Java 采用了 CSP（Communicating Sequential Process）并发模型，在消息传递模型中，并行进程通过消息传递相互交换数据。这种通信可以是异步的，就是说消息可以在接收者准备好之前发出；或是同步的，就是说消息发出前接收者必须准备好。同时 Go 基于 CSP 模型构建了一套 Happens Before 的可见性规则。</p>
+<p>程序在多个 goroutine 中进行并发读写操作，必须序列化这些操作。可以通过 <code>channel</code> 或者其他同步原语（<code>sync</code> 包下的方法）来进行同步。</p>
+<h2 id="happens-before">Happens Before</h2>
+<p>在单个 goroutine 中，读写操作必须像代码中声明的顺序那样执行。在单个 goroutine 内，只有当指令重排序不会改变 golang 的语言规范时，编译器和处理器才能对指令进行重排序。由于重排序的存在，指令执行的顺序在不同的 goroutine 中观察的顺序也可能不一致。比如说：一个 goroutine 执行代码 <code>a=1; b=2</code> ，其他的 goroutine 可能先观察到 <code>b</code> 的修改，再观察到 <code>a</code> 的修改。</p>
+<p>为指定数据读写的顺序，golang 中定义 happens before 原则。如果事件 e1 happens before 事件 e2，那么我们可以说 e2 happens after 事件 e1。如果 e1 没有 happens before e2，并且 e1 也没有 happens after e2，那么 e1 和 e2 就是并发的。</p>
+<p>单个 goroutine 中，happens-before 顺序与代码中的顺序一致。当存在多个 goroutine 访问共享变量时，必须使用同步化事件来构建 happen-before 条件，以确保能读取到期望的写入。</p>
+<blockquote>
+<p>规则1：单个 goroutine 中，happens-before 顺序与代码中的顺序一致</p>
+</blockquote>
+<p>在 go 中变量 v 会被初始化该类型的 0 值，这个过程和一次写入是一样的。<strong>读写超过机器字长的值会被拆分为多次操作，每次操作一个机器字长，并且这些操作是没有特定顺序的</strong>。</p>
+<h3 id="init">init</h3>
+<p>程序初始化是运行在单个 goroutine 中，但可能在该过程中会创建其他 goroutine 并行执行。</p>
+<blockquote>
+<p>规则2：如果包 p 引入包 q，那么 q 的 <code>init</code> 函数 happen before 于任何 p 中的 <code>init</code></p>
+</blockquote>
+<h3 id="goroutine-创建">goroutine 创建</h3>
+<blockquote>
+<p>规则3：开启新 goroutine 的 go 语句 happen before 该 gorotine 的执行开始</p>
+</blockquote>
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">var</span> <span class="nx">a</span> <span class="kt">string</span>
+<span class="kd">func</span> <span class="nf">f</span><span class="p">()</span> <span class="p">{</span>
+    <span class="nb">print</span><span class="p">(</span><span class="nx">a</span><span class="p">)</span>
+<span class="p">}</span>
+<span class="kd">func</span> <span class="nf">hello</span><span class="p">()</span> <span class="p">{</span>
+    <span class="nx">a</span> <span class="p">=</span> <span class="s">&#34;hello, world&#34;</span>
+    <span class="k">go</span> <span class="nf">f</span><span class="p">()</span>
+<span class="p">}</span>
+</code></pre></div><p>调用 hello 方法会在未来某个时间点（可能 hello 方法已返回）打印 “hello, world”</p>
+<h3 id="goroutine-销毁">goroutine 销毁</h3>
+<p>不能保证 goroutine 的退出会发生于程序中任意事件之前。</p>
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">var</span> <span class="nx">a</span> <span class="kt">string</span>
+<span class="kd">func</span> <span class="nf">hello</span><span class="p">()</span> <span class="p">{</span>
+    <span class="k">go</span> <span class="kd">func</span><span class="p">()</span> <span class="p">{</span> <span class="nx">a</span> <span class="p">=</span> <span class="s">&#34;hello&#34;</span> <span class="p">}()</span>
+    <span class="nb">print</span><span class="p">(</span><span class="nx">a</span><span class="p">)</span>
+<span class="p">}</span>
+</code></pre></div><p>上述的赋值操作没有进行同步化，所以它不保证能观察到其他 goroutine 的操作。事实上，激进的编译器可能直接删除这条 go 语句。</p>
+<p>如果需要一个 goroutine 必须观察到其他 goroutine ，使用例如锁或 channel 的同步化机制来建立关联顺序。</p>
+<h3 id="channel">channel</h3>
+<p>Go 提倡在多个 goroutine 之间使用 channel 进行同步，在特定 channel 上的每个发送都会匹配一个读取，通常是在不同的 goroutine 中。</p>
+<blockquote>
+<p>规则4：一个 channel 上第 k 个写操作，发生于第 k 个读操作完成之前</p>
+</blockquote>
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">var</span> <span class="nx">c</span> <span class="p">=</span> <span class="nb">make</span><span class="p">(</span><span class="kd">chan</span> <span class="kt">int</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+<span class="kd">var</span> <span class="nx">a</span> <span class="kt">string</span>
+<span class="kd">func</span> <span class="nf">f</span><span class="p">()</span> <span class="p">{</span>
+    <span class="nx">a</span> <span class="p">=</span> <span class="s">&#34;hello, world&#34;</span>
+    <span class="nx">c</span> <span class="o">&lt;-</span> <span class="mi">0</span>
+<span class="p">}</span>
+<span class="kd">func</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+    <span class="k">go</span> <span class="nf">f</span><span class="p">()</span>
+    <span class="o">&lt;-</span><span class="nx">c</span>
+    <span class="nb">print</span><span class="p">(</span><span class="nx">a</span><span class="p">)</span>
+<span class="p">}</span>
+</code></pre></div><p>上述代码保证输出 <code>hello, world</code>。对 a 的写操作 happens before 发送到 c ，发送到 c happens before 相对应 c 的接收，c 的接收 happens before print 方法。</p>
+<blockquote>
+<p>规则5：对 channel 的关闭操作发生于接收端收到 0 值（因为 channel 被关闭）之前</p>
+</blockquote>
+<p>在上面的例子中，把 <code>c&lt;-0</code> 替换为 <code>close(c)</code> 有同样的效果</p>
+<h4 id="无缓冲channel">无缓冲channel</h4>
+<p>在无缓冲 channel 上的读取操作发生于 channel 上写操作完成之前。</p>
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">var</span> <span class="nx">c</span> <span class="p">=</span> <span class="nb">make</span><span class="p">(</span><span class="kd">chan</span> <span class="kt">int</span><span class="p">)</span> <span class="c1">//无缓冲 channel
+</span><span class="c1"></span><span class="kd">var</span> <span class="nx">a</span> <span class="kt">string</span>
+<span class="kd">func</span> <span class="nf">f</span><span class="p">()</span> <span class="p">{</span>
+    <span class="nx">a</span> <span class="p">=</span> <span class="s">&#34;hello, world&#34;</span>
+    <span class="o">&lt;-</span><span class="nx">c</span>
+<span class="p">}</span>
+<span class="kd">func</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+    <span class="k">go</span> <span class="nf">f</span><span class="p">()</span>
+    <span class="nx">c</span> <span class="o">&lt;-</span> <span class="mi">0</span>
+    <span class="nb">print</span><span class="p">(</span><span class="nx">a</span><span class="p">)</span>
+<span class="p">}</span>
+</code></pre></div><p>上述代码也保证输出 <code>hello, world</code>。对 a 的写入操作发生于对 c 的读取之前，发生于对 c 的写入完成之前，发生于 <code>print</code> 之前。如果上述的 channel 是带缓冲的，那么该程序不能保证输出 <code>hello, world</code>（程序可能输出空字符串、崩溃或其他）</p>
+<blockquote>
+<p>规则6：在一个容量为 C 的 channel 上第 k 个读取操作，发生于第 k+C 个写操作完成之前。</p>
+</blockquote>
+<p>该原则将上一个原则推广到缓冲 channel 上。它允许通过缓冲 channel 对计数信号量进行建模：channel 中的元素个数对应信号量可用个数，channel 的容量对应信号量可同时使用的个数，写入一个元素会获取一个信号量，读取一个元素会释放一个信号量。</p>
+<p>下面的代码会为每个工作列表开启一个 goroutine ，但 goroutine 中使用同一个 limit channel 来协调，以确保同一时间最多有 3 个函数在执行。</p>
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">var</span> <span class="nx">limit</span> <span class="p">=</span> <span class="nb">make</span><span class="p">(</span><span class="kd">chan</span> <span class="kt">int</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+<span class="kd">func</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+    <span class="k">for</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">w</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">work</span> <span class="p">{</span>
+        <span class="k">go</span> <span class="kd">func</span><span class="p">(</span><span class="nx">w</span> <span class="kd">func</span><span class="p">())</span> <span class="p">{</span>
+            <span class="nx">limit</span> <span class="o">&lt;-</span> <span class="mi">1</span>
+            <span class="nf">w</span><span class="p">()</span>
+            <span class="o">&lt;-</span><span class="nx">limit</span>
+        <span class="p">}(</span><span class="nx">w</span><span class="p">)</span>
+    <span class="p">}</span>
+    <span class="k">select</span><span class="p">{}</span>
+<span class="p">}</span>
+</code></pre></div><h3 id="锁">锁</h3>
+<p>sync 包有两种锁的实现，分别是 <code>sync.Mutex</code> 和 <code>sync.RWMutex</code></p>
+<blockquote>
+<p>规则7：对于任意 <code>sync.Mutex</code> 或者 <code>sync.RWMutex</code> 类型的对象 <code>l</code>，<code>l.Unlock</code> 发生于 <code>l.Lock</code> 返回之前</p>
+</blockquote>
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">var</span> <span class="nx">l</span> <span class="nx">sync</span><span class="p">.</span><span class="nx">Mutex</span>
+<span class="kd">var</span> <span class="nx">a</span> <span class="kt">string</span>
+<span class="kd">func</span> <span class="nf">f</span><span class="p">()</span> <span class="p">{</span>
+    <span class="nx">a</span> <span class="p">=</span> <span class="s">&#34;hello, world&#34;</span>
+    <span class="nx">l</span><span class="p">.</span><span class="nf">Unlock</span><span class="p">()</span>
+<span class="p">}</span>
+<span class="kd">func</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+    <span class="nx">l</span><span class="p">.</span><span class="nf">Lock</span><span class="p">()</span>
+    <span class="k">go</span> <span class="nf">f</span><span class="p">()</span>
+    <span class="nx">l</span><span class="p">.</span><span class="nf">Lock</span><span class="p">()</span>
+    <span class="nb">print</span><span class="p">(</span><span class="nx">a</span><span class="p">)</span>
+<span class="p">}</span>
+</code></pre></div><p>上述代码保证输出 <code>hello, world</code>，第一次 <code>l.Unlock</code>（<code>f</code> 中）发生于第二次<code> l.Lock</code>（<code>main</code> 中）返回之前，<code>l.Lock</code> 的返回发生于 <code>print</code> 之前。</p>
+<p>对任意 <code>sync.RWMutex</code> 变量 <code>l</code> 的调用 <code>l.RLock</code> ，第 n 次的 <code>l.RLock</code> 发生在第 n 次的 <code>l.Unlock</code> 之后，对应的 <code>l.RUnlock</code> 发生于 n+1 次的 <code>l.Lock</code> 之前</p>
+<h3 id="once">Once</h3>
+<p>sync 包提供了一种安全的机制来初始化可能被多个 goroutine 使用的单例对象。允许多个线程同时执行 <code>once.Do(f)</code> ，但是只有一个线程能执行 <code>f()</code> ，其他的调用会阻塞直到 <code>f()</code> 返回。</p>
+<blockquote>
+<p>规则8：<code>once.Do(f)</code> 中执行的 <code>f()</code> 发生于任意 <code>once.Do(f)</code> 返回之前</p>
+</blockquote>
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">var</span> <span class="nx">a</span> <span class="kt">string</span>
+<span class="kd">var</span> <span class="nx">once</span> <span class="nx">sync</span><span class="p">.</span><span class="nx">Once</span>
+<span class="kd">func</span> <span class="nf">setup</span><span class="p">()</span> <span class="p">{</span>
+    <span class="nx">a</span> <span class="p">=</span> <span class="s">&#34;hello, world&#34;</span>
+<span class="p">}</span>
+<span class="kd">func</span> <span class="nf">doprint</span><span class="p">()</span> <span class="p">{</span>
+    <span class="nx">once</span><span class="p">.</span><span class="nf">Do</span><span class="p">(</span><span class="nx">setup</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="nx">a</span><span class="p">)</span>
+<span class="p">}</span>
+<span class="kd">func</span> <span class="nf">twoprint</span><span class="p">()</span> <span class="p">{</span>
+    <span class="k">go</span> <span class="nf">doprint</span><span class="p">()</span>
+    <span class="k">go</span> <span class="nf">doprint</span><span class="p">()</span>
+<span class="p">}</span>
+</code></pre></div><p>调用 <code>twoprint</code> 只会有一次 <code>steup</code> 调用发生。<code>steup</code> 函数会在 <code>print</code> 之前完成。最终结果为 <code>hello, world</code>，并且输出两次</p>
+<h2 id="atomic包">atomic包</h2>
+<p>atomic 包提供基于内存共享的同步语义，提供低级的内存同步功能。除非是一些特殊的或者底层应用，go 官方更推荐使用 channel 或其他更高级的同步工具，而不是共享内存。</p>
+<p>atomic 本身只提供原子性、可见性保证，<strong>不提供 happen before 的保证</strong>，这也就是 <code>atomic</code> 与 <code>mutex</code> 的根本区别。因此，相比 <code>mutex</code> <code>atomic</code> 的实现简单很多，性能上 <code>atomic</code> 也比 <code>mutex</code> 略胜一筹：</p>
+<div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash">$ go <span class="nb">test</span> -benchtime<span class="o">=</span>10000000x -bench<span class="o">=</span>.
+goos: linux
+goarch: amd64
+pkg: demo/benchmark
+BenchmarkAtomic-8   	10000000	       <span class="m">156</span> ns/op
+BenchmarkMutex-8    	10000000	       <span class="m">526</span> ns/op
+PASS
+ok  	demo/benchmark	6.826s
+</code></pre></div>
+    </div>
+
+    
+<footer class="post-footer">
+      
+      <nav class="post-nav">
+        <a class="prev" href="/2021/03/golang-types-simple/">
+            <i class="iconfont icon-left"></i>
+            <span class="prev-text nav-default">【Golang基础】类型系统简介</span>
+            <span class="prev-text nav-mobile">上一篇</span>
+          </a>
+        <a class="next" href="/2021/01/innodb-undolog/">
+            <span class="next-text nav-default">【Innodb】Undo Log</span>
+            <span class="next-text nav-mobile">下一篇</span>
+            <i class="iconfont icon-right"></i>
+          </a>
+      </nav>
+    </footer>
+  </article>
+        </div>
+        <div id="gitalk-container"></div>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js" crossorigin="anonymous"></script>
+    <script type="text/javascript">
+      var gitalk = new Gitalk({
+        id: '\/2021\/03\/golang-mem-concurrency\/',
+        title: '【Golang进阶】内存同步模型',
+        clientID: '64b9f11ba0a3291ee49e',
+        clientSecret: '8632b99db733cc33fd8f6fe85680f63f0db9d872',
+        repo: 'hadyang.github.io',
+        owner: 'hadyang',
+        admin: ['hadyang'],
+        body: decodeURI(location.href)
+      });
+      gitalk.render('gitalk-container');
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://github.com/gitalk/gitalk">comments powered by gitalk.</a></noscript>
+
+  
+
+  
+
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="social-links">
+  <a href="" type="application/rss+xml" class="iconfont icon-rss" title="rss"></a>
+</div>
+
+<div class="copyright">
+  <span class="power-by">
+    由 <a class="hexo-link" href="https://gohugo.io">Hugo</a> 强力驱动
+  </span>
+  <span class="division">|</span>
+  <span class="theme-info">
+    主题 -
+    <a class="theme-link" href="https://github.com/olOwOlo/hugo-theme-even">Even</a>
+  </span>
+
+  
+
+  <span class="copyright-year">
+    &copy; 
+    2017 - 
+    2021<span class="heart"><i class="iconfont icon-heart"></i></span><span>HadYang</span>
+  </span>
+</div>
+
+    </footer>
+
+    <div class="back-to-top" id="back-to-top">
+      <i class="iconfont icon-up"></i>
+    </div>
+  </div>
+  
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/slideout@1.0.1/dist/slideout.min.js" integrity="sha256-t+zJ/g8/KXIJMjSVQdnibt4dlaDxc9zXr/9oNPeWqdg=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.js" integrity="sha256-XVLffZaxoWfGUEbdzuLi7pwaUJv1cecsQJQqGLe7axY=" crossorigin="anonymous"></script>
+
+
+
+<script type="text/javascript" src="/js/main.min.c12618f9a600c40bd024996677e951e64d3487006775aeb22e200c990006c5c7.js"></script>
+  <script type="text/javascript">
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$','$'], ['\\(','\\)']],
+        }
+    };
+  </script>
+  <script async src="https://cdn.jsdelivr.net/npm/mathjax@3.0.5/es5/tex-mml-chtml.js" integrity="sha256-HGLuEfFcsUJGhvB8cQ8nr0gai9EucOOaIxFw7qxmd+w=" crossorigin="anonymous"></script>
+
+
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+	ga('create', 'UA-157595781-2', 'auto');
+	ga('set', 'anonymizeIp', true);
+	ga('send', 'pageview');
+}
+</script>
+<script async src='https://www.google-analytics.com/analytics.js'></script>
+
+
+
+
+
+
+
+</body>
+</html>

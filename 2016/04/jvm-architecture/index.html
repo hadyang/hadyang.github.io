@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>深入Java虚拟机读书笔记——虚拟机体系结构 - HadYang</title>
+  <meta name="renderer" content="webkit" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<meta name="theme-color" content="#f8f5ec" />
+<meta name="msapplication-navbutton-color" content="#f8f5ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
+
+
+<meta name="author" content="HadYang" /><meta name="description" content="最近在逛知乎的时候，看到有人推荐这本《深入Java虚拟机》，这几天一直在看这本书，虽然这本书里使用的JVM版本比较低，但是讲的内容还是很有营养的。在看这本书的时候学习到很多东西，在这里写一下，方便以后学习：）
+" /><meta name="keywords" content="Java" />
+
+
+
+
+
+
+<meta name="generator" content="Hugo 0.73.0 with theme even" />
+
+
+<link rel="canonical" href="https://hadyang.github.io/2016/04/jvm-architecture/" />
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="manifest" href="/manifest.json">
+<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
+
+
+
+<link href="/sass/main.min.75c01efdcbc2767fdfe1f22f5a6fccc8c390d3cda325742f698bd0c6344144be.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.css" integrity="sha256-7TyXnr2YU040zfSP+rEcz29ggW4j56/ujTPwjMzyqFY=" crossorigin="anonymous">
+
+
+<meta property="og:title" content="深入Java虚拟机读书笔记——虚拟机体系结构" />
+<meta property="og:description" content="最近在逛知乎的时候，看到有人推荐这本《深入Java虚拟机》，这几天一直在看这本书，虽然这本书里使用的JVM版本比较低，但是讲的内容还是很有营养的。在看这本书的时候学习到很多东西，在这里写一下，方便以后学习：）" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://hadyang.github.io/2016/04/jvm-architecture/" />
+<meta property="article:published_time" content="2016-04-27T00:00:00+00:00" />
+<meta property="article:modified_time" content="2016-04-27T00:00:00+00:00" />
+<meta itemprop="name" content="深入Java虚拟机读书笔记——虚拟机体系结构">
+<meta itemprop="description" content="最近在逛知乎的时候，看到有人推荐这本《深入Java虚拟机》，这几天一直在看这本书，虽然这本书里使用的JVM版本比较低，但是讲的内容还是很有营养的。在看这本书的时候学习到很多东西，在这里写一下，方便以后学习：）">
+<meta itemprop="datePublished" content="2016-04-27T00:00:00&#43;00:00" />
+<meta itemprop="dateModified" content="2016-04-27T00:00:00&#43;00:00" />
+<meta itemprop="wordCount" content="3625">
+
+
+
+<meta itemprop="keywords" content="虚拟机,笔记," /><meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="深入Java虚拟机读书笔记——虚拟机体系结构"/>
+<meta name="twitter:description" content="最近在逛知乎的时候，看到有人推荐这本《深入Java虚拟机》，这几天一直在看这本书，虽然这本书里使用的JVM版本比较低，但是讲的内容还是很有营养的。在看这本书的时候学习到很多东西，在这里写一下，方便以后学习：）"/>
+
+<!--[if lte IE 9]>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js"></script>
+<![endif]-->
+
+<!--[if lt IE 9]>
+  <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+<![endif]-->
+
+</head>
+<body>
+  <div id="mobile-navbar" class="mobile-navbar">
+  <div class="mobile-header-logo">
+    <a href="/" class="logo">HadYang</a>
+  </div>
+  <div class="mobile-navbar-icon">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
+<nav id="mobile-menu" class="mobile-menu slideout-menu">
+  <ul class="mobile-menu-list">
+    <a href="https://hadyang.github.io/interview/">
+        <li class="mobile-menu-item">Interview</li>
+      </a><a href="/categories/">
+        <li class="mobile-menu-item">分类</li>
+      </a>
+  </ul>
+
+  
+
+
+</nav>
+
+  <div class="container" id="mobile-panel">
+    <header id="header" class="header">
+        <div class="logo-wrapper">
+  <a href="/" class="logo">HadYang</a>
+</div>
+
+
+
+
+
+<nav class="site-navbar">
+  <ul id="menu" class="menu">
+    <li class="menu-item">
+        <a class="menu-item-link" href="https://hadyang.github.io/interview/">Interview</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/categories/">分类</a>
+      </li>
+  </ul>
+</nav>
+
+    </header>
+
+    <main id="main" class="main">
+      <div class="content-wrapper">
+        <div id="content" class="content">
+          <article class="post">
+    
+    <header class="post-header">
+      <h1 class="post-title">深入Java虚拟机读书笔记——虚拟机体系结构</h1>
+
+      <div class="post-meta">
+        <span class="post-time"> 2016-04-27 </span>
+        <div class="post-category">
+            <a href="/categories/java/"> Java </a>
+            </div>
+          <span class="more-meta"> 约 3625 字 </span>
+          <span class="more-meta"> 预计阅读 8 分钟 </span>
+        
+      </div>
+    </header>
+
+    <div class="post-toc" id="post-toc">
+  <h2 class="post-toc-title">文章目录</h2>
+  <div class="post-toc-content always-active">
+    <nav id="TableOfContents">
+  <ul>
+    <li>
+      <ul>
+        <li></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+  </div>
+</div>
+    <div class="post-content">
+      <p>最近在逛知乎的时候，看到有人推荐这本《深入Java虚拟机》，这几天一直在看这本书，虽然这本书里使用的JVM版本比较低，但是讲的内容还是很有营养的。在看这本书的时候学习到很多东西，在这里写一下，方便以后学习：）</p>
+<blockquote>
+<p>这篇文字主要是对JVM的大体介绍，有些比较重要的内容会在后面详细记录。</p>
+</blockquote>
+<h4 id="java虚拟机简介">Java虚拟机简介</h4>
+<p>“Java虚拟机”可能指如下三个不同的东西</p>
+<ul>
+<li>抽象规范</li>
+<li>一个具体的实现</li>
+<li>一个运行中的虚拟机实例</li>
+</ul>
+<p>每个Java程序都运行在某个具体的Java虚拟机实现的实例上。一个Java虚拟机的实例负责运行一个Java程序。当启动一个Java程序的时候，一个虚拟机的实例也就诞生了。当该程序关闭退出时，这个虚拟机实例也就随之消亡。</p>
+<h4 id="线程介绍">线程介绍</h4>
+<p>在Java虚拟机内部有两种线程：</p>
+<ul>
+<li>
+<p><code>守护线程</code>：通常是由虚拟机自己使用，比如GC线程。但是，Java程序也可以把它自己创建的任何线程标记为守护线程（<code>public final void setDaemon(boolean on)</code>来设置，但必须在<code>start()</code>方法之前调用）。</p>
+</li>
+<li>
+<p><code>非守护线程</code>：main方法执行的线程，我们通常也称为用户线程。</p>
+</li>
+</ul>
+<blockquote>
+<p>只要有任何的非守护线程在运行，Java程序也会继续运行。当该程序中所有的非守护线程都终止时，虚拟机实例将自动退出（守护线程随JVM一同结束工作）。</p>
+</blockquote>
+<p><strong>守护线程中不适合进行IO、计算等操作，因为守护线程是在所有的非守护线程退出后结束，这样并不能判断守护线程是否完成了相应的操作，如果非守护线程退出后，还有大量的数据没来得及读写，这将造成很严重的后果。</strong></p>
+<blockquote>
+<p>web服务器中的Servlet，容器启动时后台初始化一个服务线程，即调度线程，负责处理http请求，然后每个请求过来调度线程从线程池中取出一个工作者线程来处理该请求，从而实现并发控制的目的。</p>
+</blockquote>
+<h4 id="java虚拟机体系结构">Java虚拟机体系结构</h4>
+<p><img src="/image/jvm-architecture.png" alt=""></p>
+<p>每个Java虚拟机都有一个类装载器子系统，他根据给定的全限定名来装在类型。同样，每个Java虚拟机都有一个执行引擎，它负责执行那些包含在被装载类的方法中的指令。<strong>当Java虚拟机运行一个程序时，它需要内存来存储很多东西，例如：字节码，从已装载的class文件中得到的其他信息，程序创建的对象，传递给方法的参数，返回值，局部变量，以及运算的中间结果等等，Java虚拟机把这些东西都组织到几个“运行时数据区”中，以便管理。</strong></p>
+<p><strong>每个Java虚拟机实例都有一个方法区以及一个堆，</strong> 他们是由 <strong>该虚拟机实例中所有线程共享的。</strong> 当虚拟机装载一个class文件时，它会从这个class文件包含的二进制数据中解析类型信息。<strong>然后把这些类型信息放到方法区中。</strong> 当程序运行的时候，<strong>虚拟机会把所有该程序在运行时创建的对象都放到堆中。</strong></p>
+<p><strong>每个新线程都会得到它自己的PC寄存器(程序计数器)以及一个Java栈。</strong></p>
+<ul>
+<li>
+<p>如果线程正在执行的是一个Java方法(非Native方法)。那么PC寄存器的值将总指向下一条将被执行的指令，而 <strong>它的Java栈则总是存储该线程中Java方法调用的转台&ndash;包括它的局部变量、被调用时传进来的参数、返回值以及运算的中间结果等等。</strong></p>
+</li>
+<li>
+<p>Native方法调用的状态，则是以某种依赖于具体实现的方式存储在本地方法栈中，也可能是在寄存器或者其他某些与特定实现相关的内存区中。</p>
+</li>
+</ul>
+<p><strong>Java栈是由很多的栈帧(stack frame)或者说帧(frame)组成的，一个栈帧包含一个Java方法调用状态。</strong> 当现场调用一个Java方法的时候，虚拟机压入一个新的栈帧到该线程的Java栈中：当该方法返回时，这个栈帧被从Java栈中弹出并抛弃</p>
+<p>Java虚拟机没有指令寄存器，其指令集使用Java栈来存储中间数据。这样设计的原因是为了保持Java虚拟机的指令集尽量紧凑、同时也便于Java虚拟机在那些只有很少通用寄存器的平台上实现。另外，Java虚拟机这种基于栈的体系结构，也有助于运行时某些虚拟机实现的动态编译器和即时编译器的代码优化。</p>
+<p><img src="/image/jvm-thread-data-area.png" alt=""></p>
+<blockquote>
+<ol>
+<li>这些内存区域是私有的，任何线程都不能访问另外一个线程的PC寄存器或Java栈。</li>
+<li>图中是一个虚拟机实例的快照，它有三个线程正在执行。线程1和线程2都正在执行Java方法，而线程3在执行Native方法。</li>
+</ol>
+</blockquote>
+<h4 id="数据类型">数据类型</h4>
+<p>数据类型分为两种：</p>
+<ul>
+<li>基本类型：基本类型的变量持有原始值。</li>
+<li>引用类型：引用类型的变量持有引用值。引用值是指对某个对象的引用，而不是该对象本身。</li>
+</ul>
+<p><img src="/image/jvm-data-type.png" alt=""></p>
+<ul>
+<li>
+<p>基本类型:</p>
+<ul>
+<li><strong>Java语言中的所有基本类型都是Java虚拟机中的基本类型。但boolean有点特别，虽然Java虚拟机也把boolean看做基本类型，但指令集对boolean只有很有限的支持。</strong> 当编译器把Java源码编译成字节码时，它会用int或byte来表示boolean。在Java虚拟机中false是由整数'0&rsquo;表示，所有的非零整数都表示true，<strong>涉及boolean值的操作则会用int。另外boolean数组是当做byte数组来访问的，</strong> 但是在“堆”区，它也可以被表示为位域。</li>
+<li><strong>Java虚拟机的基本类型的值域在任何地方都是一致的，</strong> 比如：不管底层主机平台是什么，一个<code>long</code>在任何虚拟机中总是一个64位二进制补码表示的又复活整数。</li>
+<li>Java虚拟机中有一个值在内部使用的基本类型<code>returnAddress</code>，Java程序员不能使用这个类型。<strong>这个基本类型是用来实现Java程序中的finally子句。</strong></li>
+</ul>
+</li>
+<li>
+<p>引用类型：</p>
+<p>Java虚拟机中有三种引用类型，它们的值都是对动态创建对象的引用：</p>
+<ul>
+<li><code>类类型</code>：类实例(对象)的引用。</li>
+<li><code>接口类型</code>：是对实现了该接口的某个类实例的引用。</li>
+<li><code>数组类型</code>：数组对象的引用，在Java虚拟机中数组是个真正的对象。</li>
+</ul>
+<blockquote>
+<p>还有一个特殊的引用值&ndash;NULL，它表示引用变量没有引用任何对象。</p>
+</blockquote>
+</li>
+</ul>
+<p>Java虚拟机规范定义了每一种数据类型的取值范围，但没有定义它们的位宽。存储这些类型的值所需的占位宽度，是由具体的虚拟机实现的设计者决定的。</p>
+<p><img src="/image/jvm-data-arrange.png" alt=""></p>
+<h4 id="类装载器">类装载器</h4>
+<p>Java类加载器是Java运行时环境（Java Runtime Environment）的一部分，负责动态加载Java类到Java虚拟机的内存空间中。<strong>类通常是按需加载，即第一次使用该类时才加载。</strong> 由于有了类加载器，Java运行时系统不需要知道文件与文件系统。每个Java类必须由某个类加载器装入到内存。</p>
+<p>类装载器子系统涉及Java虚拟机的其他几个组成部分，以及几个来自<code>java.lang</code>库的类。比如，用户自定义的类装载器只是普通的Java对象，它的类必须派生自<code>java.lang.ClassLoader</code>。<code>ClassLoader</code>中定义的方法为程序提供了访问类装载器机制的接口。此外，对于每个被装载的类型，Java虚拟机都会为他创建一个<code>java.lang.Class</code>类的实例来代表该类型。和所有其他对象一样，用户自定义的类装载器以及<code>Class</code>类的实例都放在内存中的堆区，而装载的类型信息都位于方法区。</p>
+<p>类装载器子系统除了要定位和导入二进制class文件外，还必须负责验证被导入类的正确性，为变量分配初始化内存，以及帮助解析符号引用。这些动作必须严格按一下顺序完成：</p>
+<ol>
+<li>装载&ndash;查找并装载类型的二进制数据。</li>
+<li>链接&ndash;执行验证、准备以及解析(可选)
+- 验证  确保被导入类型的正确性
+- 准备  为类变量分配内存，并将其初始化为默认值。
+- 解析  把类型中的符号引用转换为直接引用。</li>
+<li>初始化&ndash;把类变量初始化为正确的初始值。</li>
+</ol>
+<h4 id="方法法区">方法法区</h4>
+<p><img src="/image/jvm-method-const-area.png" alt=""></p>
+<p><strong>在Java虚拟机中，关于被装载类型的信息存储在逻辑上一个被称为方法区的内存中。</strong> 当虚拟机装载某个类型市，它使用类装载器定位相应的<code>class</code>文件，然后读入这个<code>class</code>文件&ndash;一个线性二进制数据流，然后把他传输到虚拟机中。紧接着虚拟机提取其中的类型信息，并将这些信息存储到方法区。该类型的类(静态)变量同样也是存储在方法区内。</p>
+<blockquote>
+<p>当虚拟机运行Java程序时，它会查找使用存储在方法区中的类型信息。</p>
+</blockquote>
+<p><strong>由于所有线程都共享方法区，因此他们对方法区书记的访问必须设计为线程安全的。</strong> 方法区的大小不必是固定的，虚拟机可以根据应用需要动态调整。同样，方法区也不必是连续的，方法区可以在一个堆中自由分配。方法区也可以被垃圾收集&ndash;这里涉及到类的卸载。</p>
+<p>方法区中包含的信息：</p>
+<ol>
+<li><code>类型信息</code>：对每个装载的类型，虚拟机都会在方法区存储一下信息
+- 这个类型的全限定名
+- 这个类型的直接父类的全限定名
+- 这个类型是类类型还是接口类型
+- 这个类型的访问修饰符
+- 任何直接父接口的全限定名的有序列表</li>
+<li><code>常量池</code>：虚拟机必须为每个被装载的类型维护一个常量池。常量池就是该类型所用常量的一个有序集合，包直接常量(string,integer&hellip;)和对其他类型、字段和方法的符号引用。池中的数据项通过索引访问。</li>
+<li><code>字段信息</code>。</li>
+<li><code>方法信息</code>。</li>
+<li><code>类变量</code>。</li>
+<li><code>编译时常量</code>。</li>
+<li>指向<code>ClassLoader</code>类的引用。</li>
+<li>指向<code>Class</code>类的引用。</li>
+<li><code>方法表</code>：为了提高访问效率，虚拟机对每个装载的非抽象类都生成一个方法表，把它作为类信息的一部分，它主要存储了所有它的实例可能被调用的实例方法的直接引用，包括从父类继承的 <em>实例</em> 方法。</li>
+</ol>
+    </div>
+
+    
+<footer class="post-footer">
+      <div class="post-tags">
+          <a href="/tags/%E8%99%9A%E6%8B%9F%E6%9C%BA/">虚拟机</a>
+          <a href="/tags/%E7%AC%94%E8%AE%B0/">笔记</a>
+          </div>
+      <nav class="post-nav">
+        <a class="prev" href="/2016/04/jvm-gc/">
+            <i class="iconfont icon-left"></i>
+            <span class="prev-text nav-default">深入Java虚拟机读书笔记——垃圾回收</span>
+            <span class="prev-text nav-mobile">上一篇</span>
+          </a>
+        <a class="next" href="/2016/03/android-studio-ndk/">
+            <span class="next-text nav-default">Android Studio NDK 入门教程</span>
+            <span class="next-text nav-mobile">下一篇</span>
+            <i class="iconfont icon-right"></i>
+          </a>
+      </nav>
+    </footer>
+  </article>
+        </div>
+        <div id="gitalk-container"></div>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js" crossorigin="anonymous"></script>
+    <script type="text/javascript">
+      var gitalk = new Gitalk({
+        id: '\/2016\/04\/jvm-architecture\/',
+        title: '深入Java虚拟机读书笔记——虚拟机体系结构',
+        clientID: '64b9f11ba0a3291ee49e',
+        clientSecret: '8632b99db733cc33fd8f6fe85680f63f0db9d872',
+        repo: 'hadyang.github.io',
+        owner: 'hadyang',
+        admin: ['hadyang'],
+        body: decodeURI(location.href)
+      });
+      gitalk.render('gitalk-container');
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://github.com/gitalk/gitalk">comments powered by gitalk.</a></noscript>
+
+  
+
+  
+
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="social-links">
+  <a href="" type="application/rss+xml" class="iconfont icon-rss" title="rss"></a>
+</div>
+
+<div class="copyright">
+  <span class="power-by">
+    由 <a class="hexo-link" href="https://gohugo.io">Hugo</a> 强力驱动
+  </span>
+  <span class="division">|</span>
+  <span class="theme-info">
+    主题 -
+    <a class="theme-link" href="https://github.com/olOwOlo/hugo-theme-even">Even</a>
+  </span>
+
+  
+
+  <span class="copyright-year">
+    &copy; 
+    2017 - 
+    2021<span class="heart"><i class="iconfont icon-heart"></i></span><span>HadYang</span>
+  </span>
+</div>
+
+    </footer>
+
+    <div class="back-to-top" id="back-to-top">
+      <i class="iconfont icon-up"></i>
+    </div>
+  </div>
+  
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/slideout@1.0.1/dist/slideout.min.js" integrity="sha256-t+zJ/g8/KXIJMjSVQdnibt4dlaDxc9zXr/9oNPeWqdg=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.js" integrity="sha256-XVLffZaxoWfGUEbdzuLi7pwaUJv1cecsQJQqGLe7axY=" crossorigin="anonymous"></script>
+
+
+
+<script type="text/javascript" src="/js/main.min.c12618f9a600c40bd024996677e951e64d3487006775aeb22e200c990006c5c7.js"></script>
+  <script type="text/javascript">
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$','$'], ['\\(','\\)']],
+        }
+    };
+  </script>
+  <script async src="https://cdn.jsdelivr.net/npm/mathjax@3.0.5/es5/tex-mml-chtml.js" integrity="sha256-HGLuEfFcsUJGhvB8cQ8nr0gai9EucOOaIxFw7qxmd+w=" crossorigin="anonymous"></script>
+
+
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+	ga('create', 'UA-157595781-2', 'auto');
+	ga('set', 'anonymizeIp', true);
+	ga('send', 'pageview');
+}
+</script>
+<script async src='https://www.google-analytics.com/analytics.js'></script>
+
+
+
+
+
+
+
+</body>
+</html>
